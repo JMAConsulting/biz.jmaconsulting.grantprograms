@@ -69,86 +69,149 @@ function grantprograms_civicrm_managed(&$entities) {
   return _grantprograms_civix_civicrm_managed($entities);
 }
 
-
-function grantprograms_civicrm_grantAssessment( &$params ) { 
-  if ( array_key_exists('custom', $params ) ) {
-    $threeYearsBackDate = date('Y',strtotime("-1 year")).'-01-01';
-    $previousYear       = date('Y',strtotime("-1 year")).'-12-31';
+/*
+ * hook_civicrm_grantAssessment
+ *
+ * @param array $params to alter
+ *
+ */
+function grantprograms_civicrm_grantAssessment(&$params) { 
+  if (array_key_exists('custom', $params)) {
+    $threeYearsBackDate = date('Y', strtotime("-1 year")) . '-01-01';
+    $previousYear = date('Y',strtotime("-1 year")) . '-12-31';
     $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = 4 AND application_received_date >= '{$threeYearsBackDate}' AND application_received_date <= '{$previousYear}' AND contact_id = {$params['contact_id']}");
-    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
+    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
     $grantThresholds = array_flip($grantThresholds);
-    if ( $result->N ) {
-      while( $result->fetch() ) {
-        if ( $result->amount_granted >= $grantThresholds['Maximum Grant'] ) {
-          //$years[$result->application_received_date] = $result->amount_granted;
+    if ($result->N) {
+      while ($result->fetch()) {
+        if ($result->amount_granted >= $grantThresholds['Maximum Grant']) {
           $priority = 10;
-        } else {
+        } 
+        else {
           $priority = 0;
         }
       }
-    } else {
+    } 
+    else {
       $priority = -10;
     }
     
-    if( array_key_exists( 'assessment', $params ) ) {
-      if ( $params['assessment'] != 0 ) {
-        $params['assessment'] = $params['assessment'] - $priority;//- 5 * count($years) - $priority;
+    if (array_key_exists('assessment', $params)) {
+      if ($params['assessment'] != 0) {
+        $params['assessment'] = $params['assessment'] - $priority; //- 5 * count($years) - $priority;
       }
     }
   }
 }
 
-function grantprograms_civicrm_buildForm( $formName, &$form  ) {
+/*
+ * hook_civicrm_buildForm civicrm hook
+ * 
+ * @param string $formName form name
+ * @param object $form form object
+ *
+*/
+function grantprograms_civicrm_buildForm($formName, &$form) {
 
-  if ($formName = 'CRM_Grant_Form_Grant'  ) {
-    if ( $form->getVar('_name') == 'Grant' ) {
-      $form->_reasonGrantRejected = CRM_Core_OptionGroup::values( 'reason_grant_rejected' );
-      $form->add('select', 'grant_rejected_reason_id',  ts( 'Reason Grant Rejected' ),
-                 array( '' => ts( '- select -' ) ) + $form->_reasonGrantRejected , false);
+  if ($formName = 'CRM_Grant_Form_Grant') {
+    if ($form->getVar('_name') == 'Grant') {
+      $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_rejected');
+      $form->add('select', 
+        'grant_rejected_reason_id', 
+        ts('Reason Grant Rejected'),
+        array('' => ts('- select -')) + $form->_reasonGrantRejected, 
+        FALSE
+      );
 
       $form->_grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
-      $form->add('select', 'grant_program_id',  ts( 'Grant Programs' ),
-                 array( '' => ts( '- select -' ) ) + $form->_grantPrograms , true);
+      $form->add('select', 
+        'grant_program_id', 
+        ts('Grant Programs'),
+        array('' => ts('- select -')) + $form->_grantPrograms, TRUE
+      );
     
-      if ( CRM_Core_Permission::check('administer CiviGrant')  ) {
-        $form->add( 'text', 'assessment', ts( 'Assessment' ) );
+      if (CRM_Core_Permission::check('administer CiviGrant')) {
+        $form->add('text', 'assessment', ts('Assessment'));
       }
-    } elseif ( $form->getVar('_name') == 'Search' ) {
+    } 
+    elseif ($form->getVar('_name') == 'Search') {
       $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
-      $form->add('select', 'grant_program_id',  ts( 'Grant Programs' ),
-                 array( '' => ts( '- select -' ) ) + $grantPrograms);
-      $form->add('text', 'grant_amount_total_low', ts('From'), array( 'size' => 8, 'maxlength' => 8 ) ); 
-      $form->addRule('grant_amount_total_low', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('9.99', ' '))), 'money');
+      $form->add('select', 
+        'grant_program_id',  
+        ts('Grant Programs'),
+        array('' => ts('- select -')) + $grantPrograms
+      );
+      $form->add('text', 
+        'grant_amount_total_low', 
+        ts('From'), 
+        array('size' => 8, 'maxlength' => 8) 
+      ); 
+      $form->addRule('grant_amount_total_low', 
+        ts('Please enter a valid money value (e.g. %1).', 
+          array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+        'money'
+      );
+      $form->add('text', 
+        'grant_amount_total_high', 
+        ts('To'), 
+        array('size' => 8, 'maxlength' => 8)
+      ); 
+      $form->addRule('grant_amount_total_high', 
+        ts('Please enter a valid money value (e.g. %1).', 
+          array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+        'money'
+      );
+      $form->add('text', 
+        'grant_assessment_low', 
+        ts('From'), 
+        array('size' => 9, 'maxlength' => 9)
+      );
         
-      $form->add('text', 'grant_amount_total_high', ts('To'), array( 'size' => 8, 'maxlength' => 8 ) ); 
-      $form->addRule('grant_amount_total_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
-      $form->add('text', 'grant_assessment_low', ts('From'), array( 'size' => 9, 'maxlength' => 9 ) );
-        
-      $form->add('text', 'grant_assessment_high', ts('To'), array( 'size' => 9, 'maxlength' => 9 ) );
+      $form->add('text', 
+        'grant_assessment_high', 
+        ts('To'), 
+        array('size' => 9, 'maxlength' => 9)
+      );
     }
   }
   
   if ($formName == 'CRM_Custom_Form_Field') {
     
-    for($i = 1; $i <= $formName::NUM_OPTION; $i++) {
-      $form->add('text', 'option_description['.$i.']', 'Marks', array( 'id' => 'marks') );
+    for ($i = 1; $i <= $formName::NUM_OPTION; $i++) {
+      $form->add('text', 
+        'option_description['. $i .']', 
+        'Marks', 
+        array('id' => 'marks') 
+      );
     } 
   }
-  if( $formName == 'CRM_Custom_Form_Option'  ) {
-    $form->add('text', 'description', 'Marks', array( 'id' => 'marks') );
+  if ($formName == 'CRM_Custom_Form_Option') {
+    $form->add('text', 
+      'description', 
+      'Marks', 
+      array('id' => 'marks')
+    );
   }
 }
 
-function grantprograms_civicrm_validate( $formName, &$fields, &$files, &$form ) {
-  
-  if ( $formName == 'CRM_Grant_Form_Grant' ) {
-    $errors = array();
-    require_once 'CRM/Grant/BAO/GrantProgram.php';
+/*
+ * hook_civicrm_validate
+ *
+ * @param string $formName form name
+ * @param array $fields form submitted values
+ * @param array $files file properties as sent by PHP POST protocol
+ * @param object $form form object
+ *
+ */
+function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
+  $errors = NULL;
+  if ($formName == 'CRM_Grant_Form_Grant') {
+    $defaults = array();
     $params['grant_program_id'] = $form->_submitValues['grant_program_id'];
-    CRM_Grant_BAO_GrantProgram::retrieve( $params, $defaults);
-    if ( $defaults['remainder_amount'] < $form->_submitValues['amount_granted'] ) {
-      $errors['amount_granted'] = ts( 'You need to increase the Grant Program Total Amount' );
+    CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
+    if ($defaults['remainder_amount'] < $form->_submitValues['amount_granted']) {
+      $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
     }
   }
-  return empty($errors) ? true : $errors;
+  return empty($errors) ? TRUE : $errors;
 }
