@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.0                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -34,19 +34,15 @@
  *
  */
 
-require_once 'CRM/Grant/DAO/EntityPayment.php';
-
 /**
  * This class contains  entity payment related functions.
  */
-class CRM_Grant_BAO_EntityPayment extends CRM_Grant_DAO_EntityPayment 
-{
+class CRM_Grant_BAO_EntityPayment extends CRM_Grant_DAO_EntityPayment {
   /**
    * class constructor
    */
-  function __construct( ) 
-  {
-    parent::__construct( );
+  function __construct() {
+    parent::__construct();
   }
 
   /**
@@ -61,16 +57,16 @@ class CRM_Grant_BAO_EntityPayment extends CRM_Grant_DAO_EntityPayment
    * @access public
    * @static
    */
-  static function retrieve( &$params, &$defaults ) 
-  {
-    $entityPayment = new CRM_Grant_DAO_EntityPayment( );
-    $entityPayment->copyValues( $params );
-    if ( $entityPayment->find( true ) ) {
-      CRM_Core_DAO::storeValues( $entityPayment, $defaults );
+  static function retrieve(&$params, &$defaults) {
+    $entityPayment = new CRM_Grant_DAO_EntityPayment();
+    $entityPayment->copyValues($params);
+    if ($entityPayment->find(TRUE)) {
+      CRM_Core_DAO::storeValues($entityPayment, $defaults);
       return $entityPayment;
     }
-    return null;
+    return NULL;
   }
+
   /**
    * Function  to delete Entity Payment
    * 
@@ -79,30 +75,27 @@ class CRM_Grant_BAO_EntityPayment extends CRM_Grant_DAO_EntityPayment
    * @access public
    * @static
    */
-  static function del( $id )
-  { 
-    require_once 'CRM/Utils/Hook.php';
-    CRM_Utils_Hook::pre( 'delete', 'EntityPayment', $id, CRM_Core_DAO::$_nullArray );
+  static function del($id) { 
+    // call hook pre
+    CRM_Utils_Hook::pre('delete', 'EntityPayment', $id, CRM_Core_DAO::$_nullArray);
 
-    require_once 'CRM/Grant/DAO/EntityPayment.php';
-    $entityPayment    = new CRM_Grant_DAO_EntityPayment( );
+    $entityPayment = new CRM_Grant_DAO_EntityPayment();
     $entityPayment->id = $id; 
 
     $entityPayment->find();
 
     // delete the recently created Grant
-    require_once 'CRM/Utils/Recent.php';
     $entityPaymentRecent = array(
-                                 'id'   => $id,
-                                 'type' => 'EntityPayment'
-                                 );
-    CRM_Utils_Recent::del( $entityPaymentRecent );
+      'id'   => $id,
+      'type' => 'EntityPayment'
+    );
+    CRM_Utils_Recent::del($entityPaymentRecent);
 
-    if ( $entityPayment->fetch() ) {
+    if ($entityPayment->fetch()) {
       $results = $entityPayment->delete();
-      CRM_Utils_Hook::post( 'delete', 'EntityPayment', $entityPayment->id, $entityPayment );
+      CRM_Utils_Hook::post('delete', 'EntityPayment', $entityPayment->id, $entityPayment);
       return $results;
     }
-    return false;
+    return FALSE;
   }
 }
