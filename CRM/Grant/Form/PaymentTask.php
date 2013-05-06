@@ -34,16 +34,11 @@
  *
  */
 
-require_once 'CRM/Core/SelectValues.php';
-require_once 'CRM/Core/Form.php';
-require_once 'CRM/Grant/PaymentTask.php';
-require_once 'CRM/Contact/BAO/Query.php';
 /**
  * This class generates task actions for CiviEvent
  * 
  */
-class CRM_Grant_Form_PaymentTask extends CRM_Core_Form
-{
+class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
   /**
    * the task being performed
    *
@@ -56,7 +51,7 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form
    *
    * @var string
    */
-  protected $_componentClause = null;
+  protected $_componentClause = NULL;
 
   /**
    * The array that holds all the component ids
@@ -79,71 +74,76 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form
    * @return void
    * @access public
    */
-  function preProcess( ) 
-  {
-    self::preProcessCommon( $this );
+  function preProcess() {
+    self::preProcessCommon($this);
   }
 
-  static function preProcessCommon( &$form, $useTable = false )
-  {
+  static function preProcessCommon(&$form, $useTable = FALSE) {
     $form->_grantIds = array();
         
-    if ( !CRM_Utils_Array::value( 'prid', $_GET  ) ) {
-      $values = $form->controller->exportValues( 'PaymentSearch' );
+    if (!CRM_Utils_Array::value('prid', $_GET )) {
+      $values = $form->controller->exportValues('PaymentSearch');
     }
 
-    $form->_task = CRM_Utils_Array::value( 'task', $values );
+    $form->_task = CRM_Utils_Array::value('task', $values);
     $grantPaymentTasks = CRM_Grant_PaymentTask::tasks();
-    if ( !empty( $form->_task ) ) {
-      $form->assign( 'taskName', $grantPaymentTasks[$form->_task] );
+    if ( !empty($form->_task)) {
+      $form->assign('taskName', $grantPaymentTasks[$form->_task]);
     }
     $ids = array();
-    if ( CRM_Utils_Array::value( 'radio_ts', $values ) == 'ts_sel' ) {
-      foreach ( $values as $name => $value ) {
-        if ( substr( $name, 0, CRM_Core_Form::CB_PREFIX_LEN ) == CRM_Core_Form::CB_PREFIX ) {
-          $ids[] = substr( $name, CRM_Core_Form::CB_PREFIX_LEN );
+    if (CRM_Utils_Array::value('radio_ts', $values) == 'ts_sel') {
+      foreach ($values as $name => $value) {
+        if (substr($name, 0, CRM_Core_Form::CB_PREFIX_LEN) == CRM_Core_Form::CB_PREFIX) {
+          $ids[] = substr($name, CRM_Core_Form::CB_PREFIX_LEN);
         }
       }
-    } else {
-      $queryParams =  $form->get( 'queryParams' );
-      $query       = new CRM_Grant_BAO_PaymentSearch( $queryParams, null, null, false, false, 
-                                                      CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT);
+    } 
+    else {
+      $queryParams = $form->get('queryParams');
+      $query = new CRM_Grant_BAO_PaymentSearch( 
+        $queryParams, 
+        NULL, 
+        NULL, 
+        FALSE, 
+        FALSE, 
+        CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT
+      );
            
       $query->_distinctComponentClause = " civicrm_payment.id";
       $query->_groupByComponentClause  = " GROUP BY civicrm_payment.id ";
-      $result = $query->searchQuery(0, 0, null);
+      $result = $query->searchQuery(0, 0, NULL);
       while ($result->fetch()) {
         $ids[] = $result->id;
       }
     }
 
-    if ( ! empty( $ids ) ) {
+    if (!empty($ids)) {
       $form->_componentClause =
         ' civicrm_payment.id IN ( ' .
-        implode( ',', $ids ) . ' ) ';
-      $form->assign( 'totalSelectedGrants', count( $ids ) );             
+        implode(',', $ids) . ' ) ';
+      $form->assign('totalSelectedGrants', count($ids));             
     }
         
     $form->_grantPaymentIds = $form->_componentIds = $ids;
 
     //set the context for redirection for any task actions
-    $qfKey = CRM_Utils_Request::retrieve( 'qfKey', 'String', $this );
-    require_once 'CRM/Utils/Rule.php';
+    $qfKey = CRM_Utils_Request::retrieve('qfKey', 'String', $this);
     $urlParams = 'force=1';
-    if ( CRM_Utils_Rule::qfKey( $qfKey ) ) $urlParams .= "&qfKey=$qfKey";
-        
-    $session = CRM_Core_Session::singleton( );
-    $session->replaceUserContext( CRM_Utils_System::url( 'civicrm/grant/payment/search', $urlParams ) );
+    if (CRM_Utils_Rule::qfKey($qfKey)) {
+      $urlParams .= "&qfKey=$qfKey";
+    }
+    $session = CRM_Core_Session::singleton();
+    $session->replaceUserContext(CRM_Utils_System::url('civicrm/grant/payment/search', $urlParams));
   }
 
   /**
    * Given the grant id, compute the contact id
    * since its used for things like send email
    */
-  public function setContactIDs( ) 
-  {
-    $this->_contactIds =& CRM_Core_DAO::getContactIDsFromComponent( $this->_grantIds,
-                                                                    'civicrm_grant' );
+  public function setContactIDs() {
+    $this->_contactIds =& CRM_Core_DAO::getContactIDsFromComponent($this->_grantIds,
+      'civicrm_grant' 
+    );
   }
 
   /**
@@ -155,16 +155,17 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form
    * @return void
    * @access public
    */
-  function addDefaultButtons( $title, $nextType = 'next', $backType = 'back' )
-  {
-    $this->addButtons( array(
-                             array ( 'type'      => $nextType,
-                                     'name'      => $title,
-                                     'isDefault' => true   ),
-                             array ( 'type'      => $backType,
-                                     'name'      => ts('Back') ),
-                             )
-                       );
+  function addDefaultButtons($title, $nextType = 'next', $backType = 'back') {
+    $this->addButtons(array(
+      array ( 
+        'type' => $nextType,
+        'name' => $title,
+        'isDefault' => TRUE),
+      array ( 
+        'type' => $backType,
+        'name' => ts('Back')),
+      )
+    );
   }
 }
 
