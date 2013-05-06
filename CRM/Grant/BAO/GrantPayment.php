@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.1                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -34,25 +34,21 @@
  *
  */
 
-require_once 'CRM/Grant/DAO/GrantPayment.php';
-require_once 'CRM/Grant/BAO/GrantProgram.php';
 
-class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment 
-{
+class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
 
   /**
    * static field for all the grant information that we can potentially export
    * @var array
    * @static
    */
-  static $_exportableFields = null;
+  static $_exportableFields = NULL;
 
   /**
    * class constructor
    */
-  function __construct( ) 
-  {
-    parent::__construct( );
+  function __construct() {
+    parent::__construct();
   }
 
   /**
@@ -69,87 +65,101 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment
    * @access public
    * @static
    */
-  static function retrieve( &$params, &$defaults ) 
-  {
-    $grantPayment  = new CRM_Grant_DAO_GrantPayment( );
-    $grantPayment->copyValues( $params );
-    if ( $grantPayment->find( true ) ) {
-      CRM_Core_DAO::storeValues( $grantPayment, $defaults );
+  static function retrieve(&$params, &$defaults) {
+    $grantPayment = new CRM_Grant_DAO_GrantPayment();
+    $grantPayment->copyValues($params);
+    if ($grantPayment->find(TRUE)) {
+      CRM_Core_DAO::storeValues($grantPayment, $defaults);
       return $grantPayment;
     }
-    return null;
+    return NULL;
   }
-  function &exportableFields( ) 
-    {
-      if ( ! self::$_exportableFields ) {
-        if ( ! self::$_exportableFields ) {
-          self::$_exportableFields = array( );
-        }
-            
-        $grantFields = array( 'id'                       => array( 
-                                                                  'title'     => 'Payment ID',
-                                                                  'name'      => 'id',
-                                                                  'data_type' => CRM_Utils_Type::T_INT ),
-                              'payment_batch_number'     => array( 
-                                                                  'title'     => 'Payment Batch Nnumber',
-                                                                  'name'      => 'payment_batch_number',
-                                                                  'data_type' => CRM_Utils_Type::T_INT ),
-                              'payment_number'           => array( 
-                                                                  'title'     => 'Payment Number',
-                                                                  'name'      => 'payment_number',
-                                                                  'data_type' => CRM_Utils_Type::T_INT ),
-                              'contribution_type_id'     => array( 
-                                                                  'title'     => 'Contribution Type ID',
-                                                                  'name'      => 'contribution_type_id',
-                                                                  'data_type' => CRM_Utils_Type::T_INT ),
-                              'contact_id'               => array( 
-                                                                  'title'     => 'Contact ID',
-                                                                  'name'      => 'contact_id',
-                                                                  'data_type' => CRM_Utils_Type::T_INT ),
-                              'payment_created_date'     => array( 
-                                                                  'title'     => 'Payment Created Date',
-                                                                  'name'      => 'payment_created_date',
-                                                                  'data_type' => CRM_Utils_Type::T_DATE ),
-                              'payment_date'             => array( 
-                                                                  'title'     => 'Payment Date',
-                                                                  'name'      => 'payment_date',
-                                                                  'data_type' => CRM_Utils_Type::T_DATE ),
-                              'payable_to_name'          => array(
-                                                                  'title'     => 'Payable To Name',
-                                                                  'name'      => 'payable_to_name',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING ),
-                              'payable_to_address'       => array(
-                                                                  'title'     => 'Payable To Address',
-                                                                  'name'      => 'payable_to_address',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING),
-                              'amount'                   => array(
-                                                                  'title'     => 'Amount',
-                                                                  'name'      => 'amount',
-                                                                  'data_type' => CRM_Utils_Type::T_MONEY),
-                              'currency'                 => array(
-                                                                  'title'     => 'Currency',
-                                                                  'name'      => 'currency',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING),
-                              'payment_reason'           => array(
-                                                                  'title'     => 'Payment Reason',
-                                                                  'name'      => 'payment_reason',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING),
-                              'payment_status_id'        => array(
-                                                                  'title'     => 'Payment Status ID',
-                                                                  'name'      => 'payment_status_id',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING),
-                              'replaces_payment_id'      => array(
-                                                                  'title'     => 'Payment Reason',
-                                                                  'name'      => 'replaces_payment_id',
-                                                                  'data_type' => CRM_Utils_Type::T_STRING));
-                                                           
-        require_once 'CRM/Grant/DAO/GrantPayment.php';
-        $fields = CRM_Grant_DAO_GrantPayment::export( );
-        self::$_exportableFields = $fields;
+  
+  function &exportableFields() {
+    if (!self::$_exportableFields) {
+      if (!self::$_exportableFields) {
+        self::$_exportableFields = array();
       }
-
-      return self::$_exportableFields;
+            
+      $grantFields = array( 
+        'id' => array( 
+          'title' => 'Payment ID',
+          'name' => 'id',
+          'data_type' => CRM_Utils_Type::T_INT 
+        ),
+        'payment_batch_number' => array( 
+          'title' => 'Payment Batch Nnumber',
+          'name' => 'payment_batch_number',
+          'data_type' => CRM_Utils_Type::T_INT 
+        ),
+        'payment_number' => array( 
+          'title' => 'Payment Number',
+          'name' => 'payment_number',
+          'data_type' => CRM_Utils_Type::T_INT 
+        ),
+        'contribution_type_id' => array( 
+          'title' => 'Contribution Type ID',
+          'name' => 'contribution_type_id',
+          'data_type' => CRM_Utils_Type::T_INT 
+        ),
+        'contact_id' => array( 
+          'title' => 'Contact ID',
+          'name' => 'contact_id',
+          'data_type' => CRM_Utils_Type::T_INT 
+        ),
+        'payment_created_date' => array( 
+          'title' => 'Payment Created Date',
+          'name' => 'payment_created_date',
+          'data_type' => CRM_Utils_Type::T_DATE 
+        ),
+        'payment_date' => array( 
+          'title' => 'Payment Date',
+          'name' => 'payment_date',
+          'data_type' => CRM_Utils_Type::T_DATE 
+        ),
+        'payable_to_name' => array(
+          'title' => 'Payable To Name',
+          'name' => 'payable_to_name',
+          'data_type' => CRM_Utils_Type::T_STRING 
+        ),
+        'payable_to_address' => array(
+          'title' => 'Payable To Address',
+          'name' => 'payable_to_address',
+          'data_type' => CRM_Utils_Type::T_STRING
+        ),
+        'amount' => array(
+          'title' => 'Amount',
+          'name' => 'amount',
+          'data_type' => CRM_Utils_Type::T_MONEY
+        ),
+        'currency' => array(
+          'title' => 'Currency',
+          'name' => 'currency',
+          'data_type' => CRM_Utils_Type::T_STRING
+        ),
+        'payment_reason' => array(
+          'title' => 'Payment Reason',
+          'name' => 'payment_reason',
+          'data_type' => CRM_Utils_Type::T_STRING
+        ),
+        'payment_status_id' => array(
+          'title' => 'Payment Status ID',
+          'name' => 'payment_status_id',
+          'data_type' => CRM_Utils_Type::T_STRING
+        ),
+        'replaces_payment_id' => array(
+          'title' => 'Payment Reason',
+          'name' => 'replaces_payment_id',
+          'data_type' => CRM_Utils_Type::T_STRING
+        )
+      );
+      
+      $fields = CRM_Grant_DAO_GrantPayment::export();
+      self::$_exportableFields = $fields;
     }
+    return self::$_exportableFields;
+  }
+
   /**
    * function to add grant
    *
@@ -160,84 +170,78 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment
    * @static 
    * @return object
    */ 
+  static function add(&$params, &$ids) {
     
-
-  static function add( &$params, &$ids )
-  {
-
-    if ( empty($params) ) {
+    if (empty($params)) {
       return;
     }
     
-    if ( isset( $params['total_amount'] ) ) {
-      $params[$field] = CRM_Utils_Rule::cleanMoney( $params['total_amount'] );
+    if (isset( $params['total_amount'])) {
+      $params[$field] = CRM_Utils_Rule::cleanMoney($params['total_amount']);
     }
     // convert dates to mysql format
-    $dates = array( 'payment_date',
-                    'payment_created_date' );
+    $dates = array( 
+      'payment_date',
+      'payment_created_date' 
+    );
         
-    foreach ( $dates as $d ) {
-      if ( isset( $params[$d] ) ) {
-        $params[$d] = CRM_Utils_Date::processDate( $params[$d], null, true );
+    foreach ($dates as $date) {
+      if (isset($params[$date])) {
+        $params[$date] = CRM_Utils_Date::processDate($params[$date], NULL, TRUE);
       }
     }           
-    $grantPayment = new CRM_Grant_DAO_GrantPayment( );
-    $grantPayment->id = CRM_Utils_Array::value( 'id', $ids );
+    $grantPayment = new CRM_Grant_DAO_GrantPayment();
+    $grantPayment->id = CRM_Utils_Array::value('id', $ids);
         
-    $grantPayment->copyValues( $params );
-    return $grantPayment->save( );
+    $grantPayment->copyValues($params);
+    return $grantPayment->save();
   }
     
 
-  static function del( $id )
-  { 
-    require_once 'CRM/Utils/Hook.php';
-    CRM_Utils_Hook::pre( 'delete', 'GrantPayment', $id, CRM_Core_DAO::$_nullArray );
+  static function del($id) { 
+    CRM_Utils_Hook::pre('delete', 'GrantPayment', $id, CRM_Core_DAO::$_nullArray);
 
-    require_once 'CRM/Grant/DAO/GrantPayment.php';
-    $grantPayment     = new CRM_Grant_DAO_GrantPayment( );
+    $grantPayment = new CRM_Grant_DAO_GrantPayment();
     $grantPayment->id = $id; 
 
     $grantPayment->find();
 
     // delete the recently created Grant
-    require_once 'CRM/Utils/Recent.php';
     $grantPaymentRecent = array(
-                                'id'   => $id,
-                                'type' => 'GrantPayment'
-                                );
-    CRM_Utils_Recent::del( $grantPaymentRecent );
+      'id'   => $id,
+      'type' => 'GrantPayment'
+    );
+    CRM_Utils_Recent::del($grantPaymentRecent);
 
-    if ( $grantPayment->fetch() ) {
+    if ($grantPayment->fetch()) {
       $results = $grantPayment->delete();
-      CRM_Utils_Hook::post( 'delete', 'GrantPayment', $grantPayment->id, $grantPayment );
+      CRM_Utils_Hook::post('delete', 'GrantPayment', $grantPayment->id, $grantPayment);
       return $results;
     }
-    return false;
+    return FALSE;
   }
     
-  static function getMaxPayementBatchNumber( ) {
+  static function getMaxPayementBatchNumber() {
     $query = "SELECT MAX(payment_number) as payment_number, MAX(payment_batch_number) as payment_batch_number FROM civicrm_payment ";
-    $dao = CRM_Core_DAO::executeQuery( $query );
-    while( $dao->fetch() ) {
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while($dao->fetch()) {
       $grantPrograms['payment_number'] = $dao->payment_number;
       $grantPrograms['payment_batch_number'] = $dao->payment_batch_number;
     }
     return $grantPrograms;
   }
     
-  static function getPaymentNumber( $id ) {
+  static function getPaymentNumber($id) {
     $query = "SELECT id FROM civicrm_payment WHERE payment_number = {$id} ";
-    return CRM_Core_DAO::singleValueQuery( $query );
+    return CRM_Core_DAO::singleValueQuery($query);
   }
     
-  static function getPaymentBatchNumber( $id ) {
+  static function getPaymentBatchNumber($id) {
     $query = "SELECT id FROM civicrm_payment WHERE payment_batch_number = {$id} ";
-    return CRM_Core_DAO::singleValueQuery( $query );
+    return CRM_Core_DAO::singleValueQuery($query);
   }
     
-  static function makeReport( $fileName, $rows ) {
-    require_once 'CRM/Utils/PDF/Utils.php'; 
+  static function makeReport($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
     $query = "SELECT msg_subject subject, msg_text text, msg_html html, pdf_format_id format FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Report'";
@@ -252,57 +256,68 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment
     }
 
     $subject = $dao->subject;
-    $text    = $dao->text;
-    $html    = $dao->html;
-    $format  = $dao->format;
-    $dao->free( );
+    $text = $dao->text;
+    $html = $dao->html;
+    $format = $dao->format;
+    $dao->free();
 
-    require_once 'CRM/Core/Smarty/resources/String.php';
-    civicrm_smarty_register_string_resource( );
-    $smarty = CRM_Core_Smarty::singleton( );
-    foreach( array( 'text', 'html') as $elem) {
+    civicrm_smarty_register_string_resource();
+    $smarty = CRM_Core_Smarty::singleton();
+    foreach(array('text', 'html') as $elem) {
       $$elem = $smarty->fetch("string:{$$elem}");
     }
-    $output = file_put_contents( $pdf_filename, CRM_Utils_PDF_Utils::html2pdf( $html,
-                                                                               $fileName,
-                                                                               true,
-                                                                               'Letter'
-                                                                               )
-                                 );
+    $output = file_put_contents($pdf_filename, 
+      CRM_Utils_PDF_Utils::html2pdf( 
+        $html,
+        $fileName,
+        true,
+        'Letter'
+      )
+    );
     return $fileName;
-    
   }
     
-  static function createCSV( $filename, $grantPayment ) {
+  static function createCSV($filename, $grantPayment) {
     
-    $headers[] =  array ( 'Contact Id', 'Contribution Type', 'Batch Number', 'Payment Number', 'Payment Date', 'Payment Created Date', 
-                          'Payable To Name', 'Payable To Address', 'Amount', 'Currency', 'Payment Reason', 'Payment Replaces Id');
+    $headers[] = array ( 
+      'Contact Id', 
+      'Contribution Type', 
+      'Batch Number', 
+      'Payment Number', 
+      'Payment Date', 
+      'Payment Created Date', 
+      'Payable To Name', 
+      'Payable To Address', 
+      'Amount', 
+      'Currency', 
+      'Payment Reason', 
+      'Payment Replaces Id', 
+    );
     
-    $rows = array_merge( $headers, $grantPayment );
+    $rows = array_merge($headers, $grantPayment);
     $fp = fopen($filename, "w");
     $line = "";
     $comma = "";
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
-    foreach($rows as $value) {
-      if ( isset( $value['contribution_type_id'] ) ) {
+    foreach ($rows as $value) {
+      if (isset( $value['contribution_type_id'])) {
         $value['contribution_type_id'] = $contributionTypes[$value['contribution_type_id']];
       }
-      $line .= implode( '; ', $value );
+      $line .= implode('; ', $value);
       $line .= "\n";
     }
     fputs($fp, $line);
     fclose($fp);
   }
  
-  static function replaceVariables(  $html, $values ) {
-    foreach ( $values as $key => $value ) {
+  static function replaceVariables($html, $values) {
+    foreach ($values as $key => $value) {
       $html = str_replace($key, $value, $html);
     }
     return $html;
   }
   
-  static function makePDF( $fileName, $rows ) {
-    require_once 'CRM/Utils/PDF/Utils.php';
+  static function makePDF($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
     $query = "SELECT msg_subject subject, msg_html html
@@ -312,28 +327,31 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment
     $grantDao->fetch();
                 
     if (!$grantDao->N) {
-      if ($params['messageTemplateID'])
+      if ($params['messageTemplateID']) {
         CRM_Core_Error::fatal(ts('No such message template.'));
+      }
     }
     $subject = $grantDao->subject;
-    $html    = $grantDao->html;
+    $html = $grantDao->html;
 
-    $final_html = null;
-    foreach ( $rows as $values ) {
-      require_once 'CRM/Grant/Words.php';
+    $final_html = NULL;
+    foreach ($rows as $values) {
       $words = new CRM_Grant_Words();
       $amount = $values['amount'];
-      $values['check_total'] = ltrim( $amount, '$' );
-      $amount = str_replace (',', '',$amount );
-      $values['total_in_words'] = ucwords($words->convert_number_to_words( ltrim( $amount, '$' ) ) );
-      $final_html .= self::replaceVariables( $html, $values )."<br>";
+      $values['check_total'] = ltrim($amount, '$');
+      $amount = str_replace (',', '', $amount);
+      $values['total_in_words'] = ucwords($words->convert_number_to_words(ltrim($amount, '$')));
+      $final_html .= self::replaceVariables($html, $values) . "<br>";
     }
-    $output = file_put_contents( $pdf_filename, CRM_Utils_PDF_Utils::html2pdf( $final_html,
-                                                                               $fileName,
-                                                                               true,
-                                                                               'Letter'
-                                                                               )
-                                 );
+    $output = file_put_contents( 
+      $pdf_filename, 
+      CRM_Utils_PDF_Utils::html2pdf( 
+        $final_html,
+        $fileName,
+        TRUE,
+        'Letter'
+      )
+    );
     return $fileName;
   }
 }
