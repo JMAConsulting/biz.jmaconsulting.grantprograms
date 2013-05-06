@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.0                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -34,64 +34,63 @@
  *
  */
 
-require_once 'CRM/Core/Page.php';
-require_once 'CRM/Grant/BAO/GrantProgram.php';
-
 
 /**
  * Page for displaying list of contribution types
  */
-class CRM_Grant_Page_Payment extends CRM_Core_Page
-{
-
+class CRM_Grant_Page_Payment extends CRM_Core_Page {
     
-    function run( ) 
-    {
-        $action = CRM_Utils_Request::retrieve('action', 'String',
-                                              $this, false, 0 );
-        if ( $action & CRM_Core_Action::VIEW ) { 
-            $this->view( $action ); 
-        } elseif ( $action & ( CRM_Core_Action::STOP) ) {
-            $this->stop( $action );
-        } elseif ( $action & ( CRM_Core_Action::REPRINT ) ) {
-            $this->reprint( $action ); 
-        } else {
-            $this->withdraw( $action ); 
-        }
-        $this->assign('action', $action);
-        return parent::run( );
+  function run() {
+    $action = CRM_Utils_Request::retrieve(
+      'action', 
+      'String',
+      $this, 
+      FALSE, 
+      0 
+    );
+    if ($action & CRM_Core_Action::VIEW) { 
+      $this->view($action); 
+    } 
+    elseif ($action & (CRM_Core_Action::STOP)) {
+      $this->stop($action);
+    } 
+    elseif ($action & (CRM_Core_Action::REPRINT)) {
+      $this->reprint($action); 
+    } 
+    else {
+      $this->withdraw($action); 
     }
+    $this->assign('action', $action);
+    return parent::run();
+  }
+  
+  // FIXME : remove lots of duplicate codes
 
+  function view($action) {   
+    $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Payment_View', ts(''), $action);
+    $controller->setEmbedded(TRUE);  
+    $result = $controller->process();
+    $result = $controller->run();
+  }
 
-    function view( $action ) 
-    {   
-        $controller = new CRM_Core_Controller_Simple( 'CRM_Grant_Form_Payment_View', ts(''), $action );
-        $controller->setEmbedded( true );  
-        $result = $controller->process();
-        $result = $controller->run();
-    }
+  function stop($action) {   
+    $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Payment_View', ts(''), $action);
+    $controller->setEmbedded(TRUE);  
+    $result = $controller->process();
+    $result = $controller->run();
+  }
 
-    function stop( $action ) 
-    {   
-        $controller = new CRM_Core_Controller_Simple( 'CRM_Grant_Form_Payment_View', ts(''), $action );
-        $controller->setEmbedded( true );  
-        $result = $controller->process();
-        $result = $controller->run();
-    }
+  function reprint($action) {   
+    $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Payment_View', ts(''), $action);
+    $controller->setEmbedded(TRUE);  
+    $result = $controller->process();
+    $result = $controller->run();
+  }
 
-    function reprint( $action ) 
-    {   
-        $controller = new CRM_Core_Controller_Simple( 'CRM_Grant_Form_Payment_View', ts(''), $action );
-        $controller->setEmbedded( true );  
-        $result = $controller->process();
-        $result = $controller->run();
-    }
-
-    function withdraw( $action ) 
-    {   
-        $controller = new CRM_Core_Controller_Simple( 'CRM_Grant_Form_Payment_View', ts(''), $action );
-        $controller->setEmbedded( true );  
-        $result = $controller->process();
-        $result = $controller->run();
-    }
+  function withdraw($action) {   
+    $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Payment_View', ts(''), $action);
+    $controller->setEmbedded(TRUE);  
+    $result = $controller->process();
+    $result = $controller->run();
+  }
 }
