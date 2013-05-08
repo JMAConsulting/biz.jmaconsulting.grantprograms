@@ -130,7 +130,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         FALSE
       );
 
-      $form->_grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+      $form->_grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $form->add('select', 
         'grant_program_id', 
         ts('Grant Programs'),
@@ -142,7 +142,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       }
     } 
     elseif ($form->getVar('_name') == 'Search') {
-      $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+      $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $form->add('select', 
         'grant_program_id',  
         ts('Grant Programs'),

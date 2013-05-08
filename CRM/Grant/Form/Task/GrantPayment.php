@@ -217,7 +217,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
         $mailParams[$dao->grant_id]['grant_type_id']    = $dao->grant_type_id;
         $mailParams[$dao->grant_id]['grant_program_id'] = $dao->grant_program_id;
         $grantContctId[$dao->grant_id] = $dao->id;
-        $gProgram = CRM_Grant_BAO_Grant::getGrantPrograms( $dao->grant_program_id );
+        $gProgram = CRM_Grant_BAO_GrantProgram::getGrantPrograms( $dao->grant_program_id );
         if( !empty( $gProgram ) ) {
           $details[$dao->id]['grant_program_id'][$gProgram[$dao->grant_program_id]] = $gProgram[$dao->grant_program_id];
         }
@@ -368,7 +368,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
         $entityDAO->save();
         $grantStatus = CRM_Core_OptionGroup::values( 'grant_status' );
         $grantType   = CRM_Core_OptionGroup::values( 'grant_type' );
-        $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+        $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
         $this->assign( 'grant_type', $grantType[$mailParams[$grantId]['grant_type_id']] );
         $this->assign( 'grant_programs', $grantPrograms[$mailParams[$grantId]['grant_program_id']] );
         $this->assign( 'grant_status', 'Paid' );

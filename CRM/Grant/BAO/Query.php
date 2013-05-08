@@ -208,7 +208,7 @@ class CRM_Grant_BAO_Query
 
             $query->_where[$grouping][] = "civicrm_grant.grant_program_id $op '{$value}'";
             
-            $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+            $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
             $value = $grantPrograms[$value];
             $query->_qill[$grouping ][] = ts( 'Grant Type %2 %1', array( 1 => $value, 2 => $op) );
             $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
