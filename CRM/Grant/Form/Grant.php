@@ -345,38 +345,9 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
       $params['grant_status'] = $grantStatus = $this->_grantStatus[$params['status_id']];
       $params['grant_type'] = $grantType = $this->_grantType[$params['grant_type_id']];
       $params['grant_programs'] = $grantPrograms = $this->_grantPrograms[$params['grant_program_id']];
-      // foreach( $params['custom'] as $key => $value ) {
-      //   foreach ( $value as $vkey => $vval ) {
-      //     if ( !empty( $vval['value'] ) ) {
-      //       $data[$vval['custom_group_id']][$vval['custom_field_id']] = $vval['value'];
-      //     }
-      //   }
-      // }
-      // require_once 'CRM/Core/DAO.php';
-      // if ( !empty( $data ) ) {
-      //   foreach ( $data as $dataKey => $dataValue ) {
-      //     $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
-      //     $customGroup[$customGroupName] = $customGroupName;
-      //     $c = 0;
-      //     foreach ( $dataValue  as $dataValueKey => $dataValueValue ) {
-      //       $customField[$customGroupName][$c]['label'] = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomField',$dataValueKey,'label' );
-      //       $customField[$customGroupName][$c]['value'] = $dataValueValue;
-      //       $c++;
-      //     }
-      //   }
-      //   $this->assign( 'customGroup', $customGroup );
-      //   $this->assign( 'customField', $customField );
-      // }
-        
-      // $this->assign( 'grant_type', $grantType );
-      // $this->assign( 'grant_programs', $grantPrograms );
-      // $this->assign( 'grant_status', $grantStatus );
-      // $this->assign( 'params', $params );
-        
-      //CRM_Grant_BAO_Grant::sendMail( $this->_contactID, $params, $grantStatus );
       $grant = CRM_Grant_BAO_Grant::create($params, $ids);
       
-      $grants = CRM_Grant_BAO_Grant::getGrants( $array );
+      $grants = CRM_Grant_BAO_GrantProgram::getGrants($array);
       $grants =  array_flip( array_keys($grants) );
         
       $foundit = false;
