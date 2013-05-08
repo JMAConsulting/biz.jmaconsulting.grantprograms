@@ -97,7 +97,7 @@ class CRM_Grant_Page_GrantProgram extends CRM_Core_Page {
       );
     }
     $grantType = CRM_Grant_PseudoConstant::grantType();
-    $grantStatus = CRM_Grant_PseudoConstant::grantProgramStatus();
+    $grantStatus = CRM_Grant_BAO_GrantProgram::grantProgramStatus();
     foreach ($grantProgram as $key => $value) {
       $grantProgram[$key]['grant_type_id'] = $grantType[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['grant_type_id'])];
       $grantProgram[$key]['status_id'] = $grantStatus[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['status_id'])];
