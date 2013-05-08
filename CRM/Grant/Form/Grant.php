@@ -183,15 +183,6 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
         $this->add('select', 'status_id',  ts( 'Grant Status' ),
                    array( '' => ts( '- select -' ) ) + $this->_grantStatus , true);
 
-        // $this->_reasonGrantRejected = CRM_Core_OptionGroup::values( 'reason_grant_rejected' );
-        // $this->add('select', 'grant_rejected_reason_id',  ts( 'Reason Grant Rejected' ),
-        //            array( '' => ts( '- select -' ) ) + $this->_reasonGrantRejected , false);
-        
-        // $this->_grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
-
-        // $this->add('select', 'grant_program_id',  ts( 'Grant Programs' ),
-        //            array( '' => ts( '- select -' ) ) + $this->_grantPrograms , true);
-        
         $this->addDate( 'application_received_date', ts('Application Received'), false, array( 'formatType' => 'custom') );
         $this->addDate( 'decision_date', ts('Grant Decision'), false, array( 'formatType' => 'custom') );
         $this->addDate( 'money_transfer_date', ts('Money Transferred'), false, array( 'formatType' => 'custom') );

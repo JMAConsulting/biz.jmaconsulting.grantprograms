@@ -202,7 +202,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       }
     }
     $page = new CRM_Core_Page();
-    $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+    $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $message = "Trial Allocation Completed. $" . $grantedAmount . ".00 allocated to {$grantedCount} eligible applications. " . $eligibleCount . " eligible applications were not allocated $" . $eligibleAmount . ".00 in funds they would have received were funds available. $" . $totalAmount . " remains unallocated.";
           
     $page->assign('message', $message);
