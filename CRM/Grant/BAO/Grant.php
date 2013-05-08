@@ -341,7 +341,6 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant
             }
           }
         }
-        require_once 'CRM/Core/DAO.php';
         if ( !empty( $customData ) ) {
           foreach ( $customData as $dataKey => $dataValue ) {
             $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
@@ -356,8 +355,6 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant
           $page->assign( 'customGroup', $customGroup );
           $page->assign( 'customField', $customField );
         }
-        require_once 'CRM/Core/OptionGroup.php';  
-        require_once 'CRM/Grant/BAO/Grant.php';
         $grantStatuses = CRM_Core_OptionGroup::values( 'grant_status' );
         $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
         $grantTypes    = CRM_Core_OptionGroup::values( 'grant_type' );
@@ -369,7 +366,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant
         $page->assign( 'grant_programs', $grantProgram );
         $page->assign( 'grant_status', $grantStatus );
         $page->assign( 'params', $params );
-        self::sendMail( $params['contact_id'], $params, $grantStatus );
+        CRM_Grant_BAO_GrantProgram::sendMail( $params['contact_id'], $params, $grantStatus );
       }
       return $grant;
     }

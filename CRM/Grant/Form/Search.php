@@ -383,7 +383,7 @@ class CRM_Grant_Form_Search extends CRM_Core_Form
         foreach( $fields as $fieldKey => $fieldValue ) {
           if( strstr( $fieldKey, 'mark_x_' ) ) {
             $grantID = ltrim( $fieldKey, 'mark_x_' );
-            $grantDetails = CRM_Grant_BAO_Grant::getGrants( array( 'id' => $grantID ) );
+            $grantDetails = CRM_Grant_BAO_GrantProgram::getGrants(array('id' => $grantID));
             if( ! $grantDetails[$grantID]['amount_granted'] ) {
               $errors['task'] = ts('Payments are only possible when there is an amount owing.');
               break;
