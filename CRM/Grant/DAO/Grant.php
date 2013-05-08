@@ -247,7 +247,7 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
           'dataPattern' => '',
           'FKClassName' => 'CRM_Contact_DAO_Contact',
         ) ,
-        'grant_contact_id' => array(
+        'grant_program_id' => array(
           'name' => 'grant_program_id',
           'type' => CRM_Utils_Type::T_INT,
           'title' => ts('Grant Program ID') ,
