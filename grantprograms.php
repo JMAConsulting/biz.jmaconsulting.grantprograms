@@ -30,8 +30,6 @@ function grantprograms_civicrm_install() {
   $smarty = CRM_Core_Smarty::singleton();
   $config = CRM_Core_Config::singleton();
   $data = $smarty->fetch($config->extensionsDir . 'biz.jmaconsulting.grantprograms/sql/civicrm_msg_template.tpl');
-  CRM_Core_Error::debug( '$data', $data );
-  exit;
   file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
   return TRUE;
