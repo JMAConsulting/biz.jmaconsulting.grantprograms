@@ -324,7 +324,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
             $customGroup[$customGroupName] = $customGroupName;
             $count = 0;
             foreach ($dataValue  as $dataValueKey => $dataValueValue) {
-              $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField',$dataValueKey,'label');
+              $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
               $customField[$customGroupName][$count]['value'] = $dataValueValue;
               $count++;
             }

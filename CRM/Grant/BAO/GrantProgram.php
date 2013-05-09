@@ -304,8 +304,6 @@ WHERE civicrm_contact.id = $id ";
           'contactId' => $contactID,
           'tplParams' => array(
             'email' => $email,
-            'confirm_email_text' => CRM_Utils_Array::value('confirm_email_text', $value['event']),
-            'isShowLocation' => CRM_Utils_Array::value('is_show_location',   $value['event']),
            ),
           'PDFFilename' => '',
         );
