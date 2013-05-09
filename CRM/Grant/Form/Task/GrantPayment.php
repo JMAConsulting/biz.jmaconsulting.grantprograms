@@ -292,7 +292,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
     }
     $this->assign( 'date', date('Y-m-d'));
     $this->assign( 'time', date('H:i:s'));
-    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Contribute_DAO_ContributionType', $values['contribution_type_id'], 'name' ) );
+    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Financial_DAO_FinancialType', $values['contribution_type_id'], 'name' ) );
     $this->assign( 'batch_number', $values['payment_batch_number']);
     $this->assign( 'contact',CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $_SESSION[ 'CiviCRM' ][ 'userID' ], 'display_name' ) );
     $this->assign( 'grantPayment', $grantPayment );
