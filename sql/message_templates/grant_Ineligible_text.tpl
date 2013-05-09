@@ -3,6 +3,10 @@ Dear {contact.display_name},
 Grant Program Name: {$grant_programs}  <br>
 Grant  Type    {$grant_type}
 Total Amount: {$params.amount_total}
+{if $grant_decision_reason}
+Grant Decision Reason:
+{$grant_decision_reason}
+{/if}
 {if customField}
 {foreach from=$customField key=key item=data}
 {$customGroup.$key}
