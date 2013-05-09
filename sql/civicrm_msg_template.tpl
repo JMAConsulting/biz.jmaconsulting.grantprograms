@@ -28,11 +28,13 @@
   );
   $ovNames = array(
     'grant' => array(
-      'grant_approved' => ts('Grant approved', array('escape' => 'sql')),
-      'grant_awaiting_info' => ts('Grant awaiting info', array('escape' => 'sql')),
-      'grant_paid' => ts('Grant paid', array('escape' => 'sql')),
-      'grant_rejected' => ts('Grant rejected', array('escape' => 'sql')),
-      'grant_submitted' => ts('Grant submitted', array('escape' => 'sql')),
+      'grant_approved' => ts('Grants Approved Receipt', array('escape' => 'sql')),
+      'grant_awaiting_info' => ts('Grants Awaiting Information Receipt', array('escape' => 'sql')),
+      'grant_Ineligible' => ts('Grants Ineligible Receipt', array('escape' => 'sql')),
+      'grant_paid' => ts('Grants Paid Receipt', array('escape' => 'sql')),
+      'grant_granted' => ts('Grants Granted Receipt', array('escape' => 'sql')),
+      'grant_submitted' => ts('Grants Submitted Receipt', array('escape' => 'sql')),
+      'grant_withdrawn' => ts('Grants Withdrawn Receipt', array('escape' => 'sql')),
     ),
   );
   $smarty = CRM_Core_Smarty::singleton();
