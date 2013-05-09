@@ -178,18 +178,15 @@ INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`,
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_thresholds';
 
 -- option values
-SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
-SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Funding factor' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Fixed Percentage Of Grant' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Maximum Grant' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Minimum Score For Grant Award' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
-(@opv1, @opGId, 'Funding factor', '85', NULL, NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Maximum Grant', '1500', 'Maximum Grant', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL);

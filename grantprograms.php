@@ -179,6 +179,27 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         ts('To'), 
         array('size' => 9, 'maxlength' => 9)
       );
+      $form->add('text', 
+        'grant_amount_low', 
+        ts('From'), 
+        array('size' => 8, 'maxlength' => 8)
+      ); 
+      $form->addRule('grant_amount_low', 
+        ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+        'money'
+      );
+
+      $form->add('text', 
+        'grant_amount_high', 
+        ts('To'), 
+        array('size' => 8, 'maxlength' => 8)
+      );
+      $form->addRule('grant_amount_high', 
+        ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+        'money'
+      );
     }
   }
   
@@ -221,4 +242,8 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     }
   }
   return empty($errors) ? TRUE : $errors;
+}
+
+
+function grantprograms_civicrm_pre( $op, $objectName, $id, &$params ) {
 }
