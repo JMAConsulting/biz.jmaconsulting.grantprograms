@@ -125,6 +125,9 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
     if ($form->getVar('_name') == 'Grant') {
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Grant/Form/GrantExtra.tpl',
+      ));
       $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_rejected');
       $form->add('select', 
         'grant_rejected_reason_id', 
