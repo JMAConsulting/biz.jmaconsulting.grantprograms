@@ -25,7 +25,7 @@ function grantprograms_civicrm_xmlMenu(&$files) {
  * Implementation of hook_civicrm_install
  */
 function grantprograms_civicrm_install() {
-  //_grantprograms_civix_civicrm_install();
+  _grantprograms_civix_civicrm_install();
   
   $smarty = CRM_Core_Smarty::singleton();
   $config = CRM_Core_Config::singleton();
