@@ -14,6 +14,10 @@
 Grant Program Name: {$grant_programs} <br>
 Grant  Type             : {$grant_type}<br>
 Total Amount            : {$params.amount_total}<br>
+{if $grant_decision_reason}
+Grant Decision Reason:
+{$grant_decision_reason}
+{/if}<br>
 {if customField}
 {foreach from=$customField key=key item=data}
 <b>{$customGroup.$key}</b><br>
