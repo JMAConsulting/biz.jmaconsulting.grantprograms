@@ -107,7 +107,7 @@ cj("#download").hide();
 window.location.href = cj(".download").attr('href');
 }
 cj(function() {	
-   cj().crmaccordions(); 
+   cj().crmAccordions(); 
 });
 </script>
 {/literal}

@@ -357,18 +357,6 @@ class CRM_Grant_BAO_Query {
 
     $form->addYesNo('grant_report_received', ts('Grant report received?'));
     
-    // Added by JMA FIXME
-    $form->add('text', 'grant_amount_total_low', ts('From'), array('size' => 8, 'maxlength' => 8)); 
-    $form->addRule('grant_amount_total_low', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('9.99', ' '))), 'money');
-    $form->add('text', 'grant_amount_total_high', ts('To'), array('size' => 8, 'maxlength' => 8)); 
-    $form->addRule('grant_amount_total_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
-    
-    $form->add('text', 'grant_amount_low', ts('From'), array('size' => 8, 'maxlength' => 8)); 
-    $form->addRule('grant_amount_low', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('9.99', ' '))), 'money');
-
-    $form->add('text', 'grant_amount_high', ts('To'), array('size' => 8, 'maxlength' => 8));
-    $form->addRule('grant_amount_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
-
     // add all the custom  searchable fields
     $grant = array('Grant');
     $groupDetails = CRM_Core_BAO_CustomGroup::getGroupDetail(NULL, TRUE, $grant);
