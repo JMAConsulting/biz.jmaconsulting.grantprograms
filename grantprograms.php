@@ -121,6 +121,9 @@ function grantprograms_civicrm_grantAssessment(&$params) {
 function grantprograms_civicrm_buildForm($formName, &$form) {
 
   if ($formName = 'CRM_Grant_Form_Grant') {
+    $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
+    $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
+    $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
     if ($form->getVar('_name') == 'Grant') {
       $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_rejected');
       $form->add('select', 
@@ -139,6 +142,34 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     
       if (CRM_Core_Permission::check('administer CiviGrant')) {
         $form->add('text', 'assessment', ts('Assessment'));
+      }
+      // FIXME: session key errorfor 4.3
+      if ($form->getVar('_context') == 'search' && 0) {
+        $form->addButtons(array(
+          array (
+            'type' => 'upload',
+            'name' => ts('Save'),
+            'isDefault' => TRUE),
+          array (
+            'type' => 'submit',
+            'name' => ts('Save and Next'),
+            'subName'=> 'savenext'),
+          array (
+            'type' => 'upload',
+            'name' => ts('Save and New'),
+            'js' => array('onclick' => "return verify( );"),
+            'subName' => 'new'),
+          array (
+            'type' => 'cancel',
+            'name' => ts('Cancel')),
+          )
+        );
+        $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('grants'), NULL);
+        $controller->setEmbedded(TRUE);
+        $controller->reset();
+        $controller->set('force', 1);
+        $controller->process();
+        $controller->run();
       }
     } 
     elseif ($form->getVar('_name') == 'Search') {
@@ -246,4 +277,58 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
 
 
 function grantprograms_civicrm_pre( $op, $objectName, $id, &$params ) {
+}
+
+/*
+ * hook_civicrm_postProcess
+ *
+ * @param string $formName form name
+ * @param object $form form object
+ *
+ */
+function grantprograms_civicrm_postProcess($formName, &$form) {
+  if ($formName == 'CRM_Grant_Form_Grant') {
+    // FIXME: cookies error
+    if ($form->getVar('_context') == 'search' && 0) {
+      $array['contact_id'] = $form->getVar('_contactID');
+      $grants = CRM_Grant_BAO_GrantProgram::getGrants($array);
+      $grants = array_flip(array_keys($grants));
+        
+      $foundit = FALSE;
+      foreach ($grants as $gKey => $gVal) {
+        if ($foundit) {
+          $next = $gKey; 
+          break;
+        }
+        if ($gKey == $form->_next) { 
+          $next = $gKey; 
+          if($gVal == end($grants)) {
+            reset($grants);
+            $next = key($grants);
+          }
+          $foundit = TRUE;
+        }
+      }
+
+      if (CRM_Utils_Array::value($form->getButtonName('submit', 'savenext'), $_POST)) {
+        if ($form->_id != $form->_prev) {
+          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
+            "reset=1&action=update&id={$form->_next}&cid={$form->_contactID}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}"));
+        } 
+        else {
+          CRM_Core_Session::setStatus( ts('The next record in the Search no longer exists. Select another record to edit if desired.'));
+          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 
+            "force=1&qfKey={$form->_key}"));
+        }
+      } 
+      elseif (CRM_Utils_Array::value( $form->getButtonName('upload', 'new'), $_POST)) {
+        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
+          "reset=1&action=add&context=grant&cid={$form->_contactID}"));
+      } 
+      else {
+        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 
+          "force=1&qfKey={$form->_key}"));
+      }
+    }
+  }
 }
