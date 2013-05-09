@@ -81,11 +81,9 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
   `is_active` tinyint(4) DEFAULT '1' COMMENT 'Is this grant program active?',
   `is_auto_email` tinyint(4) DEFAULT '1' COMMENT 'Is auto email active?',
   `allocation_algorithm` int(10) unsigned DEFAULT NULL COMMENT 'Allocation Algorithm.',
-  `payment_id` int(10) unsigned NOT NULL COMMENT 'Type of grant. Implicit FK to civicrm_payment.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_grant_program_grant_type_id` (`grant_type_id`),
-  KEY `FK_civicrm_grant_program_status_id` (`status_id`),
-  KEY `FK_civicrm_grant_program_payment_id` (`payment_id`)
+  KEY `FK_civicrm_grant_program_status_id` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
@@ -96,7 +94,6 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
 -- Constraints for table `civicrm_grant_program`
 ALTER TABLE `civicrm_grant_program`
   ADD CONSTRAINT `FK_civicrm_grant_program_grant_type_id` FOREIGN KEY (`grant_type_id`) REFERENCES `civicrm_option_value` (`id`),
-  ADD CONSTRAINT `FK_civicrm_grant_program_payment_id` FOREIGN KEY (`payment_id`) REFERENCES `civicrm_payment` (`id`),
   ADD CONSTRAINT `FK_civicrm_grant_program_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_option_value` (`id`);
 
 -- add columns to civicrm_grant
@@ -178,15 +175,18 @@ INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`,
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_thresholds';
 
 -- option values
+SET @opv1 := ''; 
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
+SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Funding factor' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Fixed Percentage Of Grant' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Maximum Grant' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Minimum Score For Grant Award' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
+(@opv1, @opGId, 'Funding factor', '85', NULL, NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Maximum Grant', '1500', 'Maximum Grant', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL);
@@ -205,6 +205,54 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
  VALUES
 (@opv2, @opGId, 'Ineligible', '7', 'Ineligible', NULL, 0, 0, 6, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv1, @opGId, 'Granted', '7', 'Granted', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL);
+
+-- reason_grant_ineligible
+SET @opGId := '';
+SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_ineligible';
+INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
+(@opGId, 'reason_grant_ineligible', 'Reason Grant Ineligible', NULL, 1, 1);
+SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_ineligible';
+
+-- option values
+SET @opv1 := ''; 
+SET @opv2 := '';
+SET @opv3 := '';
+SET @opv4 := '';
+SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Outside dates' AND option_group_id = @opGId;
+SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
+SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Information not received in time' AND option_group_id = @opGId;
+SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Insufficient funds in program' AND option_group_id = @opGId;
+
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+ VALUES
+(@opv1, @opGId, 'Outside dates', '1', 'Outside dates', NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, 1, NULL),
+(@opv2, @opGId, 'Ineligible', '2', 'Ineligible', NULL, 0, 2, 1, NULL, 0, 0, 1, NULL, 1, NULL),
+(@opv3, @opGId, 'Information not received in time', '3', 'Information not received in time', NULL, 0, 3, 1, NULL, 0, 0, 1, NULL, 1, NULL),
+(@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL);
+
+-- Reason Grant Incomplete
+SET @opGId := '';
+SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_incomplete';
+INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
+(@opGId, 'reason_grant_incomplete', 'Reason Grant Incomplete', NULL, 1, 1);
+SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_incomplete';
+
+-- option values
+SET @opv1 := ''; 
+SET @opv2 := '';
+SET @opv3 := '';
+SET @opv4 := '';
+SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'No Receipts' AND option_group_id = @opGId;
+SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Inadequate Receipts' AND option_group_id = @opGId;
+SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'No Proof of completion' AND option_group_id = @opGId;
+SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Inadaquate Proof of completion' AND option_group_id = @opGId;
+
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+ VALUES
+(@opv1, @opGId, 'No Receipts', '1', 'No Receipts', NULL, 0, 0, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
+(@opv2, @opGId, 'Inadequate Receipts', '2', 'Inadequate Receipts', NULL, 0, 0, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
+(@opv3, @opGId, 'No Proof of completion', '3', 'No Proof of completion', NULL, 0, 0, 3, NULL, 0, 0, 1, NULL, NULL, NULL),
+(@opv4, @opGId, 'Inadaquate Proof of completion', '4', 'Inadaquate Proof of completion', NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL);
 
 -- insert navigation links
 
