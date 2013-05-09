@@ -275,6 +275,20 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
       $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
     }
   }
+  if ($formName == 'CRM_Grant_Form_Search') {
+    if (isset($fields['task']) && $fields['task'] == '5') {
+      foreach ($fields as $fieldKey => $fieldValue) {
+        if (strstr($fieldKey, 'mark_x_')) {
+          $grantID = ltrim( $fieldKey, 'mark_x_' );
+          $grantDetails = CRM_Grant_BAO_GrantProgram::getGrants(array('id' => $grantID));
+          if (!$grantDetails[$grantID]['amount_granted']) {
+            $errors['task'] = ts('Payments are only possible when there is an amount owing.');
+            break;
+          }
+        }
+      }
+    }
+  } 
   return empty($errors) ? TRUE : $errors;
 }
 
