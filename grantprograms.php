@@ -2,6 +2,9 @@
 
 require_once 'grantprograms.civix.php';
 
+//define pay grants
+define('PAY_GRANTS', 5);
+
 /**
  * Implementation of hook_civicrm_config
  */
@@ -276,7 +279,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     }
   }
   if ($formName == 'CRM_Grant_Form_Search') {
-    if (isset($fields['task']) && $fields['task'] == '5') {
+    if (isset($fields['task']) && $fields['task'] == PAY_GRANTS) {
       foreach ($fields as $fieldKey => $fieldValue) {
         if (strstr($fieldKey, 'mark_x_')) {
           $grantID = ltrim( $fieldKey, 'mark_x_' );
@@ -347,5 +350,25 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
           "force=1&qfKey={$form->_key}"));
       }
     }
+  }
+}
+
+/*
+ * hook_civicrm_searchTasks
+ *
+ * @param string $objectName form name
+ * @param array $tasks search task
+ *
+ */
+function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
+
+  if ($objectName == 'grant') {
+    $tasks[PAY_GRANTS] = array( 
+      'title' => ts('Pay Grants'),
+      'class' => array('CRM_Grant_Form_Task_Pay',
+        'CRM_Grant_Form_Task_GrantPayment' 
+      ),
+      'result' => FALSE,
+    );
   }
 }
