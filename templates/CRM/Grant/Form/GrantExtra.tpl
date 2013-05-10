@@ -38,12 +38,12 @@
   </tr>
 </tbody></table>
 
-{if $pager->_totalItems}
+{*if $pager->_totalItems*}
   <h3>{ts}Recent Grants{/ts}</h3>
-  <div class="form-item">
-    {include file="CRM/Grant/Form/Selector.tpl" context="DashBoard"}
+  <div class="form-item" id = "RecentGrants">
+    {* include file="CRM/Grant/Form/Selector.tpl" context="DashBoard" *}
   </div>
-{/if}
+{*/if*}
 <script type="text/javascript">
 {literal}
 cj(document).ready(function(){
@@ -62,6 +62,15 @@ if ( this.options[this.selectedIndex].text == 'Rejected' ) {
   cj('.grant_rejected_reason_id').hide();
 }
 });
+var dataUrl = {/literal}"{crmURL p='civicrm/grant/search' h=0 q="snippet=1&force=1"}"{literal};
+var response = cj.ajax({
+  url: dataUrl,
+  async: false,
+  success: function(response) {
+    cj('#RecentGrants').html(response);
+    cj('div.crm-search-form-block, .crm-search-tasks').hide();
+  }
+ }).responseText;	
 });
 var total = 0;
 cj(".form-select").change(function(){
