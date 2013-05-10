@@ -34,15 +34,6 @@
  *
  */
 
-require_once 'CRM/Grant/Form/PaymentTask.php';
-require_once 'CRM/Grant/BAO/GrantProgram.php';
-require_once 'CRM/Grant/BAO/EntityPayment.php';
-require_once 'CRM/Grant/BAO/GrantPayment.php';
-require_once 'CRM/Grant/BAO/Grant.php';
-require_once 'CRM/Utils/Money.php';
-require_once 'CRM/Core/DAO/EntityFile.php';
-require_once 'CRM/Core/BAO/File.php';
-
 /**
  * This class provides the functionality to delete a group of
  * participations. This class provides functionality for the actual
@@ -119,7 +110,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $attributes = CRM_Core_DAO::getAttribute( 'CRM_Grant_DAO_GrantProgram' );
     
       $this->_contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
-      $this->add('select', 'contribution_type_id',  ts( 'From account' ),
+      $this->add('select', 'financial_type_id',  ts( 'From account' ),
                  array( '' => ts( '- select -' ) ) + $this->_contributionTypes , true);
 
       $this->add( 'text', 'payment_batch_number', ts( 'Payment Batch number' ),
@@ -176,7 +167,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $paymentDAO->find(true);
       
       $payment['payment_batch_number'] = $values['payment_batch_number'];
-      $payment['contribution_type_id'] = $values['contribution_type_id']; 
+      $payment['financial_type_id'] = $values['financial_type_id']; 
       $payment['payment_number']       = $values['payment_number'];
       $payment['contact_id']           = $paymentDAO->contact_id; 
       $payment['payment_created_date'] = date('m/d/Y');
@@ -216,7 +207,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       }
       
       $grantPayment[$newEntityDAO->payment_id]['contact_id']           = $result->contact_id;
-      $grantPayment[$newEntityDAO->payment_id]['contribution_type_id'] = $values['contribution_type_id'];
+      $grantPayment[$newEntityDAO->payment_id]['financial_type_id'] = $values['financial_type_id'];
       $grantPayment[$newEntityDAO->payment_id]['payment_batch_number'] = $values['payment_batch_number'];
       $grantPayment[$newEntityDAO->payment_id]['payment_number'      ] = $values['payment_number'];
       $grantPayment[$newEntityDAO->payment_id]['payment_date'        ] = date("Y-m-d", strtotime( $values['payment_date']));
@@ -245,7 +236,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
     $downloadName .= '_'.date('Ymdhis');
     $this->assign( 'date', date('Y-m-d'));
     $this->assign( 'time', date('H:i:s'));
-    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Contribute_DAO_ContributionType', $values['contribution_type_id'], 'name' ) );
+    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Financial_DAO_FinancialType', $values['financial_type_id'], 'name' ) );
     $this->assign( 'batch_number', $values['payment_batch_number']);
     $this->assign( 'contact',CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $_SESSION[ 'CiviCRM' ][ 'userID' ], 'display_name' ) );
     $this->assign( 'grantPayment', $grantPayment );

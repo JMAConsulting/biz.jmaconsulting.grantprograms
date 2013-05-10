@@ -34,8 +34,8 @@
      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
      <table class="form-layout-compressed">
        <tr class="crm-grant_payment-form-block-contribution_type_id">
-	  <td class="label">{$form.contribution_type_id.label}</td>
-	  <td class="html-adjust">{$form.contribution_type_id.html}</td>
+	  <td class="label">{$form.financial_type_id.label}</td>
+	  <td class="html-adjust">{$form.financial_type_id.html}</td>
        </tr>
        <tr class="crm-grant_payment-form-block-payment_batch_number">
  	  <td class="label">{$form.payment_batch_number.label}</td>

@@ -36,7 +36,7 @@
 
 
 /**
- * Page for displaying list of contribution types
+ * Page for displaying list of financial types
  */
 class CRM_Grant_Page_Payment extends CRM_Core_Page {
     
