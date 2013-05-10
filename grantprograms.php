@@ -131,10 +131,10 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
       ));
-      $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_rejected');
+      $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
       $form->add('select', 
         'grant_rejected_reason_id', 
-        ts('Reason Grant Rejected'),
+        ts('Reason Grant Ineligible'),
         array('' => ts('- select -')) + $form->_reasonGrantRejected, 
         FALSE
       );
