@@ -56,34 +56,90 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
    * @return array Array of event summary values
    */
   static function getGrantSummary($admin = FALSE) {
-    $query = "
-            SELECT status_id, count(id) as status_total
-            FROM civicrm_grant  GROUP BY status_id";
+     $query = "SELECT 
+          p.label, 
+          g.status_id, 
+          count(g.id) AS status_total, 
+          sum(g.amount_total) AS amount_requested,
+          sum(g.amount_granted) AS amount_granted,
+          sum(cp.amount) AS total_paid,
+          sum(g.amount_granted)/count(g.id) AS average_amount 
+          FROM civicrm_grant_program p
+          LEFT JOIN civicrm_grant g ON g.grant_program_id = p.id
+          LEFT JOIN civicrm_entity_payment ep ON ep.entity_id = g.id AND ep.entity_table = 'civicrm_grant'
+          LEFT JOIN civicrm_payment cp ON cp.id = ep.payment_id
+          WHERE g.status_id IS NOT NULL
+          GROUP BY g.grant_program_id, g.status_id WITH ROLLUP";
 
-    $dao = CRM_Core_DAO::executeQuery($query, CRM_Core_DAO::$_nullArray);
+        $dao = CRM_Core_DAO::executeQuery( $query, CRM_Core_DAO::$_nullArray );
 
-    $status = array();
-    $summary = array();
-    $summary['total_grants'] = NULL;
-    $status = CRM_Grant_PseudoConstant::grantStatus();
-
-    foreach ($status as $id => $name) {
-      $stats[$id] = array(
-        'label' => $name,
-        'total' => 0,
-      );
-    }
-
-    while ($dao->fetch()) {
-      $stats[$dao->status_id] = array(
-        'label' => $status[$dao->status_id],
-        'total' => $dao->status_total,
-      );
-      $summary['total_grants'] += $dao->status_total;
-    }
-
-    $summary['per_status'] = $stats;
-    return $summary;
+        $status = array( );
+        $summary = array( );
+        $summary['total_grants'] = null;
+        $summary['total_grants']['no_of_grants'] = null;
+     $querys = "SELECT
+          v.label as label,
+          v.weight as value,
+          v.value as info
+          FROM civicrm_option_value v, civicrm_option_group g
+          WHERE  v.option_group_id = g.id
+          AND  g.name = 'grant_status'
+          AND  g.is_active = 1
+          ORDER BY v.weight";
+        $daos = CRM_Core_DAO::executeQuery( $querys, CRM_Core_DAO::$_nullArray );
+        while ($daos->fetch()) {
+          $status[$daos->value] = array(
+            'weight' => $daos->value,
+            'value' => $daos->info,
+            'label' => $daos->label,
+            'total' => 0,
+          );
+        }
+        foreach( $status as $id => $name ) {
+            $stats[$status[$id]['value']] = array( 
+              'label' => $name['label'],
+	      'value' => $name['value'],
+              'weight' => $name['weight'],
+              'total' => 0 
+            );
+        }
+        $count = 1;
+        while ( $dao->fetch( ) ) {
+          if ($dao->N == $count) {
+            $summary['total_grants']['total_requested'] = $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_granted'] = $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_paid'] = $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_average'] = $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0);
+            continue;
+          }
+          if (!empty($dao->status_id)) {
+            $programs[$dao->label][$stats[$dao->status_id]['weight']]= array( 
+              'label' => $stats[$dao->status_id]['label'],
+              'total' => $dao->status_total,
+	      'value' => $stats[$dao->status_id]['value'],
+              'amount_requested' => $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0),
+              'amount_granted' => $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0),
+              'total_paid' => $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0),
+              'average_amount' => $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0),
+            );
+            $programs[$dao->label] = $programs[$dao->label] + array_diff_key($status, $programs[$dao->label]); //add the two arrays
+            ksort($programs[$dao->label]);
+            $summary['total_grants']['all'] = 'All';
+            $summary['total_grants']['no_of_grants'] += $dao->status_total;
+          } else{
+            $programs["<b>Subtotal $dao->label </b>"]['subtotal'] = array(
+              'label' => '',
+              'total' => $dao->status_total,
+              'amount_requested' => $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0),
+              'amount_granted' => $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0),
+              'total_paid' => $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0),
+              'average_amount' => $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0),
+            );
+          }
+          $count++;
+        }
+        $summary['per_status'] = $programs;
+        return $summary;
   }
 
   /**
@@ -256,8 +312,6 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
    */
   public static function create(&$params, &$ids) {
     $transaction = new CRM_Core_Transaction();
-    //added by JMA, FIXME might not need
-    CRM_Utils_Hook::grantAssessment( $params );
     $grant = self::add($params, $ids);
 
     if (is_a($grant, 'CRM_Core_Error')) {
@@ -301,53 +355,6 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
       'civicrm_grant',
       $grant->id
     );
-
-    // added by JMA fixme in module
-    $grantProgram  = new CRM_Grant_DAO_GrantProgram();
-      $grantProgram->id = $params['grant_program_id'];
-      $page = new CRM_Core_Page();
-      if ($grantProgram->find(TRUE)) {
-        $params['is_auto_email'] = $grantProgram->is_auto_email;
-      }
-      if ($params['is_auto_email'] == 1 && !array_key_exists('resrictEmail', $params)) {
-        // FIXME: for grant profiles
-        foreach($params['custom'] as $key => $value) {
-          foreach ($value as $index => $field) {
-            if (!empty( $field['value'])) {
-              $customData[$field['custom_group_id']][$field['custom_field_id']] = $field['value'];
-            }
-          }
-        }
-        if (!empty( $customData)) {
-          foreach ($customData as $dataKey => $dataValue) {
-            $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
-            $customGroup[$customGroupName] = $customGroupName;
-            $count = 0;
-            foreach ($dataValue  as $dataValueKey => $dataValueValue) {
-              $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
-              $customField[$customGroupName][$count]['value'] = $dataValueValue;
-              $count++;
-            }
-          }
-          $page->assign('customGroup', $customGroup);
-          $page->assign('customField', $customField);
-        }
-        // EOF FIXME
-        
-        $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
-        $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-        $grantTypes    = CRM_Core_OptionGroup::values('grant_type');
-        $grantProgram  = $grantPrograms[$params['grant_program_id']];
-        $grantType     = $grantTypes[$params['grant_type_id']];
-        $grantStatus   = $grantStatuses[$params['status_id']];
-          
-        $page->assign('grant_type', $grantType);
-        $page->assign('grant_programs', $grantProgram);
-        $page->assign('grant_status', $grantStatus);
-        $page->assign('params', $params);
-        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
-      }
-      //eof 
 
     $transaction->commit();
 
