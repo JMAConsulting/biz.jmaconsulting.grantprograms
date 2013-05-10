@@ -34,18 +34,6 @@
  *
  */
 
-require_once 'CRM/Core/Form.php';
-require_once 'CRM/Utils/Rule.php';
-require_once 'CRM/Grant/BAO/GrantProgram.php';
-require_once 'CRM/Grant/BAO/Grant.php';
-require_once 'CRM/Grant/DAO/Grant.php';
-require_once "CRM/Core/DAO/EntityFile.php";
-require_once 'CRM/Core/BAO/File.php';
-require_once 'CRM/Grant/BAO/GrantPayment.php';
-require_once 'CRM/Activity/BAO/Activity.php';
-require_once 'CRM/Grant/Form/Task.php';
-require_once 'CRM/Core/OptionGroup.php';
-require_once 'CRM/Utils/Money.php';
 /**
  * This class generates form components for Payments
  * 
@@ -103,7 +91,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
     $attributes = CRM_Core_DAO::getAttribute( 'CRM_Grant_DAO_GrantProgram' );
         
     $this->_contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
-    $this->add('select', 'contribution_type_id',  ts( 'From account' ),
+    $this->add('select', 'financial_type_id',  ts( 'From account' ),
                array( '' => ts( '- select -' ) ) + $this->_contributionTypes , true);
 
     $this->add( 'text', 'payment_batch_number', ts( 'Payment Batch number' ),
@@ -229,7 +217,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
     foreach ( $details as $id => $value ) {
       
       $grantPayment[$id]['contact_id'] = $id;
-      $grantPayment[$id]['contribution_type_id'] = $values['contribution_type_id'];
+      $grantPayment[$id]['financial_type_id'] = $values['financial_type_id'];
       $grantPayment[$id]['payment_batch_number'] = $values['payment_batch_number'];
       $grantPayment[$id]['payment_number'      ] = $values['payment_number'];
       $grantPayment[$id]['payment_date'        ] = date("Y-m-d", strtotime($values['payment_date']));
@@ -292,7 +280,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
     }
     $this->assign( 'date', date('Y-m-d'));
     $this->assign( 'time', date('H:i:s'));
-    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Financial_DAO_FinancialType', $values['contribution_type_id'], 'name' ) );
+    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Financial_DAO_FinancialType', $values['financial_type_id'], 'name' ) );
     $this->assign( 'batch_number', $values['payment_batch_number']);
     $this->assign( 'contact',CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $_SESSION[ 'CiviCRM' ][ 'userID' ], 'display_name' ) );
     $this->assign( 'grantPayment', $grantPayment );
