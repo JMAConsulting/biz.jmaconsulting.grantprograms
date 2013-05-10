@@ -50,6 +50,18 @@ cj(document).ready(function(){
   cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
   cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
+if ( cj("#status_id option:selected").text() == 'Rejected') {
+  cj('.grant_rejected_reason_id').show();
+} else {
+  cj('.grant_rejected_reason_id').hide();
+}
+cj('#status_id').change(function(){
+if ( this.options[this.selectedIndex].text == 'Rejected' ) {
+  cj('.grant_rejected_reason_id').show();
+} else {
+  cj('.grant_rejected_reason_id').hide();
+}
+});
 });
 var total = 0;
 cj(".form-select").change(function(){
