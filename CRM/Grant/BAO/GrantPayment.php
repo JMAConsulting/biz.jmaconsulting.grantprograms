@@ -97,9 +97,9 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
           'name' => 'payment_number',
           'data_type' => CRM_Utils_Type::T_INT 
         ),
-        'contribution_type_id' => array( 
-          'title' => 'Contribution Type ID',
-          'name' => 'contribution_type_id',
+        'financial_type_id' => array( 
+          'title' => 'Financial Type ID',
+          'name' => 'financial_type_id',
           'data_type' => CRM_Utils_Type::T_INT 
         ),
         'contact_id' => array( 
@@ -281,7 +281,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     
     $headers[] = array ( 
       'Contact Id', 
-      'Contribution Type', 
+      'Financial Type', 
       'Batch Number', 
       'Payment Number', 
       'Payment Date', 
@@ -300,8 +300,8 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     $comma = "";
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
     foreach ($rows as $value) {
-      if (isset( $value['contribution_type_id'])) {
-        $value['contribution_type_id'] = $contributionTypes[$value['contribution_type_id']];
+      if (isset($value['financial_type_id'])) {
+        $value['financial_type_id'] = $contributionTypes[$value['financial_type_id']];
       }
       $line .= implode('; ', $value);
       $line .= "\n";

@@ -117,11 +117,11 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
    */
   public $remainder_amount;
   /**
-   * Contribution Type ID
+   * Financial Type ID
    *
    * @var int unsigned
    */
-  public $contribution_type_id;
+  public $financial_type_id;
   /**
    * Id of Grant status.
    *
@@ -266,13 +266,13 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
           'dataPattern' => '/^\d+(\.\d{2})?$/',
           'export' => true,
         ) ,
-        'contribution_type_id' => array(
-          'name' => 'contribution_type_id',
+        'financial_type_id' => array(
+          'name' => 'financial_type_id',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Contribution Type ID') ,
+          'title' => ts('Financial Type ID') ,
           'required' => true,
           'import' => true,
-          'where' => 'civicrm_grant_program.contribution_type_id',
+          'where' => 'civicrm_grant_program.financial_type_id',
           'headerPattern' => '',
           'dataPattern' => '',
           'export' => true,
