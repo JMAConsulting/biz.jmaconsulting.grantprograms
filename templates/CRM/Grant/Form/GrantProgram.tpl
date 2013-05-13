@@ -64,6 +64,10 @@
 	  <td class="label">{$form.allocation_algorithm.label}</td>
 	  <td class="html-adjust">{$form.allocation_algorithm.html}</td>
        </tr>
+       <tr class="crm-grant_program-form-block-grant_program_id">
+	  <td class="label">{$form.grant_program_id.label}</td>
+	  <td class="html-adjust">{$form.grant_program_id.html}</td>
+       </tr>
        <tr class="crm-grant_program-form-block-allocation_date">
            <td class="label">{$form.allocation_date.label}</td>
 	   <td>
