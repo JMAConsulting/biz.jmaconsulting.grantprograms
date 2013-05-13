@@ -67,7 +67,7 @@
 {else if}
 <div class="messages status">
         <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}Please select at least one grant payment that has been printed or reprinted.{/ts}</p>
+        {ts}Please select at least one grant payment that has been printed.{/ts}</p>
 </div>
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl"}</div>
 {/if}
