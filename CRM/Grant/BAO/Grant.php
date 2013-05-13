@@ -104,12 +104,12 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
             );
         }
         $count = 1;
-        while ( $dao->fetch( ) ) {
+        while ($dao->fetch()) {
           if ($dao->N == $count) {
-            $summary['total_grants']['total_requested'] = $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0);
-            $summary['total_grants']['total_granted'] = $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0);
-            $summary['total_grants']['total_paid'] = $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0);
-            $summary['total_grants']['total_average'] = $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_requested'] = $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_granted'] = $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_paid'] = $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0);
+            $summary['total_grants']['total_average'] = $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0);
             continue;
           }
           if (!empty($dao->status_id)) {
@@ -117,10 +117,10 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
               'label' => $stats[$dao->status_id]['label'],
               'total' => $dao->status_total,
 	      'value' => $stats[$dao->status_id]['value'],
-              'amount_requested' => $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0),
-              'amount_granted' => $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0),
-              'total_paid' => $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0),
-              'average_amount' => $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0),
+              'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
+              'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
+              'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
+              'average_amount' => $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0),
             );
             $programs[$dao->label] = $programs[$dao->label] + array_diff_key($status, $programs[$dao->label]); //add the two arrays
             ksort($programs[$dao->label]);
@@ -130,10 +130,10 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
             $programs["<b>Subtotal $dao->label </b>"]['subtotal'] = array(
               'label' => '',
               'total' => $dao->status_total,
-              'amount_requested' => $dao->amount_requested?CRM_Utils_Money::format($dao->amount_requested):CRM_Utils_Money::format(0),
-              'amount_granted' => $dao->amount_granted?CRM_Utils_Money::format($dao->amount_granted):CRM_Utils_Money::format(0),
-              'total_paid' => $dao->total_paid?CRM_Utils_Money::format($dao->total_paid):CRM_Utils_Money::format(0),
-              'average_amount' => $dao->average_amount?CRM_Utils_Money::format($dao->average_amount):CRM_Utils_Money::format(0),
+              'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
+              'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
+              'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
+              'average_amount' => $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0),
             );
           }
           $count++;

@@ -248,7 +248,7 @@ WHERE civicrm_contact.id = $id ";
     if (!empty($id)) {
       $where .= " AND id = {$id}";
     }
-    $query = "SELECT id, name FROM civicrm_grant_program ".$where;
+    $query = "SELECT id, name FROM civicrm_grant_program " . $where;
     $dao = CRM_Core_DAO::executeQuery($query);
     while ($dao->fetch()) {
       $grantPrograms[$dao->id] = $dao->name;
@@ -289,7 +289,7 @@ WHERE civicrm_contact.id = $id ";
   }
     
   static function sendMail($contactID, &$values, $grantStatus) {
-        
+    $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       if (isset($email)) {

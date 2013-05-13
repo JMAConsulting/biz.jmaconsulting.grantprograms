@@ -61,6 +61,12 @@ class CRM_Grant_BAO_Query {
         $query->_tables['grant_status'] = $query->_whereTables['grant_status'] = 1;
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
       }
+      
+      if (CRM_Utils_Array::value('status_weight', $query->_returnProperties)) {
+        $query->_select['status_weight'] = 'v.weight as status_weight';
+        $query->_element['status_weight'] = 1;
+        $query->_tables['status_weight'] = 1;
+      }
 
       if (CRM_Utils_Array::value('grant_type_id', $query->_returnProperties)) {
         $query->_select['grant_type_id'] = 'grant_type.id as grant_type_id';
@@ -81,12 +87,26 @@ class CRM_Grant_BAO_Query {
         $query->_element['grant_note'] = 1;
         $query->_tables['grant_note'] = 1;
       }
+      
+        if (CRM_Utils_Array::value('course_conference_type_21', $query->_returnProperties)) { 
+        $query->_select['course_type']  = "civicrm_value_course_conference_details_6.course_conference_type_21 as course_type";
+        $query->_element['course_type'] = 1;
+        $query->_tables['course_type']  = 1;
+      }
+            
+      if (CRM_Utils_Array::value('course_conference_name_24', $query->_returnProperties)) {
+        $query->_select['course_name']  = "civicrm_value_course_conference_details_6.course_conference_name_24 as course_name";
+        $query->_element['course_name'] = 1;
+        $query->_tables['course_name']  = 1;
+      }
+
       $query->_select['grant_amount_requested'] = 'civicrm_grant.amount_requested as grant_amount_requested';
       $query->_select['grant_amount_granted'] = 'civicrm_grant.amount_granted as grant_amount_granted';
       $query->_select['grant_amount_total'] = 'civicrm_grant.amount_total as grant_amount_total';
       $query->_select['grant_application_received_date'] = 'civicrm_grant.application_received_date as grant_application_received_date ';
       $query->_select['grant_report_received'] = 'civicrm_grant.grant_report_received as grant_report_received';
       $query->_select['grant_money_transfer_date'] = 'civicrm_grant.money_transfer_date as grant_money_transfer_date';
+      $query->_select['grant_payment_created'] = 'civicrm_payment.payment_created_date as grant_payment_created';
       $query->_element['grant_type_id'] = 1;
       $query->_element['grant_status_id'] = 1;
       $query->_tables['civicrm_grant'] = 1;
@@ -270,11 +290,22 @@ class CRM_Grant_BAO_Query {
         else {
           $from .= " $side JOIN civicrm_option_value grant_type ON (civicrm_grant.grant_type_id = grant_type.value AND option_group_grant_type.id = grant_type.option_group_id ) ";
         }
+        $from .= "$side JOIN civicrm_entity_payment AS temp1 ON (civicrm_grant.id = temp1.entity_id AND temp1.entity_table = 'civicrm_grant')
+$side JOIN (SELECT payment_id AS payment_id, entity_id AS entity_id FROM civicrm_entity_payment ORDER BY payment_id DESC) AS temp2 ON temp1.entity_id = temp2.entity_id
+$side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)"; 
+
         break;
 
       case 'grant_note':
         $from .= " $side JOIN civicrm_note ON ( civicrm_note.entity_table = 'civicrm_grant' AND
                                                         civicrm_grant.id = civicrm_note.entity_id )";
+        break;
+      case 'status_weight':
+        $from .= " $side JOIN civicrm_option_value v ON (civicrm_grant.status_id = v.value AND v.option_group_id=21)";
+        break;
+
+      case 'course_name':
+        $from .= " $side JOIN civicrm_value_course_conference_details_6 ON ( civicrm_grant.id = civicrm_value_course_conference_details_6.entity_id )";
         break;
     }
     return $from;
@@ -302,8 +333,12 @@ class CRM_Grant_BAO_Query {
         'grant_id' => 1,
         'grant_type' => 1,
         'grant_status' => 1,
+        'status_weight' => 1,
         'grant_amount_requested' => 1,
         'grant_application_received_date' => 1,
+        'grant_payment_created' => 1,
+        'course_conference_type_74' => 1,
+        'course_conference_name_77' => 1,
         'grant_report_received' => 1,
         'grant_money_transfer_date' => 1,
         'grant_note' => 1,
