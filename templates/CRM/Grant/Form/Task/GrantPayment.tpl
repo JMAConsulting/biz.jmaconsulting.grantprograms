@@ -37,6 +37,10 @@
  	  <td class="label">{$form.payment_batch_number.label}</td>
 	  <td class="html-adjust">{$form.payment_batch_number.html}</td>	
        </tr>
+       <tr class="crm-grant_payment-form-block-number_checks">
+ 	  <td class="label">{$form.number_checks.label}</td>
+	  <td class="html-adjust">{$form.number_checks.html}</td>	
+       </tr>
        <tr class="crm-grant_payment-form-block-payment_number">
  	  <td class="label">{$form.payment_number.label}</td>
 	  <td class="html-adjust">{$form.payment_number.html}</td>	
