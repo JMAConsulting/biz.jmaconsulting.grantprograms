@@ -37,6 +37,7 @@
     	<a href="{crmURL q="action=add&reset=1"}" id="grant_program" class="button"><span><div class="icon add-icon"></div>{ts}Add Grant Program{/ts}</span></a>
         </div>
     {/if}
+    {strip}
         <table cellpadding="0" cellspacing="0" border="0">
            <thead class="sticky">
             <th>{ts}Name{/ts}</th>
@@ -85,10 +86,11 @@
 cj(document).ready(function(){
 cj('ul.panel').css('width','205px');
 
-cj('#allocation').click(function(){
+cj('#allocation').click(function(event){
 var r=confirm("You want to do trial allocation?");
 if (r==true)
-  {    
+  {  
+     event.preventDefault();
      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
      cj.ajax({ 
@@ -96,7 +98,7 @@ if (r==true)
          data: data,
          type: 'POST',
          success: function(output) { 
-           setTimeout("location.reload(true);",1500);
+          setTimeout("location.reload(true);",1500);
 	 }
       });
    }
@@ -105,10 +107,11 @@ return false;
 }
 });
 
-cj('#finalize').click(function(){
+cj('#finalize').click(function(event){
  var confirmed = 0;
  var totalAmounts = 0;
  var grantedAmount = 0;
+ event.preventDefault();
  var data = 'pid={/literal}{$id}{literal}}&amount={/literal}{$total_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/finalize'}"{literal};
      cj.ajax({ 
@@ -155,11 +158,12 @@ alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater 
 
 
 
-cj('#reject').click(function(){
+cj('#reject').click(function(event){
 
 var r=confirm("Do you want to reject all Pending grant applications for this Grant Program??");
 if (r==true)
   {
+  event.preventDefault();
  var data = 'pid={/literal}{$id}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
      cj.ajax({ 

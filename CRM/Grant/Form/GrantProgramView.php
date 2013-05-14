@@ -53,7 +53,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     CRM_Grant_BAO_GrantProgram::retrieve($params, $values);
     $grantPrograms = CRM_Grant_BAO_GrantProgram::grantPrograms();
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
-    $this->assign('grantType', CRM_Grant_BAO_GrantProgram::getOptionName($values['grant_type_id'] );
+    $this->assign('grantType', CRM_Grant_BAO_GrantProgram::getOptionName($values['grant_type_id'] ));
     $this->assign('grantProgramStatus', CRM_Grant_BAO_GrantProgram::getOptionName($values['status_id']));
     $this->assign('contributionType', $contributionTypes[$values['financial_type_id']] );
     $this->assign('grantProgramAlgorithm', CRM_Grant_BAO_GrantProgram::getOptionName( $values['allocation_algorithm']));
@@ -85,8 +85,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   }
 
   public function allocate() {   
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
-    $grantStatus = array_flip($grantStatus);
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $params = array(
       'status_id' => $grantStatus['Approved'],
       'grant_program_id' => $_POST['pid'],
@@ -94,7 +93,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       'assessment'     => 'NOT NULL',
     );
       
-    $result = CRM_Grant_BAO_Grant::getGrants($params);
+    $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
       
     if (!empty($result)) {
       if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
@@ -113,8 +112,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       }
         
       $contact = array(); 
-      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
-      $grantThresholds = array_flip($grantThresholds);
+      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
          
       foreach ($result as $key => $value) {
             
@@ -182,7 +180,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       }
     }
     $page = new CRM_Core_Page();
-    $grantPrograms = CRM_Grant_BAO_Grant::getGrantPrograms();
+    $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $message = "Trial Allocation Completed. $".$grantedAmount.".00 allocated to {$grantedCount} eligible applications. ".$eligibleCount." eligible applications were not allocated $".$eligibleAmount.".00 in funds they would have received were funds available. $".$totalAmount." remains unallocated.";
      
     $page->assign('message', $message);
@@ -190,18 +188,17 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $page->assign('grant_program_name', $grantPrograms[$_POST['pid']]);
     CRM_Core_Session::setStatus($message);
     $params['is_auto_email'] = 1;
-    CRM_Grant_BAO_Grant::sendMail($_SESSION['CiviCRM']['userID'], $params, 'allocation');
+    CRM_Grant_BAO_GrantProgram::sendMail($_SESSION['CiviCRM']['userID'], $params, 'allocation');
   }
     
   public function finalize() {   
     $grantedAmount = 0;
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
-    $grantStatus = array_flip($grantStatus);
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $params = array(
       'status_id' => $grantStatus['Approved'],
       'grant_program_id' => $_POST['pid'],
     );
-    $result = CRM_Grant_BAO_Grant::getGrants($params);
+    $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
     if (!empty($result)) {
       foreach ($result as $key => $row) {
         $grantedAmount += $row['amount_granted'];
@@ -223,13 +220,12 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   }
     
   public function processFinalization() {
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
-    $grantStatus = array_flip($grantStatus);
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $params = array(
       'status_id' => $grantStatus['Approved'],
       'grant_program_id' => $_POST['pid'],
     );
-    $result = CRM_Grant_BAO_Grant::getGrants($params);
+    $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
     if (!empty($result)) {
       foreach ($result as $key => $row) {
         if ( $row['amount_granted'] > 0 ) {
@@ -244,19 +240,18 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   }
     
   public function reject() {
-    $grantStatus = CRM_Core_OptionGroup::values( 'grant_status' );
-    $grantStatus = array_flip($grantStatus);
+    $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE);
     $id = $_POST['pid'];
     $params = array(
       'status_id' => $grantStatus['Submitted'] . ',' . $grantStatus['Approved'],
       'grant_program_id' => $_POST['pid'],
     );
 
-    $result = CRM_Grant_BAO_Grant::getGrants($params);
+    $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
       
     if (!empty($result)) {
       foreach ($result as $key => $value) {
-        $value['status_id'] = $grantStatus['Rejected'];
+        $value['status_id'] = $grantStatus['Withdrawn'];
         $value['amount_granted'] = 0.00;
         $ids['grant'] = $key;
         $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);

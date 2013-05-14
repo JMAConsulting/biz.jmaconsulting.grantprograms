@@ -143,7 +143,7 @@ cj('#finalize').click(function(){
               data: data,
               type: 'POST',
               success: function(output) { 
-	      setTimeout("location.reload(true);",1500);
+	        setTimeout("location.reload(true);",1500);
 	      }
 	      });
 	    }
