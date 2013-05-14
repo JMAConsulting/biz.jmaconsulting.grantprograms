@@ -102,7 +102,7 @@ class CRM_Grant_Page_GrantProgram extends CRM_Core_Page {
       $grantProgram[$key]['grant_type_id'] = $grantType[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['grant_type_id'])];
       $grantProgram[$key]['status_id'] = $grantStatus[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['status_id'])];
     }
-    $this->assign('rows',$grantProgram);
+    $this->assign('programs',$grantProgram);
   }
     
   function run() {
