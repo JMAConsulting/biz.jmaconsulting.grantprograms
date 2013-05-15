@@ -453,15 +453,17 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) { 
     $assessmentAmount = 0;
     if (empty($params['assessment'])) {
-      foreach ($params['custom'] as $key => $value) {
-        foreach($value as $fieldKey => $fieldValue) {
-          $customParams = array('id' => $key, 'is_active' => 1, 'html_type' => 'Select');
-          $customFields = CRM_Core_BAO_CustomField::retrieve($customParams, $default = array());
-          if (!empty($customFields)) { 
-            $optionValueParams = array('option_group_id' => $customFields->option_group_id, 'value' => $fieldValue['value'], 'is_active' => 1);
-            $optionValues = CRM_Core_BAO_OptionValue::retrieve($optionValueParams,  $default = array());
-            if(!empty($optionValues->description)) {
-              $assessmentAmount += $optionValues->description;
+      if (CRM_Utils_Array::value('custom', $params)) {
+        foreach ($params['custom'] as $key => $value) {
+          foreach($value as $fieldKey => $fieldValue) {
+            $customParams = array('id' => $key, 'is_active' => 1, 'html_type' => 'Select');
+            $customFields = CRM_Core_BAO_CustomField::retrieve($customParams, $default = array());
+            if (!empty($customFields)) { 
+              $optionValueParams = array('option_group_id' => $customFields->option_group_id, 'value' => $fieldValue['value'], 'is_active' => 1);
+              $optionValues = CRM_Core_BAO_OptionValue::retrieve($optionValueParams,  $default = array());
+              if(!empty($optionValues->description)) {
+                $assessmentAmount += $optionValues->description;
+              }
             }
           }
         }
@@ -477,7 +479,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     }
     else if ($objectName == 'Grant' && $op == "edit") {
       $defaultAmount = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $id, 'amount_granted');
-      if (!empty($defaultAmount) && CRM_Utils_Money::format($defaultAmount) != CRM_Utils_Money::format($params['amount_granted'])) {
+      if (!empty($defaultAmount) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($defaultAmount) != CRM_Utils_Money::format($params['amount_granted'])) {
         $params['manualEdit'] = TRUE;
       }
     }
