@@ -269,7 +269,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         $controller->run();
       }
     } 
-    elseif ($form->getVar('_name') == 'Search') {
+    elseif ($form->getVar('_name') == 'Search' && 0) {
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $form->add('select', 
         'grant_program_id',  
