@@ -251,7 +251,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       
     if (!empty($result)) {
       foreach ($result as $key => $value) {
-        $value['status_id'] = $grantStatus['Withdrawn'];
+        $value['status_id'] = $grantStatus['Ineligible'];
         $value['amount_granted'] = 0.00;
         $ids['grant'] = $key;
         $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);

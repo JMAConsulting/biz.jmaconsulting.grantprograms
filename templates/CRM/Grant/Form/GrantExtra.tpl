@@ -50,19 +50,20 @@ cj(document).ready(function(){
   cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
   cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
-if ( cj("#status_id option:selected").text() == 'Rejected') {
+if ( cj("#status_id option:selected").text() == 'Ineligible') {
   cj('.grant_rejected_reason_id').show();
 } else {
   cj('.grant_rejected_reason_id').hide();
 }
 cj('#status_id').change(function(){
-if ( this.options[this.selectedIndex].text == 'Rejected' ) {
+if ( this.options[this.selectedIndex].text == 'Ineligible' ) {
   cj('.grant_rejected_reason_id').show();
 } else {
   cj('.grant_rejected_reason_id').hide();
 }
 });
 var dataUrl = {/literal}"{crmURL p='civicrm/grant/search' h=0 q="snippet=1&force=1"}"{literal};
+dataUrl = dataUrl + '&key=' + "{/literal}{$qfKey}{literal}";
 var response = cj.ajax({
   url: dataUrl,
   async: false,
