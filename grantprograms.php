@@ -91,8 +91,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     $threeYearsBackDate = date('Y',strtotime("-1 year")).'-01-01';
     $previousYear       = date('Y',strtotime("-1 year")).'-12-31';
     $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = 4 AND application_received_date >= '{$threeYearsBackDate}' AND application_received_date <= '{$previousYear}' AND contact_id = {$params['contact_id']}");
-    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
-    $grantThresholds = array_flip($grantThresholds);
+    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds', TRUE);
     if ( $result->N) {
       while( $result->fetch() ) {
         if ( $result->amount_granted >= $grantThresholds['Maximum Grant'] ) {
@@ -204,6 +203,9 @@ function &links() {
 function grantprograms_civicrm_permission(&$permissions) {
   $prefix = ts('CiviCRM Grant Program') . ': '; // name of extension or module
   $permissions['edit grant finance'] = $prefix . ts('edit grant finance');
+  $permissions['cancel payments in CiviGrant'] = $prefix . ts('cancel payments in CiviGrant');
+  $permissions['edit payments in CiviGrant'] = $prefix . ts('edit payments in CiviGrant');
+  $permissions['create payments in CiviGrant'] = $prefix . ts('create payments in CiviGrant');
 }
 /*
  * hook_civicrm_buildForm civicrm hook

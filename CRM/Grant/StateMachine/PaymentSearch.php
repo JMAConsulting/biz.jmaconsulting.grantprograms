@@ -60,7 +60,7 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
         $this->_pages[$t] = NULL;
       }
     } 
-    else {
+    elseif (!empty($task)) {
       $this->_pages[$task] = NULL;
     }
 
