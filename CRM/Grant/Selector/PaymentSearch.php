@@ -307,7 +307,7 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
              
       // the columns we are interested in
       foreach (self::$_properties as $property) {
-        if (isset( $result->$property)) {
+        if (isset($result->$property)) {
           if ($property == 'payment_status_id') {
             $paymentStatus = CRM_Core_OptionGroup::values('grant_payment_status');
             $row[$property] = $paymentStatus[$result->$property];
