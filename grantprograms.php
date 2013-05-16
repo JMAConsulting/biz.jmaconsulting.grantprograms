@@ -201,7 +201,7 @@ function &links() {
   return $_links;
 }
 
-function rnao_civicrm_permissions(&$permissions) {
+function grantprograms_civicrm_permission(&$permissions) {
   $prefix = ts('CiviCRM Grant Program') . ': '; // name of extension or module
   $permissions['edit grant finance'] = $prefix . ts('edit grant finance');
 }
@@ -269,7 +269,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         $controller->run();
       }
     } 
-    elseif ($form->getVar('_name') == 'Search' && 0) {
+    elseif ($form->getVar('_name') == 'Search') {
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $form->add('select', 
         'grant_program_id',  
@@ -402,14 +402,14 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->assign('context', 'dashboard');
   }
 
- if ($formName == 'CRM_Grant_Form_Grant' ) {
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id')) {
    //freeze fields based on permissions
-   if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
-     $form->_elements[$form->_elementIndex['amount_granted']]->_flagFrozen = 1;
-     $form->_elements[$form->_elementIndex['decision_date']]->_flagFrozen = 1;
-     $form->_elements[$form->_elementIndex['money_transfer_date']]->_flagFrozen = 1;
-     $form->assign('readOnly', TRUE);
-   }
+    if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
+      $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Grant/Form/Freeze.tpl',
+      ));
+    }
  }
 }
 
