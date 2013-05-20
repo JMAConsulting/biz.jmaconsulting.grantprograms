@@ -429,6 +429,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id') && !$form->getVar('_gName') && $form->getVar('_name') != 'GrantProgram') {
     //RG-116 Hide attachments on edit
     $form->assign('hideAttachments', 1);
+    $form->assign('grant_id', $form->getVar('_id'));
     //freeze fields based on permissions
     if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
       $form->_elements[$form->_elementIndex['amount_granted']]->freeze();

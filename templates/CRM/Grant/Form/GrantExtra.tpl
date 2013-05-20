@@ -62,6 +62,7 @@ if ( this.options[this.selectedIndex].text == 'Ineligible' ) {
   cj('.grant_rejected_reason_id').hide();
 }
 });
+var grantId = {/literal}{if $grant_id}{$grant_id}{else}{literal}0{/literal}{/if}{literal};
 var dataUrl = {/literal}"{crmURL p='civicrm/grant/search' h=0 q="snippet=1&force=1"}"{literal};
 dataUrl = dataUrl + '&key=' + "{/literal}{$qfKey}{literal}";
 var response = cj.ajax({
@@ -70,6 +71,7 @@ var response = cj.ajax({
   success: function(response) {
     cj('#RecentGrants').html(response);
     cj('div.crm-search-form-block, .crm-search-tasks').hide();
+    cj('tr#crm-grant_'+grantId).hide();
   }
  }).responseText;	
 });
