@@ -81,9 +81,11 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
   `is_active` tinyint(4) DEFAULT '1' COMMENT 'Is this grant program active?',
   `is_auto_email` tinyint(4) DEFAULT '1' COMMENT 'Is auto email active?',
   `allocation_algorithm` int(10) unsigned DEFAULT NULL COMMENT 'Allocation Algorithm.',
+  `grant_program_id` int(11) DEFAULT NULL COMMENT 'FK reference to this civicrm_grant_program table, used to determine grants given to contact in previous year during assessment.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_grant_program_grant_type_id` (`grant_type_id`),
-  KEY `FK_civicrm_grant_program_status_id` (`status_id`)
+  KEY `FK_civicrm_grant_program_status_id` (`status_id`),
+  KEY `FK_civicrm_grant_program_grant_program_id` (`grant_program_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --

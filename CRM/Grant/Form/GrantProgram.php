@@ -144,7 +144,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
       array('' => ts('- select -')) + $grantAlgorithm , TRUE); 
     
     $this->add('select', 'grant_program_id', ts("Previous Year's NEI Grant Program"),
-      array('' => ts('- select -')) + $grantPrograms, TRUE);
+      array('' => ts('- select -')) + $grantPrograms, FALSE);
     
     $this->addDate('allocation_date', ts('Allocation Date'), FALSE, array('formatType' => 'custom'));
 
