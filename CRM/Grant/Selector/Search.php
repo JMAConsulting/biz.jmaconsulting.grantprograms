@@ -344,7 +344,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       if (isset($result->course_type)) {
         if (!empty($result->course_type)) {
           if ($result->course_type != 'select_or_other') {
-            $result->course_type = CRM_Core_DAO::singleValueQuery("SELECT civicrm_option_value.label as course_type FROM civicrm_option_value LEFT JOIN civicrm_option_group ON civicrm_option_group.id = civicrm_option_value.option_group_id  WHERE civicrm_option_value.value = {$result->course_type} AND  civicrm_option_group.name = 'course_conference_type_20120606094128'");
+            $result->course_type = CRM_Core_DAO::singleValueQuery("SELECT civicrm_option_value.label as course_type FROM civicrm_option_value LEFT JOIN civicrm_option_group ON civicrm_option_group.id = civicrm_option_value.option_group_id  WHERE civicrm_option_value.value = {$result->course_type} AND  civicrm_option_group.name = 'course_conference_type_20120720143907'");
           } 
           else {
             $result->course_type = 'Other';
