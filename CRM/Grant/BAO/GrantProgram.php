@@ -114,9 +114,9 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
   }
 
   static function grantPrograms($id = NULL) {
-    $where = '';
+    $where = 'WHERE is_active = 1';
     if (!empty($id)) {
-      $where = "WHERE id = {$id}";
+      $where .= " AND id = {$id}";
     }
     $query = "SELECT id, label FROM civicrm_grant_program {$where}";
     $dao = CRM_Core_DAO::executeQuery($query);

@@ -114,6 +114,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
 
     $this->applyFilter('__ALL__','trim');
     $attributes = CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantProgram');
+    $grantPrograms = CRM_Grant_BAO_GrantProgram::grantPrograms();
         
     $this->add('text', 'label', ts('Label'),
       $attributes['label'], TRUE);
@@ -141,7 +142,10 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $grantAlgorithm = CRM_Core_OptionGroup::values('allocation_algorithm');
     $this->add('select', 'allocation_algorithm', ts('Allocation Algorithm'),
       array('' => ts('- select -')) + $grantAlgorithm , TRUE); 
-
+    
+    $this->add('select', 'grant_program_id', ts("Previous Year's NEI Grant Program"),
+      array('' => ts('- select -')) + $grantPrograms, TRUE);
+    
     $this->addDate('allocation_date', ts('Allocation Date'), FALSE, array('formatType' => 'custom'));
 
     $this->add('checkbox', 'is_active', ts('Enabled?'));
