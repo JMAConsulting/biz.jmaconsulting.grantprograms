@@ -135,10 +135,12 @@ function quickAllocate($grantProgram, $value) {
   }
   
   if (isset($value['assessment'])) {
-    if (((($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100) ) < $totalAmount) { 
-      if((($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100) <= $grantThresholds['Maximum Grant']) {
-        $amountGranted = (($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100);
-      }
+    $requestedAmount = ((($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100));
+    if ($requestedAmount > $grantThresholds['Maximum Grant']) {
+      $requestedAmount = $grantThresholds['Maximum Grant'];
+    }
+    if ($requestedAmount < $totalAmount) { 
+      $amountGranted = $requestedAmount;
     }
   }
 
