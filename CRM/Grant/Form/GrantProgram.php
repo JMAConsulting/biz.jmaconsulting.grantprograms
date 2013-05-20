@@ -211,6 +211,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $dao->is_active = $values['is_active'];
     $dao->is_auto_email = $values['is_auto_email'];
     $dao->allocation_algorithm = CRM_Grant_BAO_GrantProgram::getOptionValueID(CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup','allocation_algorithm','id','name'), $values['allocation_algorithm']);
+    $dao->grant_program_id = $values['grant_program_id'];
     return $dao->save();
   }
 }
