@@ -171,6 +171,12 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
    */
   public $payment_id;
   /**
+   * Grant Program Id. Implicit FK to civicrm_grant_program.
+   *
+   * @var int unsigned
+   */
+  public $grant_program_id;
+  /**
    * class constructor
    *
    * @access public
@@ -208,7 +214,7 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
   {
     if (!(self::$_fields)) {
       self::$_fields = array(
-        'grant_program_id' => array(
+        'id' => array(
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
           'title' => ts('Grant Program ID') ,
@@ -335,6 +341,17 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
           'dataPattern' => '',
           'FKClassName' => 'CRM_Grant_DAO_GrantPayment',
         ) ,
+        'grant_program_id' => array(
+          'name' => 'grant_program_id',
+          'type' => CRM_Utils_Type::T_INT,
+          'title' => ts("Previous Year's NEI Grant Program") ,
+          'required' => true,
+          'import' => true,
+          'where' => 'civicrm_grant_program.grant_program_id',
+          'headerPattern' => '',
+          'dataPattern' => '',
+          'export' => false,
+         ) ,
       );
     }
     return self::$_fields;
