@@ -4,7 +4,17 @@ require_once 'grantprograms.civix.php';
 
 //define pay grants
 define('PAY_GRANTS', 5);
-
+//RG-116 hide other fields
+define('EMPLOYMENT', 62);
+define('EMPLOYMENT_OTHER', 63);
+define('POSITION', 66);
+define('POSITION_OTHER', 67);
+define('EMPLOYMENT_SETTING', 68);
+define('EMPLOYMENT_SETTING_OTHER', 69);
+define('INITIATIVE', 72);
+define('INITIATIVE_OTHER', 73);
+define('COURSE', 74);
+define('COURSE_OTHER', 75);
 /**
  * Implementation of hook_civicrm_config
  */
@@ -222,6 +232,16 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
+    $form->assign('employment', 'custom_'.EMPLOYMENT.'_-1');
+    $form->assign('employment_other', 'custom_'.EMPLOYMENT_OTHER.'_-1');
+    $form->assign('position', 'custom_'.POSITION.'_-1');
+    $form->assign('position_other', 'custom_'.POSITION_OTHER.'_-1');
+    $form->assign('employment_setting', 'custom_'.EMPLOYMENT_SETTING.'_-1');
+    $form->assign('employment_setting_other', 'custom_'.EMPLOYMENT_SETTING_OTHER.'_-1');
+    $form->assign('init', 'custom_'.INITIATIVE.'_-1');
+    $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_-1');
+    $form->assign('course', 'custom_'.COURSE.'_-1');
+    $form->assign('course_other', 'custom_'.COURSE_OTHER.'_-1');
     if ($form->getVar('_name') == 'Grant') {
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
@@ -326,7 +346,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         'grant_amount_high', 
         ts('To'), 
         array('size' => 8, 'maxlength' => 8)
-      );
+     );
       $form->addRule('grant_amount_high', 
         ts('Please enter a valid money value (e.g. %1).', 
         array(1 => CRM_Utils_Money::format('99.99', ' '))), 
@@ -406,8 +426,10 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->assign('context', 'dashboard');
   }
 
-  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id')) {
-   //freeze fields based on permissions
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id') && !$form->getVar('_gName') && $form->getVar('_name') != 'GrantProgram') {
+    //RG-116 Hide attachments on edit
+    $form->assign('hideAttachments', 1);
+    //freeze fields based on permissions
     if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
       $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
       CRM_Core_Region::instance('page-body')->add(array(
@@ -428,6 +450,17 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
  */
 function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = NULL;
+  if ($formName == "CRM_Admin_Form_Options" && ($form->getVar('_action') & CRM_Core_Action::DELETE) && $form->getVar('_gName') == "grant_type") {
+    $defaults = array();
+    $params = array(
+      'grant_type_id' => $form->getVar('_id'),
+    );
+    CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
+    if (!empty($defaults)) {
+      $errors[''] = ts('Error');
+      CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because a Grant Program is currently using it. Click '. l('here', 'civicrm/grant_program?reset=1') .' to view the Grant Programs.'), ts("Sorry"), "error");
+    }
+  }
   if ($formName == 'CRM_Grant_Form_Grant') {
     $defaults = array();
     $params['grant_program_id'] = $form->_submitValues['grant_program_id'];
