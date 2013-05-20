@@ -88,14 +88,14 @@ class CRM_Grant_BAO_Query {
         $query->_tables['grant_note'] = 1;
       }
       
-        if (CRM_Utils_Array::value('course_conference_type_21', $query->_returnProperties)) { 
-        $query->_select['course_type']  = "civicrm_value_course_conference_details_6.course_conference_type_21 as course_type";
+        if (CRM_Utils_Array::value('course_conference_type_74', $query->_returnProperties)) { 
+        $query->_select['course_type']  = "civicrm_value_nei_course_conference_details_16.course_conference_type_74 as course_type";
         $query->_element['course_type'] = 1;
         $query->_tables['course_type']  = 1;
       }
             
-      if (CRM_Utils_Array::value('course_conference_name_24', $query->_returnProperties)) {
-        $query->_select['course_name']  = "civicrm_value_course_conference_details_6.course_conference_name_24 as course_name";
+      if (CRM_Utils_Array::value('course_conference_name_77', $query->_returnProperties)) {
+        $query->_select['course_name']  = "civicrm_value_nei_course_conference_details_16.course_conference_name_77 as course_name";
         $query->_element['course_name'] = 1;
         $query->_tables['course_name']  = 1;
       }
@@ -305,7 +305,7 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         break;
 
       case 'course_name':
-        $from .= " $side JOIN civicrm_value_course_conference_details_6 ON ( civicrm_grant.id = civicrm_value_course_conference_details_6.entity_id )";
+        $from .= " $side JOIN civicrm_value_nei_course_conference_details_16 ON ( civicrm_grant.id = civicrm_value_nei_course_conference_details_16.entity_id )";
         break;
     }
     return $from;
