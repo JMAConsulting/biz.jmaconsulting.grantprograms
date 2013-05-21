@@ -427,13 +427,16 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->assign('context', 'dashboard');
   }
 
-  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id') && !$form->getVar('_gName') && $form->getVar('_name') != 'GrantProgram') {
-    //RG-116 Hide attachments on edit
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id') && $form->getVar('_name') == 'Grant') {
+    // RG-116 Hide attachments on edit
     $form->assign('hideAttachments', 1);
+    // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
-    //freeze fields based on permissions
+    // freeze fields based on permissions
     if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
-      $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
+      if (CRM_Utils_Array::value('amount_granted', $form->_elementIndex)) {
+        $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
+      }
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/Freeze.tpl',
       ));
