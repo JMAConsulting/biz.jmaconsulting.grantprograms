@@ -258,7 +258,8 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       $form->add('select', 
         'grant_program_id', 
         ts('Grant Programs'),
-        array('' => ts('- select -')) + $form->_grantPrograms, TRUE
+        array('' => ts('- select -')) + $form->_grantPrograms,
+        TRUE
       );
     
       if (CRM_Core_Permission::check('administer CiviGrant')) {
@@ -307,7 +308,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       ); 
       $form->addRule('grant_amount_total_low', 
         ts('Please enter a valid money value (e.g. %1).', 
-          array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
         'money'
       );
       $form->add('text', 
@@ -317,7 +318,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       ); 
       $form->addRule('grant_amount_total_high', 
         ts('Please enter a valid money value (e.g. %1).', 
-          array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
         'money'
       );
       $form->add('text', 
