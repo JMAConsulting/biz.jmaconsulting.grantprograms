@@ -100,7 +100,7 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask
           CRM_Grant_BAO_EntityPayment::del( $entityDAO->id );
           $grantDAO =& new CRM_Grant_DAO_Grant();
           $grantDAO->id        = $entityDAO->entity_id;
-          $grantDAO->status_id = CRM_Core_OptionGroup::getValue( 'grant_status', 'Approved', 'name' );
+          $grantDAO->status_id = CRM_Core_OptionGroup::getValue( 'grant_status', 'Approved for Payment', 'name' );
           $grantDAO->save();
         }
         if ( CRM_Grant_BAO_GrantPayment::del( $paymentId ) ) {
