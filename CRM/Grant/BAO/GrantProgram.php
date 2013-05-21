@@ -128,7 +128,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
         $grantPrograms[$dao->id] = $dao->label;
       }
     }
-    return $grantPrograms;
+    return empty($grantPrograms) ? array() : $grantPrograms;
   }  
 
   static function contributionTypes() {
