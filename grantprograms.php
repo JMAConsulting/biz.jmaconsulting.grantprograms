@@ -96,36 +96,41 @@ function grantprograms_civicrm_managed(&$entities) {
  *
  */
 function grantprograms_civicrm_grantAssessment(&$params) {
-  if ( array_key_exists('custom', $params ) ) {
-    if ( isset($params['action']) ) {
-    $threeYearsBackDate = date('Y',strtotime("-1 year")).'-01-01';
-    $previousYear       = date('Y',strtotime("-1 year")).'-12-31';
-    $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = 4 AND application_received_date >= '{$threeYearsBackDate}' AND application_received_date <= '{$previousYear}' AND contact_id = {$params['contact_id']}");
-    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds', TRUE);
-    if ( $result->N) {
-      while( $result->fetch() ) {
-        if ( $result->amount_granted >= $grantThresholds['Maximum Grant'] ) {
-          //$years[$result->application_received_date] = $result->amount_granted;
-          $priority = 10;
-        } else {
-          $priority = 0;
+  if (array_key_exists('custom', $params)) {
+    if (isset($params['action'])) {
+      $grantProgramParams['id'] = $params['grant_program_id'];
+      $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams);
+      if (!empty($grantProgram->grant_program_id)) {
+        $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = ".CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name')." AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
+        $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
+        $grantThresholds = array_flip($grantThresholds);
+        if ($result->N) {
+          while($result->fetch()) {
+            if ($result->amount_granted >= $grantThresholds['Maximum Grant']) {
+              $priority = 10;
+            } 
+            else {
+              $priority = 0;
+            }
+          }
+        } 
+        else {
+          $priority = -10;
+        }
+        if (array_key_exists('assessment', $params)) {
+          if ( $params['assessment'] != 0 ) {
+            $params['assessment'] = $params['assessment'] - $priority;
+          }
         }
       }
-    } else {
-      $priority = -10;
     }
-    if( array_key_exists( 'assessment', $params ) ) {
-      if ( $params['assessment'] != 0 ) {
-        $params['assessment'] = $params['assessment'] - $priority;//- 5 * count($years) - $priority;
-      }
-    }
-   }
     $defaults = array();
-    $programParams = array( 'id' => $params['grant_program_id'] );
+    $programParams = array('id' => $params['grant_program_id']);
     $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
     $algoType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $grantProgram->allocation_algorithm, 'grouping');
-    $grantStatuses = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
-    if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && ($params['status_id'] == $grantStatuses['Submitted'] || $params['status_id'] == $grantStatuses['Approved for Payment'] || $params['status_id'] == $grantStatuses['Awaiting Information'])) {
+    $grantStatuses = CRM_Core_OptionGroup::values('grant_status', TRUE);
+    if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && ($params['status_id'] == $grantStatuses['Submitted'] || $params['status_id'] == $grantStatuses['Eligible'] || $params['status_id'] == $grantStatuses['Awaiting Information'])) {
+
       $params['amount_granted'] = quickAllocate($grantProgram, $params);
     } 
   }
@@ -136,7 +141,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
  *
  */
 function quickAllocate($grantProgram, $value) {
-  $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds', TRUE );
+  $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
   $amountGranted = NULL; 
   if( $grantProgram->remainder_amount == '0.00' ) {
     $totalAmount = $grantProgram->total_amount;
@@ -158,7 +163,7 @@ function quickAllocate($grantProgram, $value) {
   $grantProgramParams['remainder_amount'] = $totalAmount - $amountGranted;
   $grantProgramParams['id'] =  $grantProgram->id;
   $ids['grant_program']     =  $grantProgram->id;
-  CRM_Grant_BAO_GrantProgram::create( $grantProgramParams, $ids );
+  CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
   return $amountGranted;
 }
 
@@ -468,7 +473,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
   }
   if ($formName == 'CRM_Grant_Form_Grant') {
     $defaults = array();
-    $params['grant_program_id'] = $form->_submitValues['grant_program_id'];
+    $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
     if ($defaults['remainder_amount'] < $form->_submitValues['amount_granted']) {
       $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
