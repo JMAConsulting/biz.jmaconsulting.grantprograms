@@ -36,8 +36,8 @@
     </p>
 </div>
 
-{if $grantSummary.total_grants}
-You have {$grantSummary.total_grants} grant(s) registered in your database.
+{if $grantSummary.no_of_grants}
+You have {$grantSummary.no_of_grants} grant(s) registered in your database.
 <table class="report">
 <tr class="columnheader-dark">
     <th scope="col">{ts}Grant Program{/ts}</th>
