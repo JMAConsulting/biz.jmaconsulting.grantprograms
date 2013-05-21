@@ -125,7 +125,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
     $algoType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $grantProgram->allocation_algorithm, 'grouping');
     $grantStatuses = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
-    if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && ($params['status_id'] == $grantStatuses['Submitted'] || $params['status_id'] == $grantStatuses['Approved'] || $params['status_id'] == $grantStatuses['Awaiting Information'])) {
+    if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && ($params['status_id'] == $grantStatuses['Submitted'] || $params['status_id'] == $grantStatuses['Approved for Payment'] || $params['status_id'] == $grantStatuses['Awaiting Information'])) {
       $params['amount_granted'] = quickAllocate($grantProgram, $params);
     } 
   }
