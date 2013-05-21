@@ -66,14 +66,14 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
     $grantStatus = CRM_Grant_PseudoConstant::grantStatus();
     CRM_Utils_System::setTitle(ts('Update Grants'));
     $this->addElement('select', 'status_id', ts('Grant Status'), array('' => '') + $grantStatus);
-    $this->addElement('radio', 'radio_ts', null, 'Do not update', 'no_update' );  
-    $this->addElement('radio', 'radio_ts', null, 'Other Amount', 'amount_granted' );  
+    $this->addElement('radio', 'radio_ts', null, ts('&nbsp;Do not update'), 'no_update' );  
+    $this->addElement('radio', 'radio_ts', null, ts('&nbsp;Other Amount'), 'amount_granted' );  
     $this->setDefaults( array( 'radio_ts'=> 'no_update' ) );
 
     $this->addElement('text', 'amount_granted', ts('Amount Granted'));
     $this->addRule('amount_granted', ts('Please enter a valid amount.'), 'money');
 
-    $this->addElement('radio', 'radio_ts', null, 'Standard Allocation', 'amount_total' );
+    $this->addElement('radio', 'radio_ts', null, ts('&nbsp;Standard Allocation'), 'amount_total');
 
     $this->addDate('decision_date', ts('Grant Decision'), FALSE, array('formatType' => 'custom'));
 
