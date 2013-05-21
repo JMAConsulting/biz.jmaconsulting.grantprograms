@@ -99,7 +99,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
   if (array_key_exists('custom', $params)) {
     if (isset($params['action'])) {
       $grantProgramParams['id'] = $params['grant_program_id'];
-      $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams);
+      $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, &$defaults);
       if (!empty($grantProgram->grant_program_id)) {
         $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = ".CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name')." AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
         $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );

@@ -71,13 +71,13 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
           WHERE g.status_id IS NOT NULL
           GROUP BY g.grant_program_id, g.status_id WITH ROLLUP";
 
-        $dao = CRM_Core_DAO::executeQuery( $query, CRM_Core_DAO::$_nullArray );
+        $dao = CRM_Core_DAO::executeQuery($query, CRM_Core_DAO::$_nullArray);
 
         $status = array( );
         $summary = array( );
         $summary['total_grants'] = null;
-        $summary['total_grants']['no_of_grants'] = null;
-     $querys = "SELECT
+        $summary['no_of_grants'] = null;
+        $querys = "SELECT
           v.label as label,
           v.weight as value,
           v.value as info
@@ -86,7 +86,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
           AND  g.name = 'grant_status'
           AND  g.is_active = 1
           ORDER BY v.weight";
-        $daos = CRM_Core_DAO::executeQuery( $querys, CRM_Core_DAO::$_nullArray );
+        $daos = CRM_Core_DAO::executeQuery($querys, CRM_Core_DAO::$_nullArray);
         while ($daos->fetch()) {
           $status[$daos->value] = array(
             'weight' => $daos->value,
@@ -116,7 +116,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
             $programs[$dao->label][$stats[$dao->status_id]['weight']]= array( 
               'label' => $stats[$dao->status_id]['label'],
               'total' => $dao->status_total,
-	      'value' => $stats[$dao->status_id]['value'],
+              'value' => $stats[$dao->status_id]['value'],
               'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
               'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
               'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
@@ -125,7 +125,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
             $programs[$dao->label] = $programs[$dao->label] + array_diff_key($status, $programs[$dao->label]); //add the two arrays
             ksort($programs[$dao->label]);
             $summary['total_grants']['all'] = 'All';
-            $summary['total_grants']['no_of_grants'] += $dao->status_total;
+            $summary['no_of_grants'] += $dao->status_total;
           } else{
             $programs["<b>Subtotal $dao->label </b>"]['subtotal'] = array(
               'label' => '',
