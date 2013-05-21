@@ -67,8 +67,7 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
         }
         require_once "CRM/Core/PseudoConstant.php";
         require_once 'CRM/Core/OptionGroup.php';
-        $grantStatus = CRM_Core_OptionGroup::values( 'grant_status' );
-        $grantStatus =  array_flip($grantStatus);
+        $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
         
         $paidGrants = $approvedGrants = array();
         CRM_Core_PseudoConstant::populate( &$paidGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}" );
