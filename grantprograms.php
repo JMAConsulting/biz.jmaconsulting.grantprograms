@@ -507,7 +507,6 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
             if (!empty($customFields)) { 
               $optionValueParams = array('option_group_id' => $customFields->option_group_id, 'value' => $fieldValue['value'], 'is_active' => 1);
               $optionValues = CRM_Core_BAO_OptionValue::retrieve($optionValueParams,  $default = array());
-              CRM_Core_Error::debug( '$optionValues', $optionValues );
               if(!empty($optionValues->description)) {
                 $assessmentAmount += $optionValues->description;
               }
@@ -516,9 +515,6 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
         }
       }
     }
-   
-                CRM_Core_Error::debug( '$assessmentAmount', $assessmentAmount );
-                exit;
     if(!empty($assessmentAmount)) {
       $params['assessment'] = $assessmentAmount;
     }
