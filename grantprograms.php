@@ -149,9 +149,14 @@ function quickAllocate($grantProgram, $value) {
   }
   
   if (isset($value['assessment'])) {
+    
+    $userparams['contact_id'] = $value['contact_id'];
+    $userparams['grant_program_id'] = $grantProgram->id;
+    $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+    $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
     $requestedAmount = ((($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100));
-    if ($requestedAmount > $grantThresholds['Maximum Grant']) {
-      $requestedAmount = $grantThresholds['Maximum Grant'];
+    if ($requestedAmount > $amountEligible) {
+      $requestedAmount = $amountEligible;
     }
     if ($requestedAmount < $totalAmount) { 
       $amountGranted = $requestedAmount;
