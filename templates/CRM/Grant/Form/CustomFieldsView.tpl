@@ -1,4 +1,4 @@
-{debug}{if $view_form}
+{if $view_form}
 <div id="field_page_new">
       <p></p>
       <div class="form-item">
