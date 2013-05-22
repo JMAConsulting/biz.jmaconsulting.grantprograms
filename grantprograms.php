@@ -367,7 +367,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   
   if ($formName == 'CRM_Custom_Form_Field') {
     
-    for ($i = 1;$i <= $formName::NUM_OPTION; $i++) {
+    for ($i = 1; $i <= $formName::NUM_OPTION; $i++) {
       $form->add('text', 
         'option_description['. $i .']', 
         'Marks', 
@@ -385,11 +385,11 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       'Marks', 
       array('id' => 'marks')
     );
-    $form->assign('view_form', 1);
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/Grant/Form/CustomFields.tpl',
     ));
   }
+  
   if ($formName == 'CRM_Grant_Form_Grant' && $form->get('context') == 'dashboard') {
     $query = "SELECT
       approved.amount_granted AS approved,
@@ -462,10 +462,21 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
 }
 
 function grantprograms_civicrm_pageRun( &$page ) {
-  if ($page->getVar('_name') == "CRM_Custom_Page_Option") {
+  if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
+    $params['id'] = $page->getVar('_fid');
+    $params['custom_group_id'] = $page->getVar('_gid');
+    CRM_Core_BAO_CustomField::retrieve(&$params, &$defaults);
+    $optionValues = CRM_Core_BAO_OptionValue::getOptionValuesArray($defaults['option_group_id']);
+    $smarty = CRM_Core_Smarty::singleton();
+    foreach ($optionValues as $key => $value) {
+      if (!empty($value['description'])) {
+        $smarty->_tpl_vars['customOption'][$key]['description'] = $value['description'];
+      }
+    }
+    $config = CRM_Core_Config::singleton();
     $page->assign('view_form', 1);
     CRM_Core_Region::instance('page-body')->add(array(
-      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+      'template' => 'CRM/Grant/Form/CustomFieldsView.tpl',
     ));
   }
 }
@@ -562,13 +573,23 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function grantprograms_civicrm_postProcess($formName, &$form) {
 
+  if ($formName == "CRM_Custom_Form_Field") {
+    $customGroupID = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_OptionGroup', $form->_submitValues['label'], 'id', 'title');
+    foreach ($form->_submitValues['option_label'] as $key => $value) {
+      if (!empty($value)) {
+        $sql = "UPDATE civicrm_option_value SET description = ".$form->_submitValues['option_description'][$key]." WHERE option_group_id = {$customGroupID} AND label = '{$value}'";
+        CRM_Core_DAO::executeQuery($sql);
+      }
+    }
+  }
+  
   if ($formName == "CRM_Custom_Form_Option") {
     $params = array(
-      'optionId' => $form->_submitValues['optionId'],
+      'id' => $form->_submitValues['optionId'],
       'description' => $form->_submitValues['description'],
-      'fieldId' => $form->_submitValues['fieldId'],
+      'option_group_id' => $form->getVar('_optionGroupID'),
     );
-    CRM_Core_BAO_CustomOption::updateCustomValues($params);
+    CRM_Core_BAO_OptionValue::create($params);
   }
 
   if ($formName == 'CRM_Grant_Form_Grant') {
