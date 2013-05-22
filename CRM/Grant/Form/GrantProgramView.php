@@ -87,7 +87,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function allocate() {   
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $params = array(
-      'status_id' => $grantStatus['Eligible'],
+      'status_id' => $grantStatus['Approved'],
       'grant_program_id' => $_POST['pid'],
       'amount_granted' => 'NULL',
       'assessment'     => 'NOT NULL',
@@ -103,77 +103,77 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $sort_order = SORT_DESC;
         array_multisort($order, $sort_order, $result);
       } 
-        
+      
       if ($_POST['remainder_amount'] == '0.00') {
         $totalAmount = $_POST['amount'];
       } 
       else {
         $totalAmount = $_POST['remainder_amount'];
       }
-        
+      
       $contact = array(); 
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
-         
       foreach ($result as $key => $value) {
-            
-        if (!in_array($value['contact_id'], $contact)) {
-          if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
-            if ($value['amount_total'] > $grantThresholds['Maximum Grant']) {
-              $value['amount_granted'] = $grantThresholds['Maximum Grant'];
-              if ($value['amount_granted'] <= $totalAmount) {
-                $grant['granted'][] = $grantThresholds['Maximum Grant'];
-                $totalAmount = $totalAmount - $grantThresholds['Maximum Grant'];
-                $contact[] = $value['contact_id'];
-              } 
-              else {
-                $grant['eligible'][] = $value['amount_granted'];
-                continue;
-              } 
+        $userparams['contact_id'] = $value['contact_id'];
+        $userparams['grant_program_id'] = $_POST['pid'];
+        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+        if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
+          $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
+          if ($value['amount_total'] > $amountEligible) {
+            $value['amount_granted'] = $amountEligible;
+            if ($value['amount_granted'] <= $totalAmount) {
+              $grant['granted'][] = $amountEligible;
+              $totalAmount = $totalAmount - $amountEligible;
             } 
             else {
-              if ($value['amount_total'] <= $totalAmount) {
-                $grant['granted'][] = $value['amount_total'];
-                $totalAmount = $totalAmount - $value['amount_total'];
-                $value['amount_granted'] = $value['amount_total'];
+              $grant['eligible'][] = $value['amount_granted'];
+              continue;
+            } 
+          } 
+          else {
+            if ($value['amount_total'] <= $totalAmount) {
+              $grant['granted'][] = $value['amount_total'];
+              $totalAmount = $totalAmount - $value['amount_total'];
+              $value['amount_granted'] = $value['amount_total'];
+            } 
+            else {
+              $grant['eligible'][] = $value['amount_granted'];
+              continue;
+            }
+          }
+          $ids['grant']            = $value['grant_id'];
+        }
+        else {
+          $requestedAmount = (($value['assessment']/100 )*$value['amount_total']*($grantThresholds['Funding factor']/100));
+          $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
+          if ($requestedAmount > $amountEligible) {
+            if ($amountEligible > $totalAmount) {
+              $grant['eligible'][] = $amountEligible;
+              continue;
+            } 
+            else {
+              if ($amountEligible != 0) {
+                $value['amount_granted'] = $grant['granted'][] = $amountEligible;
+                $totalAmount = $totalAmount - $value['amount_granted'];
               } 
               else {
-                $grant['eligible'][] = $value['amount_granted'];
-                continue;
+                $grant['nonEligible'][] = $requestedAmount;
               }
             }
-            $ids['grant']            = $value['grant_id'];
           }
           else {
-            $requestedAmount = (($value['assessment']/100 )*$value['amount_total']*($grantThresholds['Funding factor']/100));
-            if ($requestedAmount > $grantThresholds['Maximum Grant']) {
-              if ($grantThresholds['Maximum Grant'] > $totalAmount) {
-                $grant['eligible'][] = $grantThresholds['Maximum Grant'];
-                continue;
-              } 
-              else {
-                $value['amount_granted'] = $grant['granted'][] = $grantThresholds['Maximum Grant'];
-                $contact[] = $value['contact_id'];
-                $totalAmount = $totalAmount - $value['amount_granted'];
-              }
+            if ($requestedAmount > $totalAmount) {
+              $grant['eligible'][] = $requestedAmount;
+              continue;
             }
             else {
-              if ($requestedAmount > $totalAmount) {
-                $grant['eligible'][] = $grantThresholds['Maximum Grant'];
-                continue;
-              }
-              else {
-                $value['amount_granted'] = $grant['granted'][] = $requestedAmount;
-                $contact[] = $value['contact_id'];
-                $totalAmount = $totalAmount - $value['amount_granted'];
-              }
+              $value['amount_granted'] = $grant['granted'][] = $requestedAmount;
+              $totalAmount = $totalAmount - $value['amount_granted'];
             }
-            $ids['grant'] = $key;
-          } 
-          $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
+          }
+          $ids['grant'] = $key;
         } 
-        else {
-          $grant['nonEligible'][] = $value['amount_total'];
-        }
+        $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
       } 
     }
       
