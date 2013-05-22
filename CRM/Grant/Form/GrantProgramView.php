@@ -87,7 +87,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function allocate() {   
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $params = array(
-      'status_id' => $grantStatus['Approved'],
+      'status_id' => $grantStatus['Eligible'],
       'grant_program_id' => $_POST['pid'],
       'amount_granted' => 'NULL',
       'assessment'     => 'NOT NULL',
