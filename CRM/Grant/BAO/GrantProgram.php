@@ -314,5 +314,17 @@ WHERE civicrm_contact.id = $id ";
         CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
       }
     }
-  }    
+  }
+  
+  static function getUserAllocatedAmount($userparams) {
+    $where = NULL;
+    if (!empty($userparams)) {
+      foreach ($userparams as $key => $value) {
+        $where .= " AND {$key} = {$value}";
+      }
+      $query = "SELECT SUM(amount_granted) as amount_granted FROM civicrm_grant WHERE " .ltrim($where, ' AND');
+      $amountGranted = CRM_Core_DAO::singleValueQuery($query);
+    }
+    return empty($amountGranted) ? 0 : $amountGranted;
+  }
 }
