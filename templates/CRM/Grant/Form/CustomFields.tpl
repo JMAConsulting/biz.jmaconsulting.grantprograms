@@ -1,4 +1,4 @@
-{debug}{if $form.description}
+{if $form.description}
 	<div id="form_marks" class="crm-custom_option-form-block-value">
 	<tr class="crm-custom_option-form-block-description">
             <td class="label">{$form.description.label}</td>
