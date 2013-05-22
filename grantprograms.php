@@ -237,7 +237,7 @@ function grantprograms_civicrm_permission(&$permissions) {
 */
 function grantprograms_civicrm_buildForm($formName, &$form) {
 
-  if ($formName = 'CRM_Grant_Form_Grant') {
+  if ($formName == 'CRM_Grant_Form_Grant') {
     $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
@@ -367,13 +367,17 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   
   if ($formName == 'CRM_Custom_Form_Field') {
     
-    for ($i = 1; $i <= $formName::NUM_OPTION; $i++) {
+    for ($i = 1;$i <= $formName::NUM_OPTION; $i++) {
       $form->add('text', 
         'option_description['. $i .']', 
         'Marks', 
         array('id' => 'marks') 
       );
     } 
+    $form->assign('edit_form', 1);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+    ));
   }
   if ($formName == 'CRM_Custom_Form_Option') {
     $form->add('text', 
@@ -381,6 +385,10 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       'Marks', 
       array('id' => 'marks')
     );
+    $form->assign('view_form', 1);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+    ));
   }
   if ($formName == 'CRM_Grant_Form_Grant' && $form->get('context') == 'dashboard') {
     $query = "SELECT
@@ -453,6 +461,14 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
  }
 }
 
+function grantprograms_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == "CRM_Custom_Page_Option") {
+    $page->assign('view_form', 1);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+    ));
+  }
+}
 /*
  * hook_civicrm_validate
  *
@@ -545,6 +561,16 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
  *
  */
 function grantprograms_civicrm_postProcess($formName, &$form) {
+
+  if ($formName == "CRM_Custom_Form_Option") {
+    $params = array(
+      'optionId' => $form->_submitValues['optionId'],
+      'description' => $form->_submitValues['description'],
+      'fieldId' => $form->_submitValues['fieldId'],
+    );
+    CRM_Core_BAO_CustomOption::updateCustomValues($params);
+  }
+
   if ($formName == 'CRM_Grant_Form_Grant') {
    
     // FIXME: cookies error
