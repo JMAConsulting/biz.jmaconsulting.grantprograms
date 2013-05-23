@@ -462,6 +462,14 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
 }
 
 function grantprograms_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == "CRM_Grant_Page_Tab") {
+    $contactId = $page->getVar('_contactId');
+    if ($contactId) {
+      $name = CRM_Contact_BAO_Contact::getDisplayAndImage($contactId);
+      CRM_Utils_System::setTitle('Grant - '.$name[0] );
+    }
+  }
+  
   if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
     $params['id'] = $page->getVar('_fid');
     $params['custom_group_id'] = $page->getVar('_gid');
