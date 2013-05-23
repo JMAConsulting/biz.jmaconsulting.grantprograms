@@ -473,7 +473,6 @@ function grantprograms_civicrm_pageRun( &$page ) {
         $smarty->_tpl_vars['customOption'][$key]['description'] = $value['description'];
       }
     }
-    $config = CRM_Core_Config::singleton();
     $page->assign('view_form', 1);
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/Grant/Form/CustomFieldsView.tpl',
@@ -493,13 +492,18 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = NULL;
   if ($formName == "CRM_Admin_Form_Options" && ($form->getVar('_action') & CRM_Core_Action::DELETE) && $form->getVar('_gName') == "grant_type") {
     $defaults = array();
-    $params = array(
-      'grant_type_id' => $form->getVar('_id'),
-    );
-    CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
-    if (!empty($defaults)) {
+    $valId = $form->getVar('_values');
+    $isGrantPresent = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $valId['value'], 'id', 'grant_type_id');
+    $isProgramPresent = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $form->getVar('_id'), 'id', 'grant_type_id');
+    if ($isGrantPresent || $isProgramPresent) {
       $errors[''] = ts('Error');
-      CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because a Grant Program is currently using it. Click '. l('here', 'civicrm/grant_program?reset=1') .' to view the Grant Programs.'), ts("Sorry"), "error");
+      if ($isGrantPresent) {
+        $error[] = l('Grant(s)', 'civicrm/grant?reset=1');
+      }
+      if ($isProgramPresent) {
+        $error[] = l('Grant Program(s)', 'civicrm/grant_program?reset=1');
+      }
+      CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because '. implode(' and ', $error ) .' are currently using it.'), ts("Sorry"), "error");
     }
   }
   if ($formName == 'CRM_Grant_Form_Grant') {
