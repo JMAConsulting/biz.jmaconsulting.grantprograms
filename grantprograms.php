@@ -270,7 +270,18 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         array('' => ts('- select -')) + $form->_grantPrograms,
         TRUE
       );
-    
+         
+      //Financial Type RG-125
+      $financialType = CRM_Contribute_PseudoConstant::financialType();
+      if (count($financialType)) {
+        $form->assign('financialType', $financialType);
+      }
+      $form->add('select', 'financial_type_id', 
+        ts('Financial Type'), 
+        array('' => ts('- Select Financial Type -')) + $financialType,
+        FALSE 
+      );      
+
       if (CRM_Core_Permission::check('administer CiviGrant')) {
         $form->add('text', 'assessment', ts('Assessment'));
       }
@@ -518,8 +529,12 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     $defaults = array();
     $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
-    if ($defaults['remainder_amount'] < $form->_submitValues['amount_granted']) {
+    if (CRM_Utils_Array::value('remainder_amount', $defaults) < $form->_submitValues['amount_granted']) {
       $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
+    }
+    
+    if (CRM_Utils_Array::value('amount_granted', $fields) && $fields['amount_granted'] > 0 && !CRM_Utils_Array::value('financial_type_id', $fields) && CRM_Utils_Array::value('money_transfer_date', $fields)) {
+      $errors['financial_type_id'] = ts('Financial Type is a required field if Amount is Granted');
     }
   }
   if ($formName == 'CRM_Grant_Form_Search') {
@@ -592,7 +607,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     $smarty = CRM_Core_Smarty::singleton();
     $createItem = TRUE;
     $previousGrant = $smarty->get_template_vars('previousGrant');
-    if ($previousGrant->status_id == $objectRef->status_id) {
+    if ($previousGrant && $previousGrant->status_id == $objectRef->status_id) {
       return FALSE;
     }
     $status = CRM_Grant_PseudoConstant::grantStatus();

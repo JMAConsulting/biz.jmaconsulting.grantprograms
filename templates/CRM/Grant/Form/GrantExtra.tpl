@@ -36,6 +36,17 @@
     <td class="label">{$form.assessment.label}</td>
     <td>{$form.assessment.html}</td>
   </tr>
+  <tr class="crm-grant-form-block-financial_type">
+    <td class="label">{$form.financial_type_id.label}</td>
+    <td>
+      {if !$financialType}
+        {capture assign=ftUrl}{crmURL p='civicrm/admin/financial/financialType' q="reset=1"}{/capture}
+        {ts 1=$ftUrl}There is no Financial Type configured.<a href='%1'> Click here</a> if you want to configure financial type for your site.{/ts}
+      {else}
+        {$form.financial_type_id.html}
+      {/if}
+    </td>
+  </tr>  
 </tbody></table>
 
 {*if $pager->_totalItems*}
@@ -50,6 +61,7 @@ cj(document).ready(function(){
   cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
   cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
+  cj('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
 if ( cj("#status_id option:selected").text() == 'Ineligible') {
   cj('.grant_rejected_reason_id').show();
 } else {
