@@ -374,6 +374,10 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         array('id' => 'marks') 
       );
     } 
+    $form->assign('edit_form', 1);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+    ));
   }
   if ($formName == 'CRM_Custom_Form_Option') {
     $form->add('text', 
@@ -381,7 +385,11 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       'Marks', 
       array('id' => 'marks')
     );
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFields.tpl',
+    ));
   }
+  
   if ($formName == 'CRM_Grant_Form_Grant' && $form->get('context') == 'dashboard') {
     $query = "SELECT
       approved.amount_granted AS approved,
@@ -453,6 +461,32 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
  }
 }
 
+function grantprograms_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == "CRM_Grant_Page_Tab") {
+    $contactId = $page->getVar('_contactId');
+    if ($contactId) {
+      $name = CRM_Contact_BAO_Contact::getDisplayAndImage($contactId);
+      CRM_Utils_System::setTitle('Grant - '.$name[0] );
+    }
+  }
+  
+  if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
+    $params['id'] = $page->getVar('_fid');
+    $params['custom_group_id'] = $page->getVar('_gid');
+    CRM_Core_BAO_CustomField::retrieve(&$params, &$defaults);
+    $optionValues = CRM_Core_BAO_OptionValue::getOptionValuesArray($defaults['option_group_id']);
+    $smarty = CRM_Core_Smarty::singleton();
+    foreach ($optionValues as $key => $value) {
+      if (!empty($value['description'])) {
+        $smarty->_tpl_vars['customOption'][$key]['description'] = $value['description'];
+      }
+    }
+    $page->assign('view_form', 1);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Form/CustomFieldsView.tpl',
+    ));
+  }
+}
 /*
  * hook_civicrm_validate
  *
@@ -466,13 +500,18 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = NULL;
   if ($formName == "CRM_Admin_Form_Options" && ($form->getVar('_action') & CRM_Core_Action::DELETE) && $form->getVar('_gName') == "grant_type") {
     $defaults = array();
-    $params = array(
-      'grant_type_id' => $form->getVar('_id'),
-    );
-    CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
-    if (!empty($defaults)) {
+    $valId = $form->getVar('_values');
+    $isGrantPresent = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $valId['value'], 'id', 'grant_type_id');
+    $isProgramPresent = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $form->getVar('_id'), 'id', 'grant_type_id');
+    if ($isGrantPresent || $isProgramPresent) {
       $errors[''] = ts('Error');
-      CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because a Grant Program is currently using it. Click '. l('here', 'civicrm/grant_program?reset=1') .' to view the Grant Programs.'), ts("Sorry"), "error");
+      if ($isGrantPresent) {
+        $error[] = l('Grant(s)', 'civicrm/grant?reset=1');
+      }
+      if ($isProgramPresent) {
+        $error[] = l('Grant Program(s)', 'civicrm/grant_program?reset=1');
+      }
+      CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because '. implode(' and ', $error ) .' are currently using it.'), ts("Sorry"), "error");
     }
   }
   if ($formName == 'CRM_Grant_Form_Grant') {
@@ -622,6 +661,26 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  *
  */
 function grantprograms_civicrm_postProcess($formName, &$form) {
+
+  if ($formName == "CRM_Custom_Form_Field") {
+    $customGroupID = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_OptionGroup', $form->_submitValues['label'], 'id', 'title');
+    foreach ($form->_submitValues['option_label'] as $key => $value) {
+      if (!empty($value)) {
+        $sql = "UPDATE civicrm_option_value SET description = ".$form->_submitValues['option_description'][$key]." WHERE option_group_id = {$customGroupID} AND label = '{$value}'";
+        CRM_Core_DAO::executeQuery($sql);
+      }
+    }
+  }
+  
+  if ($formName == "CRM_Custom_Form_Option") {
+    $params = array(
+      'id' => $form->_submitValues['optionId'],
+      'description' => $form->_submitValues['description'],
+      'option_group_id' => $form->getVar('_optionGroupID'),
+    );
+    CRM_Core_BAO_OptionValue::create($params);
+  }
+
   if ($formName == 'CRM_Grant_Form_Grant') {
    
     // FIXME: cookies error
