@@ -594,6 +594,8 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       $smarty = CRM_Core_Smarty::singleton();
       $smarty->assign('previousGrant', $previousGrant);
     }
+    $config = CRM_Core_Config::singleton();
+    $config->_params = $params;
   }
 }
 
