@@ -740,58 +740,6 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
           "force=1&qfKey={$form->_key}"));
       }
     }
-    
-    $params = $form->_submitValues;
-    $params['contact_id'] = $form->getVar('_contactID');
-    // added by JMA fixme in module
-    $grantProgram  = new CRM_Grant_DAO_GrantProgram();
-      $grantProgram->id = $params['grant_program_id'];
-      $page = new CRM_Core_Page();
-      if ($grantProgram->find(TRUE)) {
-        $params['is_auto_email'] = $grantProgram->is_auto_email;
-      }
-      if ($params['is_auto_email'] == 1 && !array_key_exists('resrictEmail', $params)) {
-        // FIXME: for grant profiles
-        $customData = array();
-        if (!CRM_Utils_Array::value('custom', $params)) {
-          $params['custom'] = array();
-        }
-        foreach($params['custom'] as $key => $value) {
-          foreach ($value as $index => $field) {
-            if (!empty( $field['value'])) {
-              $customData[$field['custom_group_id']][$field['custom_field_id']] = $field['value'];
-            }
-          }
-        }
-        if (!empty( $customData)) {
-          foreach ($customData as $dataKey => $dataValue) {
-            $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
-            $customGroup[$customGroupName] = $customGroupName;
-            $count = 0;
-            foreach ($dataValue  as $dataValueKey => $dataValueValue) {
-              $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
-              $customField[$customGroupName][$count]['value'] = $dataValueValue;
-              $count++;
-            }
-          }
-          $page->assign('customGroup', $customGroup);
-          $page->assign('customField', $customField);
-        }
-        // EOF FIXME
-        
-        $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
-        $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-        $grantTypes    = CRM_Core_OptionGroup::values('grant_type');
-        $grantProgram  = $grantPrograms[$params['grant_program_id']];
-        $grantType     = $grantTypes[$params['grant_type_id']];
-        $grantStatus   = $grantStatuses[$params['status_id']];
-          
-        $page->assign('grant_type', $grantType);
-        $page->assign('grant_programs', $grantProgram);
-        $page->assign('grant_status', $grantStatus);
-        $page->assign('params', $params);
-        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
-      }
   }
 }
 
@@ -812,5 +760,79 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
       ),
       'result' => FALSE,
     );
+  }
+}
+
+function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'Grant') {
+    $config = CRM_Core_Config::singleton();
+    $params = $config->_params;
+    // added by JMA fixme in module
+    $grantProgram  = new CRM_Grant_DAO_GrantProgram();
+    $grantProgram->id = $params['grant_program_id'];
+    $page = new CRM_Core_Page();
+    if ($grantProgram->find(TRUE)) {
+      $params['is_auto_email'] = $grantProgram->is_auto_email;
+    }
+     
+    if ($params['is_auto_email'] == 1) {
+      // FIXME: for grant profiles
+      $customData = array();
+      if (!CRM_Utils_Array::value('custom', $params)) {
+        $params['custom'] = array();
+      }
+      foreach($params['custom'] as $key => $value) {
+        foreach ($value as $index => $field) {
+          if (!empty( $field['value'])) {
+            $customData[$field['custom_group_id']][$field['custom_field_id']] = $field['value'];
+            if (strstr($field['column_name'], 'start_date')) {
+              $startDate = $field['value'];
+            }
+            if (strstr($field['column_name'], 'end_date')) {
+              $endDate = $field['value'];
+            }
+          }
+        }
+      }
+      if (!empty( $customData)) {
+        foreach ($customData as $dataKey => $dataValue) {
+          $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
+          $customGroup[$customGroupName] = $customGroupName;
+          $count = 0;
+          foreach ($dataValue  as $dataValueKey => $dataValueValue) {
+            $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
+            $customField[$customGroupName][$count]['value'] = $dataValueValue;
+            $count++;
+          }
+        }
+        $page->assign('customGroup', $customGroup);
+        $page->assign('customField', $customField);
+      }
+      // EOF FIXME
+      
+      $grantStatus = CRM_Core_OptionGroup::values('grant_status');
+      $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
+      $grantTypes = CRM_Core_OptionGroup::values('grant_type');
+      $grantProgram = $grantPrograms[$params['grant_program_id']];
+      $grantType = $grantTypes[$params['grant_type_id']];
+      $grantStatus = $grantStatus[$params['status_id']];
+      
+      $page->assign('grant_type', $grantType);
+      $page->assign('grant_programs', $grantProgram);
+      $page->assign('grant_status', $grantStatus);
+      $page->assign('params', $params);
+      CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
+    }
+
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
+    $grantStatus = array_flip($grantStatus);
+    $newDate = date('Y-m-d', strtotime($endDate." +60 days"));
+    if (($newDate <= date('Y-m-d') || date('Y') < date('Y',strtotime($endDate))) && $params['status_id'] == $grantStatus['Submitted']) {
+      $reasonGranItneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
+      $reasonGranItneligible = array_flip($reasonGranItneligible);
+      $params['status_id'] = $grantStatus['Ineligible'];
+      $params['grant_rejected_reason_id'] = $reasonGranItneligible['Outside dates'];
+      $result = CRM_Grant_BAO_Grant::create( $params, $ids );
+    }
   }
 }
