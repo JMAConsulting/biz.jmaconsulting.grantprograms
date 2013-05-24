@@ -290,7 +290,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
       );
     }
 
-    if (CRM_Utils_Array::value('grant', $ids)) {
+    if (CRM_Utils_Array::value('grant_id', $ids)) {
       CRM_Utils_Hook::post('edit', 'Grant', $grant->id, $grant);
     }
     else {
