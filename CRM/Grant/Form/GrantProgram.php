@@ -74,7 +74,6 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
   function setDefaultValues() {
     $defaults = $this->_values;
     if (!empty( $defaults)) {
-      $defaults['grant_type_id'] = CRM_Grant_BAO_GrantProgram::getOptionValue($defaults['grant_type_id']);
       $defaults['status_id'] = CRM_Grant_BAO_GrantProgram::getOptionValue($defaults['status_id']);
       if (!empty($defaults['allocation_date'])) {
         $defaults['allocation_date']  = strftime("%m/%d/%Y", strtotime($defaults['allocation_date']));
@@ -193,16 +192,15 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
 
   function updateGrantProgram(&$values, $domainID) {
     $dao = new CRM_Grant_DAO_GrantProgram();
-    if ( empty($values['is_active']))
+    if (empty($values['is_active']))
       $values['is_active'] = 0;
-    if (empty($values['is_auto_email'])) {
+    if (empty($values['is_auto_email']))
       $values['is_auto_email'] = 0;
-    }
     $dao->id = $this->_id;
     $dao->domain_id = $domainID;
     $dao->label = $values['label'];
     $dao->name = $values['label'];
-    $dao->grant_type_id = CRM_Grant_BAO_GrantProgram::getOptionValueID(CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup','grant_type','id','name'), $values['grant_type_id']);
+    $dao->grant_type_id = $values['grant_type_id'];
     $dao->total_amount = $values['total_amount'];
     $dao->remainder_amount = $values['remainder_amount'];
     $dao->financial_type_id = $values['financial_type_id'];

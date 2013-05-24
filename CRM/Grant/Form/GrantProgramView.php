@@ -114,6 +114,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       $contact = array(); 
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
       foreach ($result as $key => $value) {
+        $value['amount_total'] = str_replace(',', '', $value['amount_total']);
         $userparams['contact_id'] = $value['contact_id'];
         $userparams['grant_program_id'] = $_POST['pid'];
         $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
