@@ -162,7 +162,7 @@ function quickAllocate($grantProgram, $value) {
 
   //Update grant program
   if ($amountGranted > 0) {
-    $grantProgramParams['remainder_amount'] = $totalAmount - $amountGranted;
+    $grantProgramParams['remainder_amount'] = $grantProgram->remainder_amount - $amountGranted;
     $grantProgramParams['id'] =  $grantProgram->id;
     $ids['grant_program']     =  $grantProgram->id;
     CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
