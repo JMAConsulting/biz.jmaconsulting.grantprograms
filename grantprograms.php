@@ -384,7 +384,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     for ($i = 1; $i <= $formName::NUM_OPTION; $i++) {
       $form->add('text', 
         'option_description['. $i .']', 
-        'Marks', 
+        'Mark', 
         array('id' => 'marks') 
       );
     } 
@@ -396,7 +396,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Custom_Form_Option') {
     $form->add('text', 
       'description', 
-      'Marks', 
+      'Mark', 
       array('id' => 'marks')
     );
     CRM_Core_Region::instance('page-body')->add(array(
