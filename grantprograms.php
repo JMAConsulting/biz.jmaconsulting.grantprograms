@@ -482,6 +482,13 @@ function grantprograms_civicrm_pageRun( &$page ) {
       $name = CRM_Contact_BAO_Contact::getDisplayAndImage($contactId);
       CRM_Utils_System::setTitle('Grant - '.$name[0] );
     }
+    $smarty = CRM_Core_Smarty::singleton();
+    if ($smarty->_tpl_vars['action'] == CRM_Core_Action::VIEW) {
+      $smarty->_tpl_vars['assessment'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $smarty->_tpl_vars['id'], 'assessment', 'id');
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Grant/Page/GrantExtra.tpl',
+      ));
+    }
   }
   
   if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
