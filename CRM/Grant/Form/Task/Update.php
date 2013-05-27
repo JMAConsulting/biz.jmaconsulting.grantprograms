@@ -122,17 +122,21 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
       }
       foreach ($sorted as $grantId) {
         $ids['grant_id'] = $grantId;
-        if ( $params['radio_ts'] == 'amount_total' ) {
+        $grantParams = array('id'=>$grantId);
+        $grant = CRM_Grant_BAO_Grant::retrieve($grantParams, $defaults=array());
+        $values['contact_id'] = $grant->contact_id;
+        $values['grant_program_id'] = $grant->grant_program_id;
+        $values['grant_type_id'] = $grant->grant_type_id;
+        $values['amount_total'] = $grant->amount_total;
+        if ( $params['radio_ts'] == 'amount_total') {
           unset($params['amount_granted']);
-          $grantParams = array('id'=>$grantId);
-          $grant = CRM_Grant_BAO_Grant::retrieve($grantParams, $defaults=array());
-          self::allocation($grant);
+          self::allocation($grant, $values);
+        } else {
+          CRM_Grant_BAO_Grant::add($values, $ids);
         }
-        CRM_Grant_BAO_Grant::add($values, $ids);
         $updatedGrants++;
       }
     }
-
     $status = 
       ts('Updated Grant(s): %1', array(1 => $updatedGrants)).', '.
       ts('Total Selected Grant(s): %1', array(1 => count($this->_grantIds)));
@@ -140,17 +144,17 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 'force=1&qfKey=' . $qfKey));
   }
 
-  function allocation($grant) {
+  function allocation($grant, $values) {
     $defaults = $grants = array();
     $programId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $grant->id, 'grant_program_id');
     $programParams = array('id' => $programId);
     $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
     $algoType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $grantProgram->allocation_algorithm, 'grouping');
     if ($algoType == 'immediate') {
-      $grantedAmount = self::quickAllocate($grantProgram, $grant);
+      $grantedAmount = self::quickAllocate($grantProgram, $grant, $values);
     } 
     else if ($algoType == 'batch') {
-      $grantedAmount = self::batchAllocate($grantProgram, $grant);
+      //FIXME needs error message
     }
 
     if ($grantedAmount) {
@@ -158,27 +162,33 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
         'id' => $grant->id,
         'amount_granted' => $grantedAmount,
       );
-      $grantIds['grant'] = $grant->id;
+      $grantIds['grant_id'] = $grant->id;
       CRM_Grant_BAO_Grant::add($grantUpdate, $grantIds);
     }
   }
 
-  function quickAllocate($grantProgram, $grant) {
-    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
+  function quickAllocate($grantProgram, $grant, $values) {
+    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
     $grantThresholds = array_flip($grantThresholds);
-    $amountGranted = NULL; 
-    if( $grantProgram->remainder_amount == '0.00' ) {
-      $totalAmount = $grantProgram->total_amount;
-    } else {
-      $totalAmount = $grantProgram->remainder_amount;
-    }
+    $amountGranted = NULL;
+    $totalAmount = $grantProgram->remainder_amount;
     if (isset($grant->assessment)) {
+      $userparams['contact_id'] = $values['contact_id'];
+      $userparams['grant_program_id'] = $values['grant_program_id'];
+      $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+      $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
+      $grant->amount_total = str_replace(',', '', $grant->amount_total);
       if ($grant->assessment > $grantThresholds['Minimum Score For Grant Award']) {
-        if ((($grantThresholds['Fixed Percentage Of Grant']/100) * $grant->amount_total) < $totalAmount) {
-          $amountGranted = ($grantThresholds['Fixed Percentage Of Grant']/100) * $grant->amount_total;
-        }
-      } else if ((($grant->assessment/100) * $grant->amount_total) < $totalAmount) {
-        $amountGranted = ($grant->assessment/100) * $grant->amount_total;
+        $requestedAmount = ((($grantThresholds['Fixed Percentage Of Grant'] / 100) * $grant->amount_total) * ($grantThresholds['Funding factor'] / 100));
+      } 
+      else {
+        $requestedAmount = ((($grant->assessment / 100) * $grant->amount_total) * ($grantThresholds['Funding factor'] / 100));
+      }
+      if ($requestedAmount > $amountEligible) {
+        $requestedAmount = $amountEligible;
+      }
+      if ($requestedAmount < $totalAmount) { 
+        $amountGranted = $requestedAmount;
       }
     }
 
@@ -189,33 +199,6 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
     $ids['grant_program']     =  $grantProgram->id;
     CRM_Grant_BAO_GrantProgram::create( $grantProgramParams, $ids );
     return $amountGranted;
-  }
-
-  function batchAllocate($grantProgram, $grant) {
-    $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
-    $grantThresholds = array_flip($grantThresholds);
-    $amountGranted = NULL; 
-    if( $grantProgram->remainder_amount == '0.00' ) {
-      $totalAmount = $grantProgram->total_amount;
-    } else {
-      $totalAmount = $grantProgram->remainder_amount;
-    }
-    if( $grant->amount_total < $totalAmount ) {
-      if ( $grant->amount_total >= $grantThresholds['Maximum Grant'] ) {
-        $totalAmount = $totalAmount - $grantThresholds['Maximum Grant'];
-        $amountGranted = $grantThresholds['Maximum Grant'];
-      } else {
-        $totalAmount = $totalAmount - $grant->amount_total;
-        $amountGranted = $grant->amount_total;
-      }
-      //Update grant program
-      $grantProgramParams = array();
-      $grantProgramParams['remainder_amount'] = $totalAmount - $amountGranted;
-      $grantProgramParams['id'] =  $grantProgram->id;
-      $ids['grant_program']     =  $grantProgram->id;
-      CRM_Grant_BAO_GrantProgram::create( $grantProgramParams, $ids );
-      return $amountGranted;
-    }
   }
 }
 

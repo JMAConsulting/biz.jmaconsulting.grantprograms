@@ -104,12 +104,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         array_multisort($order, $sort_order, $result);
       } 
       
-      if ($_POST['remainder_amount'] == '0.00') {
-        $totalAmount = $_POST['amount'];
-      } 
-      else {
-        $totalAmount = $_POST['remainder_amount'];
-      }
+      $totalAmount = $_POST['remainder_amount'];
       
       $contact = array(); 
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
@@ -145,7 +140,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           $ids['grant']            = $value['grant_id'];
         }
         else {
-          $requestedAmount = (($value['assessment']/100 )*$value['amount_total']*($grantThresholds['Funding factor']/100));
+          $requestedAmount = (($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100));
           $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
           if ($requestedAmount > $amountEligible) {
             if ($amountEligible > $totalAmount) {
