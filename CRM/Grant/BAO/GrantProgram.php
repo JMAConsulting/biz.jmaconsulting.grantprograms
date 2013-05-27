@@ -325,11 +325,14 @@ WHERE civicrm_contact.id = $id ";
    * @access public
    * @static
    */
-  static function getUserAllocatedAmount($params) {
+  static function getUserAllocatedAmount($params, $id = NULL) {
     $where = NULL;
     if (!empty($params)) {
       foreach ($params as $key => $value) {
         $where .= " AND {$key} = {$value}";
+      }
+      if (!empty($id)) {
+        $where .= " AND id != {$id}";
       }
       $query = "SELECT SUM(amount_granted) as amount_granted FROM civicrm_grant WHERE " .ltrim($where, ' AND');
       $amountGranted = CRM_Core_DAO::singleValueQuery($query);

@@ -141,11 +141,14 @@ function grantprograms_civicrm_grantAssessment(&$params) {
 function quickAllocate($grantProgram, $value) {
   $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
   $amountGranted = NULL;
-  
+  $grant_id = NULL;
   if (isset($value['assessment'])) {
     $userparams['contact_id'] = $value['contact_id'];
     $userparams['grant_program_id'] = $grantProgram->id;
-    $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+    if (!empty($value['id'])) {
+      $grant_id = $value['id'];
+    }
+    $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $grant_id);
     $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
     if ($amountEligible > $grantProgram->remainder_amount) {
       $amountEligible = $grantProgram->remainder_amount;
@@ -592,6 +595,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       if (!empty($defaultAmount) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($defaultAmount) != CRM_Utils_Money::format($params['amount_granted'])) {
         $params['manualEdit'] = TRUE;
       }
+    }
+    if (!empty($id)) {
+      $params['id'] = $id;
     }
     CRM_Utils_Hook::grantAssessment($params);
     if ($op == 'edit') {
