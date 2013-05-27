@@ -315,11 +315,20 @@ WHERE civicrm_contact.id = $id ";
       }
     }
   }
-  
-  static function getUserAllocatedAmount($userparams) {
+
+  /**
+   * Function to get sum of amount granted for a Contact
+   *
+   * @param int $params
+   *
+   * @return int sum of amount granted
+   * @access public
+   * @static
+   */
+  static function getUserAllocatedAmount($params) {
     $where = NULL;
-    if (!empty($userparams)) {
-      foreach ($userparams as $key => $value) {
+    if (!empty($params)) {
+      foreach ($params as $key => $value) {
         $where .= " AND {$key} = {$value}";
       }
       $query = "SELECT SUM(amount_granted) as amount_granted FROM civicrm_grant WHERE " .ltrim($where, ' AND');
