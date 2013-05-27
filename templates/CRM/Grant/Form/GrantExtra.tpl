@@ -88,7 +88,6 @@ var response = cj.ajax({
  }).responseText;	
 });
 cj(document).ready( function(){
-alert('hi');
 // RG-116 hide attachments
 {/literal}{if $hideAttachments}{literal}
 cj('div.crm-grant-form-block-attachment').hide();
