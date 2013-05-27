@@ -100,17 +100,15 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     $grantProgramParams['id'] = $params['grant_program_id'];
     $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
     if (!empty($grantProgram->grant_program_id)) {
-      $result = CRM_Core_DAO::executeQuery("SELECT id, contact_id, application_received_date, amount_granted, status_id FROM civicrm_grant WHERE status_id = ".CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name')." AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
-      $grantThresholds = CRM_Core_OptionGroup::values( 'grant_thresholds' );
+      $previousGrantedAmount = CRM_Core_DAO::singleValueQuery("SELECT SUM(amount_granted) as amount_granted  FROM civicrm_grant WHERE status_id = " . CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name') . " AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
+      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
       $grantThresholds = array_flip($grantThresholds);
-      if ($result->N) {
-        while($result->fetch()) {
-          if ($result->amount_granted >= $grantThresholds['Maximum Grant']) {
-            $priority = 10;
-          } 
-          else {
-            $priority = 0;
-          }
+      if (!empty($previousGrantedAmount)) {
+        if ($previousGrantedAmount >= $grantThresholds['Maximum Grant']) {
+          $priority = 10;
+        } 
+        else {
+          $priority = 0;
         }
       } 
       else {
@@ -127,7 +125,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
   $programParams = array('id' => $params['grant_program_id']);
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
   $algoType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $grantProgram->allocation_algorithm, 'grouping');
-  $grantStatuses = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
+  $grantStatuses = CRM_Core_OptionGroup::values('grant_status', TRUE);
   if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && ($params['status_id'] == $grantStatuses['Submitted'] || $params['status_id'] == $grantStatuses['Eligible'] || $params['status_id'] == $grantStatuses['Awaiting Information']) && empty($params['amount_granted'])) {
     $params['amount_granted'] = quickAllocate($grantProgram, $params);
     if (empty($params['amount_granted'])) {
@@ -156,7 +154,7 @@ function quickAllocate($grantProgram, $value) {
     $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
 
     $value['amount_total'] = str_replace(',', '', $value['amount_total']);
-    $requestedAmount = ((($value['assessment']/100) * $value['amount_total'])*($grantThresholds['Funding factor']/100));
+    $requestedAmount = ((($value['assessment'] / 100) * $value['amount_total']) * ($grantThresholds['Funding factor'] / 100));
     if ($requestedAmount > $amountEligible) {
       $requestedAmount = $amountEligible;
     }
