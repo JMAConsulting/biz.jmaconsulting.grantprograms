@@ -202,11 +202,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $dao->name = $values['label'];
     $dao->grant_type_id = $values['grant_type_id'];
     $dao->total_amount = $values['total_amount'];
-    if ($this->_action & CRM_Core_Action::ADD) {
-      $dao->remainder_amount = $values['total_amount'];
-    } else {
-      $dao->remainder_amount = $values['total_amount'] - $this->_defaultValues['total_amount'] + $values['remainder_amount'];
-    }
+    $dao->remainder_amount = $values['remainder_amount'];
     $dao->financial_type_id = $values['financial_type_id'];
     $dao->status_id = CRM_Grant_BAO_GrantProgram::getOptionValueID(CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup','grant_program_status','id','name'), $values['status_id']);
     $dao->allocation_date = CRM_Utils_Date::processDate($values['allocation_date']);

@@ -175,7 +175,7 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
     if (isset($grant->assessment)) {
       $userparams['contact_id'] = $values['contact_id'];
       $userparams['grant_program_id'] = $values['grant_program_id'];
-      $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+      $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $grant->id);
       $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
       $grant->amount_total = str_replace(',', '', $grant->amount_total);
       if ($grant->assessment > $grantThresholds['Minimum Score For Grant Award']) {

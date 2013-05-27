@@ -89,7 +89,6 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $params = array(
       'status_id' => $grantStatus['Eligible'],
       'grant_program_id' => $_POST['pid'],
-      'amount_granted' => 'NULL',
       'assessment'     => 'NOT NULL',
     );
       
@@ -112,7 +111,8 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $value['amount_total'] = str_replace(',', '', $value['amount_total']);
         $userparams['contact_id'] = $value['contact_id'];
         $userparams['grant_program_id'] = $_POST['pid'];
-        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams);
+        //FIXME pass grant id instead of NULL
+        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, NULL);
         if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
           $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
           if ($value['amount_total'] > $amountEligible) {
