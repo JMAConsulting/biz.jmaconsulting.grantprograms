@@ -48,7 +48,8 @@
     </tr>
     <tr class="crm-contact-custom-search-form-row-radio_ts">
        <td class="label">{$form.radio_ts.amount_total.label}</td>
-       <td>{$form.radio_ts.amount_total.html}<br />
+       <td>{$form.radio_ts.amount_total.html}
+       <td>{$form.standard_allocation.html}</td><br />
        <span class="description">{ts}Set to the amount determined by the current allocation algorithm.{/ts}</span></td>
     </tr>
 
@@ -63,17 +64,19 @@
 </div><!-- /.crm-form-block -->
 
 
+{literal} 
 <script type="text/javascript">
-    {literal} 
-
-cj("#CIVICRM_QFID_amount_total_4").click(function() {
-   cj("#amount_total").show();
-   cj("#amount_granted").hide();
-   cj("#amount_granted").val(null);
+cj(document).ready( function() {
+cj("#amount_granted").parent().parent().hide();
+cj('input[name="radio_ts"]').click(function(){
+  if (this.value == 'amount_total' || this.value == 'no_update') {
+    cj("#amount_granted").parent().parent().hide();
+    cj("#amount_granted").val(null);
+  }
+  else {
+    cj("#amount_granted").parent().parent().show();
+  }
 });
-
-cj("#CIVICRM_QFID_amount_granted_2").click(function() {
-   cj("#amount_granted").show();
 });
-    {/literal}
 </script>
+{/literal}
