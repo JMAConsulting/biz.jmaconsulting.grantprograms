@@ -64,7 +64,19 @@ class CRM_Grant_BAO_Query {
         $query->_tables['grant_status'] = $query->_whereTables['grant_status'] = 1;
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
       }
-      
+
+      if (CRM_Utils_Array::value('grant_program', $query->_returnProperties)) {
+        $query->_select['grant_program'] = 'gp.name as program_name';
+        $query->_element['grant_program'] = 1;
+        $query->_tables['grant_program'] = 1;
+      }
+
+      if (CRM_Utils_Array::value('grant_program_id', $query->_returnProperties)) {
+        $query->_select['grant_program_id'] = 'gp.id as program_id';
+        $query->_element['grant_program_id'] = 1;
+        $query->_tables['grant_program_id'] = 1;
+      }
+
       if (CRM_Utils_Array::value('status_weight', $query->_returnProperties)) {
         $query->_select['status_weight'] = 'v.weight as status_weight';
         $query->_element['status_weight'] = 1;
@@ -310,6 +322,10 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
       case 'course_name':
         $from .= ' '.$side.' JOIN '.CONFERENCE_DETAILS_TABLE.' ON ( civicrm_grant.id = '.CONFERENCE_DETAILS_TABLE.'.entity_id )';
         break;
+
+      case 'grant_program':
+        $from .= " $side JOIN civicrm_grant_program gp ON (civicrm_grant.grant_program_id = gp.id)";
+        break;
     }
     return $from;
   }
@@ -345,6 +361,8 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         'grant_report_received' => 1,
         'grant_money_transfer_date' => 1,
         'grant_note' => 1,
+        'grant_program' => 1,
+        'grant_program_id' => 1,
       );
     }
 
