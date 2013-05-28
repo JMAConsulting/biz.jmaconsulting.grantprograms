@@ -253,130 +253,101 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_-1');
     $form->assign('course', 'custom_'.COURSE.'_-1');
     $form->assign('course_other', 'custom_'.COURSE_OTHER.'_-1');
-    if ($form->getVar('_name') == 'Grant') {
-      CRM_Core_Region::instance('page-body')->add(array(
+    CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
       ));
-      $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
-      $form->add('select', 
-        'grant_rejected_reason_id', 
-        ts('Reason Grant Ineligible'),
-        array('' => ts('- select -')) + $form->_reasonGrantRejected, 
-        FALSE
-      );
+    $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
+    $form->add('select', 
+      'grant_rejected_reason_id', 
+      ts('Reason Grant Ineligible'),
+      array('' => ts('- select -')) + $form->_reasonGrantRejected, 
+      FALSE
+    );
 
-      $form->_grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-      $form->add('select', 
-        'grant_program_id', 
-        ts('Grant Programs'),
-        array('' => ts('- select -')) + $form->_grantPrograms,
-        TRUE
-      );
+    $form->_grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
+    $form->add('select', 
+      'grant_program_id', 
+      ts('Grant Programs'),
+      array('' => ts('- select -')) + $form->_grantPrograms,
+      TRUE
+    );
          
-      //Financial Type RG-125
-      $financialType = CRM_Contribute_PseudoConstant::financialType();
-      if (count($financialType)) {
-        $form->assign('financialType', $financialType);
-      }
-      $form->add('select', 'financial_type_id', 
-        ts('Financial Type'), 
-        array('' => ts('- Select Financial Type -')) + $financialType,
-        FALSE 
-      );      
+    //Financial Type RG-125
+    $financialType = CRM_Contribute_PseudoConstant::financialType();
+    if (count($financialType)) {
+      $form->assign('financialType', $financialType);
+    }
+    $form->add('select', 'financial_type_id', 
+      ts('Financial Type'), 
+      array('' => ts('- Select Financial Type -')) + $financialType,
+      FALSE 
+    );      
 
-      if (CRM_Core_Permission::check('administer CiviGrant')) {
-        $form->add('text', 'assessment', ts('Assessment'));
-      }
-      // FIXME: session key errorfor 4.3
-      if ($form->getVar('_context') == 'search' && 0) {
-        $form->addButtons(array(
-          array (
-            'type' => 'upload',
-            'name' => ts('Save'),
-            'isDefault' => TRUE),
-          array (
-            'type' => 'submit',
-            'name' => ts('Save and Next'),
-            'subName'=> 'savenext'),
-          array (
-            'type' => 'upload',
-            'name' => ts('Save and New'),
-            'js' => array('onclick' => "return verify( );"),
-            'subName' => 'new'),
-          array (
-            'type' => 'cancel',
-            'name' => ts('Cancel')),
-          )
-        );
-        $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('grants'), NULL);
-        $controller->setEmbedded(TRUE);
-        $controller->reset();
-        $controller->set('force', 1);
-        $controller->process();
-        $controller->run();
-      }
-    } 
-    elseif ($form->getVar('_name') == 'Search') {
-      $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-      $form->add('select', 
-        'grant_program_id',  
-        ts('Grant Programs'),
-        array('' => ts('- select -')) + $grantPrograms
-      );
-      $form->add('text', 
-        'grant_amount_total_low', 
-        ts('From'), 
-        array('size' => 8, 'maxlength' => 8) 
-      ); 
-      $form->addRule('grant_amount_total_low', 
-        ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
-        'money'
-      );
-      $form->add('text', 
-        'grant_amount_total_high', 
-        ts('To'), 
-        array('size' => 8, 'maxlength' => 8)
-      ); 
-      $form->addRule('grant_amount_total_high', 
-        ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
-        'money'
-      );
-      $form->add('text', 
-        'grant_assessment_low', 
-        ts('From'), 
-        array('size' => 9, 'maxlength' => 9)
-      );
-        
-      $form->add('text', 
-        'grant_assessment_high', 
-        ts('To'), 
-        array('size' => 9, 'maxlength' => 9)
-      );
-      $form->add('text', 
-        'grant_amount_low', 
-        ts('From'), 
-        array('size' => 8, 'maxlength' => 8)
-      ); 
-      $form->addRule('grant_amount_low', 
-        ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
-        'money'
-      );
-
-      $form->add('text', 
-        'grant_amount_high', 
-        ts('To'), 
-        array('size' => 8, 'maxlength' => 8)
-     );
-      $form->addRule('grant_amount_high', 
-        ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
-        'money'
-      );
+    if (CRM_Core_Permission::check('administer CiviGrant')) {
+      $form->add('text', 'assessment', ts('Assessment'));
     }
   }
+  if ($formName == "CRM_Grant_Form_Search") {
+    $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
+    $form->add('select', 
+      'grant_program_id',  
+      ts('Grant Programs'),
+      array('' => ts('- select -')) + $grantPrograms
+    );
+    $form->add('text', 
+      'grant_amount_total_low', 
+      ts('From'), 
+      array('size' => 8, 'maxlength' => 8) 
+    ); 
+    $form->addRule('grant_amount_total_low', 
+      ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+      'money'
+    );
+    $form->add('text', 
+      'grant_amount_total_high', 
+      ts('To'), 
+      array('size' => 8, 'maxlength' => 8)
+    ); 
+    $form->addRule('grant_amount_total_high', 
+      ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+      'money'
+    );
+    $form->add('text', 
+      'grant_assessment_low', 
+      ts('From'), 
+      array('size' => 9, 'maxlength' => 9)
+    );
+        
+    $form->add('text', 
+      'grant_assessment_high', 
+      ts('To'), 
+      array('size' => 9, 'maxlength' => 9)
+    );
+    $form->add('text', 
+      'grant_amount_low', 
+      ts('From'), 
+      array('size' => 8, 'maxlength' => 8)
+    ); 
+    $form->addRule('grant_amount_low', 
+      ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+      'money'
+    );
+
+    $form->add('text', 
+      'grant_amount_high', 
+      ts('To'), 
+      array('size' => 8, 'maxlength' => 8)
+    );
+    $form->addRule('grant_amount_high', 
+      ts('Please enter a valid money value (e.g. %1).', 
+        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+      'money'
+    );
+  }
+
   
   if ($formName == 'CRM_Custom_Form_Field') {
     

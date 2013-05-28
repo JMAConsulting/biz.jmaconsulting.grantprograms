@@ -78,6 +78,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'grant_payment_created',
     'course_type',
     'course_name',
+    'program_name',
+    'program_id',
     'grant_report_received',
     'grant_money_transfer_date',
   );
@@ -417,7 +419,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       self::$_columnHeaders = array(
         array(
           'name' => ts('Program Name'),
-          'sort' => 'grant_type_id',
+          'sort' => 'program_id',
           'direction' => CRM_Utils_Sort::DONTCARE,
         ),
         array(
