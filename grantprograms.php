@@ -374,7 +374,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     ));
   }
   
-  if ($formName == 'CRM_Grant_Form_Grant' && $form->get('context') == 'dashboard') {
+  if ($formName == 'CRM_Grant_Form_Search' && $form->get('context') == 'dashboard') {
     $query = "SELECT
       approved.amount_granted AS approved,
       paid.amount_granted AS paid, 
