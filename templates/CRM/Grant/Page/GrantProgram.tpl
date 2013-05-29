@@ -80,14 +80,14 @@
 {/if}
 {/if}
 
-{literal}
+{if $action neq 4}{literal}
 <script type="text/javascript">
 
 cj(document).ready(function(){
 cj('ul.panel').css('width','205px');
 
 cj('#allocation').click(function(event){
-var r=confirm("You want to do trial allocation?");
+var r=confirm("Do you want to do a trial allocation?");
 if (r==true)
   {  
      event.preventDefault();
@@ -181,3 +181,4 @@ if (r==true)
 
 </script>
 {/literal}
+{/if}
