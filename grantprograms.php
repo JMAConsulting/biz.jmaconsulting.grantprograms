@@ -120,6 +120,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
       }
     }
   }
+   
   $defaults = array();
   $programParams = array('id' => $params['grant_program_id']);
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
@@ -148,6 +149,7 @@ function quickAllocate($grantProgram, $value) {
       $grant_id = $value['id'];
     }
     $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $grant_id);
+    $defalutGrantedAmount = CRM_Grant_BAO_GrantProgram::getCurrentGrantAmount($grant_id);
     $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
     if ($amountEligible > $grantProgram->remainder_amount) {
       $amountEligible = $grantProgram->remainder_amount;
@@ -157,14 +159,17 @@ function quickAllocate($grantProgram, $value) {
     if ($requestedAmount > $amountEligible) {
       $requestedAmount = $amountEligible;
     }
-    if ($requestedAmount < $grantProgram->remainder_amount) {
+    if ($requestedAmount > 0) {
+      $remainderDifference = $requestedAmount - $defalutGrantedAmount;
+    }
+    if ($remainderDifference < $grantProgram->remainder_amount) {
       $amountGranted = $requestedAmount;
     }
   }
-
+   
   //Update grant program
   if ($amountGranted > 0) {
-    $grantProgramParams['remainder_amount'] = $grantProgram->remainder_amount - $amountGranted;
+    $grantProgramParams['remainder_amount'] = $grantProgram->remainder_amount - $remainderDifference;
     $grantProgramParams['id'] =  $grantProgram->id;
     $ids['grant_program']     =  $grantProgram->id;
     CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
@@ -561,18 +566,25 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       $params['action'] = TRUE;
     }
     else if ($objectName == 'Grant' && $op == "edit") {
-      $defaultAmount = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $id, 'amount_granted');
-      if (!empty($defaultAmount) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($defaultAmount) != CRM_Utils_Money::format($params['amount_granted'])) {
+      $grantParams = array('id' => $id);
+      $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
+      if (!empty($previousGrant->amount_granted) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($previousGrant->amount_granted) != CRM_Utils_Money::format($params['amount_granted']) && !CRM_Utils_Array::value('allocation', $params)) {
+        $programParams = array('id' => $previousGrant->grant_program_id);
+        $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, CRM_Core_DAO::$_nullArray);
+        $remainderDifference = CRM_Utils_Rule::cleanMoney($params['amount_granted']) - $previousGrant->amount_granted;
+        $grantProgramParams['remainder_amount'] = $grantProgram->remainder_amount - $remainderDifference;
+        $grantProgramParams['id'] =  $grantProgram->id;
+        $ids['grant_program'] =  $grantProgram->id;
+        CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
         $params['manualEdit'] = TRUE;
       }
     }
+    
     if (!empty($id)) {
       $params['id'] = $id;
     }
     CRM_Utils_Hook::grantAssessment($params);
     if ($op == 'edit') {
-      $grantParams = array('id' => $id);
-      $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
       $smarty = CRM_Core_Smarty::singleton();
       $smarty->assign('previousGrant', $previousGrant);
     }
@@ -587,69 +599,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
  *
  */
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
-  if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create') && $objectRef->financial_type_id) {
-    $smarty = CRM_Core_Smarty::singleton();
-    $createItem = TRUE;
-    $previousGrant = $smarty->get_template_vars('previousGrant');
-    if ($previousGrant && $previousGrant->status_id == $objectRef->status_id) {
-      return FALSE;
-    }
-    $status = CRM_Grant_PseudoConstant::grantStatus();
-    $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
-    $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
-    $amount = $objectRef->amount_granted;
-    $params = array();
-    if ($objectRef->status_id == array_search('Approved for Payment', $status)) {
-      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
-      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
-      $financialItemStatusID = array_search('Unpaid', $financialItemStatus);
-      $statusID = array_search('Pending', $contributionStatuses);
-    }
-    elseif ($objectRef->status_id == array_search('Paid', $status)) {
-      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Asset Account is' "));
-      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
-      $statusID = array_search('Completed', $contributionStatuses);
-      $financialItemStatusID = array_search('Paid', $financialItemStatus);
-      $createItem = FALSE;
-    }
-    if (CRM_Utils_Array::value('to_financial_account_id', $params)) {
-      //build financial transaction params
-      $trxnParams = array(
-        'to_financial_account_id' => $params['to_financial_account_id'],
-        'trxn_date' => date('YmdHis'),
-        'total_amount' => $amount,
-        'currency' => $objectRef->currency,
-        'status_id' => $statusID,
-      );
-      $trxnEntityTable = array(
-        'entity_table' => 'civicrm_grant',
-        'entity_id' => $objectId,
-      );
-      if ($previousGrant && $previousGrant->status_id == array_search('Approved for Payment', $status) && $objectRef->status_id == array_search('Paid', $status)) {
-        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
-        $trxnParams['from_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
-      }
-      $trxnId = CRM_Core_BAO_FinancialTrxn::create($trxnParams, $trxnEntityTable);
-      if ($createItem) {
-        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Expense Account is' "));
-        $financialAccountId = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
-        $itemParams = array(
-          'transaction_date' => date('YmdHis'),
-          'contact_id' => $objectRef->contact_id, 
-          'currency' => $objectRef->currency,
-          'amount' => $amount,
-          'description' => NULL, 
-          'status_id' => $financialItemStatusID,
-          'financial_account_id' => $financialAccountId,
-          'entity_table' => 'civicrm_grant',
-          'entity_id' => $objectId
-        );
-        $trxnIds['id'] = $trxnId->id;
-        CRM_Financial_BAO_FinancialItem::create($itemParams, NULL, $trxnIds);
-      }
-    }
-  }
-
+  //send mail after grant save
   $config = CRM_Core_Config::singleton();
   if ($objectName == 'Grant' && $config->_params) {
     $params = $config->_params;
@@ -719,6 +669,69 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $params['status_id'] = $grantStatus['Ineligible'];
         $params['grant_rejected_reason_id'] = $reasonGranItneligible['Outside dates'];
         $result = CRM_Grant_BAO_Grant::create( $params, $ids );
+      }
+    }
+  }
+  //create financial account entry on grant create
+  if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create') && $objectRef->financial_type_id) {
+    $smarty = CRM_Core_Smarty::singleton();
+    $createItem = TRUE;
+    $previousGrant = $smarty->get_template_vars('previousGrant');
+    if ($previousGrant && $previousGrant->status_id == $objectRef->status_id) {
+      return FALSE;
+    }
+    $status = CRM_Grant_PseudoConstant::grantStatus();
+    $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
+    $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
+    $amount = $objectRef->amount_granted;
+    $params = array();
+    if ($objectRef->status_id == array_search('Approved for Payment', $status)) {
+      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
+      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+      $financialItemStatusID = array_search('Unpaid', $financialItemStatus);
+      $statusID = array_search('Pending', $contributionStatuses);
+    }
+    elseif ($objectRef->status_id == array_search('Paid', $status)) {
+      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Asset Account is' "));
+      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+      $statusID = array_search('Completed', $contributionStatuses);
+      $financialItemStatusID = array_search('Paid', $financialItemStatus);
+      $createItem = FALSE;
+    }
+    if (CRM_Utils_Array::value('to_financial_account_id', $params)) {
+      //build financial transaction params
+      $trxnParams = array(
+        'to_financial_account_id' => $params['to_financial_account_id'],
+        'trxn_date' => date('YmdHis'),
+        'total_amount' => $amount,
+        'currency' => $objectRef->currency,
+        'status_id' => $statusID,
+      );
+      $trxnEntityTable = array(
+        'entity_table' => 'civicrm_grant',
+        'entity_id' => $objectId,
+      );
+      if ($previousGrant && $previousGrant->status_id == array_search('Approved for Payment', $status) && $objectRef->status_id == array_search('Paid', $status)) {
+        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
+        $trxnParams['from_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+      }
+      $trxnId = CRM_Core_BAO_FinancialTrxn::create($trxnParams, $trxnEntityTable);
+      if ($createItem) {
+        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Expense Account is' "));
+        $financialAccountId = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+        $itemParams = array(
+          'transaction_date' => date('YmdHis'),
+          'contact_id' => $objectRef->contact_id, 
+          'currency' => $objectRef->currency,
+          'amount' => $amount,
+          'description' => NULL, 
+          'status_id' => $financialItemStatusID,
+          'financial_account_id' => $financialAccountId,
+          'entity_table' => 'civicrm_grant',
+          'entity_id' => $objectId
+        );
+        $trxnIds['id'] = $trxnId->id;
+        CRM_Financial_BAO_FinancialItem::create($itemParams, NULL, $trxnIds);
       }
     }
   }

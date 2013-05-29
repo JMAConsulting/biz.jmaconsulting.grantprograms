@@ -342,4 +342,19 @@ WHERE civicrm_contact.id = $id ";
     }
     return empty($amountGranted) ? 0 : $amountGranted;
   }
+  
+  /**
+   * Function to get current grant granted amount
+   *
+   * @return int amount granted
+   * @access public
+   * @static
+   */
+  static function getCurrentGrantAmount($id = NULL) {
+    if ($id != NULL) {
+      $query = "SELECT amount_granted FROM civicrm_grant WHERE id = " . $id;
+      $amountGranted = CRM_Core_DAO::singleValueQuery($query);
+    }
+    return empty($amountGranted) ? 0 : $amountGranted;
+  }
 }

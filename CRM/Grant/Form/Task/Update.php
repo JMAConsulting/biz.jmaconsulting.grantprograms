@@ -151,19 +151,25 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
       foreach ($this->sorted as $grantId) {
         $ids['grant_id'] = $grantId;
         $grantParams = array('id' => $grantId);
-        $grant = CRM_Grant_BAO_Grant::retrieve($grantParams, $defaults=array());
+        $grant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
+        $values['contact_id'] = $grant->contact_id;
+        $values['grant_program_id'] = $grant->grant_program_id;
+        $values['grant_type_id'] = $grant->grant_type_id;
+        $values['id'] = $grantId;
+        $values['status_id'] = $grant->status_id;
+        $values['amount_total'] = $grant->amount_total;
         if ( $params['radio_ts'] == 'amount_total') {
           unset($params['amount_granted']);
-          $programParams = array('id' => $grant->grant_program_id);
-          $grant->status_id = $values['status_id'];
-          $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
-          self::quickAllocate($grantProgram, $grant);
-        } else {
-          $values['contact_id'] = $grant->contact_id;
-          $values['grant_program_id'] = $grant->grant_program_id;
-          $values['grant_type_id'] = $grant->grant_type_id;
-          $values['amount_total'] = $grant->amount_total;
+          unset($values['amount_granted']);
+          $values['assessment'] = $grant->assessment;
+          $values['allocation'] = TRUE;
           CRM_Grant_BAO_Grant::add($values, $ids);
+        } 
+        else {
+          CRM_Grant_BAO_Grant::add($values, $ids);
+          if (!empty($params['amount_granted'])) {
+            CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
+          }
         }
         $updatedGrants++;
       }
@@ -173,48 +179,6 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
       ts('Total Selected Grant(s): %1', array(1 => count($this->_grantIds)));
     CRM_Core_Session::setStatus($status);
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 'force=1&qfKey=' . $qfKey));
-  }
-
-  function quickAllocate($grantProgram, $grant) {
-    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
-    $grantThresholds = array_flip($grantThresholds);
-    $amountGranted = NULL;
-    $totalAmount = $grantProgram->remainder_amount;
-    if (isset($grant->assessment)) {
-      $userparams['contact_id'] = $grant->contact_id;
-      $userparams['grant_program_id'] = $grant->grant_program_id;
-      $userAmountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $grant->id);
-      $amountEligible = $grantThresholds['Maximum Grant'] - $userAmountGranted;
-      $grant->amount_total = str_replace(',', '', $grant->amount_total);
-      $requestedAmount = ((($grant->assessment / 100) * $grant->amount_total) * ($grantThresholds['Funding factor'] / 100));
-      if ($requestedAmount > $amountEligible) {
-        $requestedAmount = $amountEligible;
-      }
-      if ($requestedAmount < $totalAmount) { 
-        $amountGranted = $requestedAmount;
-      }
-    }
-
-    //Update grant program
-    $grantProgramParams = array();
-    $grantProgramParams['remainder_amount'] = $totalAmount - $amountGranted;
-    $grantProgramParams['id'] =  $grantProgram->id;
-    $ids['grant_program']     =  $grantProgram->id;
-    CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
-    
-    if ($amountGranted) {
-      $grantUpdate = array(
-        'id' => $grant->id,
-        'amount_granted' => $amountGranted,
-        'contact_id' => $grant->contact_id,
-        'grant_program_id' => $grant->grant_program_id,
-        'grant_type_id' => $grant->grant_type_id,
-        'status_id' => $grant->status_id,
-      );
-      $grantIds['grant_id'] = $grant->id;
-      CRM_Grant_BAO_Grant::add($grantUpdate, $grantIds);
-    }
-    return true;
   }
 }
 
