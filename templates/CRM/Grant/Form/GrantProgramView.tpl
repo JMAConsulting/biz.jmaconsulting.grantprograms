@@ -91,7 +91,7 @@
 {literal}
 <script type="text/javascript">
 cj('#allocation').click(function(){
-var r = confirm("You want to do trial allocation?");
+var r = confirm("Do you want to do a trial allocation?");
 if (r == true)
   {    
      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
