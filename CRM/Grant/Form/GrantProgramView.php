@@ -98,11 +98,9 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       'grant_program_id' => $_POST['pid'],
       'assessment'     => 'NOT NULL',
     );
-      
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
-      
     if (!empty($result)) {
-      if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
+      if (trim($_POST['algorithm']) == 'Best To Worst, Fully Funded') {
         foreach ($result as $key => $row) {
           $order[$key] = $row['assessment'];
         }
@@ -115,18 +113,18 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       $contact = array(); 
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
       foreach ($result as $key => $value) {
-        $value['amount_total'] = str_replace(',', '', $value['amount_total']);
+        $value['amount_total'] = CRM_Utils_Rule::cleanMoney($value['amount_total']);
         $userparams['contact_id'] = $value['contact_id'];
         $userparams['grant_program_id'] = $_POST['pid'];
         //FIXME pass grant id instead of NULL
-        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, NULL);
-        if ($_POST['algorithm'] == 'Best to Worst, Fully Funded') {
+        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $value['grant_id']);
+        if ($_POST['algorithm'] == 'Best To Worst, Fully Funded') {
           $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
           if ($value['amount_total'] > $amountEligible) {
-            $value['amount_granted'] = $amountEligible;
-            if ($value['amount_granted'] <= $totalAmount) {
+            if ($amountEligible <= $totalAmount) {
               $grant['granted'][] = $amountEligible;
-              $totalAmount = $totalAmount - $amountEligible;
+              $totalAmount = $totalAmount - ($amountEligible - $value['amount_granted']);
+              $value['amount_granted'] = $amountEligible;
             } 
             else {
               $grant['eligible'][] = $value['amount_granted'];
@@ -136,7 +134,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           else {
             if ($value['amount_total'] <= $totalAmount) {
               $grant['granted'][] = $value['amount_total'];
-              $totalAmount = $totalAmount - $value['amount_total'];
+              $totalAmount = $totalAmount - ($value['amount_total'] - $value['amount_granted']);
               $value['amount_granted'] = $value['amount_total'];
             } 
             else {
@@ -144,7 +142,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
               continue;
             }
           }
-          $ids['grant']            = $value['grant_id'];
+          $ids['grant_id'] = $value['grant_id'];
         }
         else {
           $requestedAmount = (($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100));
@@ -156,8 +154,8 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
             } 
             else {
               if ($amountEligible != 0) {
+                $totalAmount = $totalAmount - ($amountEligible - $value['amount_granted']);
                 $value['amount_granted'] = $grant['granted'][] = $amountEligible;
-                $totalAmount = $totalAmount - $value['amount_granted'];
               } 
               else {
                 $grant['nonEligible'][] = $requestedAmount;
@@ -170,16 +168,18 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
               continue;
             }
             else {
+              $totalAmount = $totalAmount - ($requestedAmount - $value['amount_granted']);
               $value['amount_granted'] = $grant['granted'][] = $requestedAmount;
-              $totalAmount = $totalAmount - $value['amount_granted'];
             }
           }
-          $ids['grant'] = $key;
+          $ids['grant_id'] = $key;
         } 
+        $value['allocation'] = TRUE;
+        $value['grant_program_id'] = $_POST['pid'];
         $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
       } 
     }
-      
+     
     $grantProgramParams['remainder_amount'] = $totalAmount;
     $grantProgramParams['id'] =  $_POST['pid'];
     $ids['grant_program'] =  $_POST['pid'];
@@ -202,7 +202,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $page = new CRM_Core_Page();
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $message = "Trial Allocation Completed. $".$grantedAmount.".00 allocated to {$grantedCount} eligible applications. ".$eligibleCount." eligible applications were not allocated $".$eligibleAmount.".00 in funds they would have received were funds available. $".$totalAmount." remains unallocated.";
-     
+   
     $page->assign('message', $message);
       
     $page->assign('grant_program_name', $grantPrograms[$_POST['pid']]);
