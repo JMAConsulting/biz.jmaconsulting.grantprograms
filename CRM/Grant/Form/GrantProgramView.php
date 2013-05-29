@@ -258,8 +258,9 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function reject() {
     $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE);
     $id = $_POST['pid'];
+    $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     $params = array(
-      'status_id' => $grantStatus['Submitted'] . ',' . $grantStatus['Eligible'],
+      'status_id' => $statuses,
       'grant_program_id' => $_POST['pid'],
     );
 
