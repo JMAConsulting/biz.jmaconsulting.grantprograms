@@ -101,8 +101,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
     if (!empty($grantProgram->grant_program_id)) {
       $sumAmountGranted = CRM_Core_DAO::singleValueQuery("SELECT SUM(amount_granted) as sum_amount_granted  FROM civicrm_grant WHERE status_id = " . CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name') . " AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
-      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds');
-      $grantThresholds = array_flip($grantThresholds);
+      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
       if (!empty($sumAmountGranted)) {
         if ($sumAmountGranted >= $grantThresholds['Maximum Grant']) {
           $priority = 10;
@@ -711,8 +710,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
     }
 
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
-    $grantStatus = array_flip($grantStatus);
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     if (isset($endDate)) {
       $newDate = date('Y-m-d', strtotime($endDate." +60 days"));
       if (($newDate <= date('Y-m-d') || date('Y') < date('Y',strtotime($endDate))) && $params['status_id'] == $grantStatus['Submitted']) {
