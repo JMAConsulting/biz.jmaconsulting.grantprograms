@@ -111,7 +111,7 @@ cj('#finalize').click(function(){
  var confirmed = 0;
  var totalAmounts = 0;
  var grantedAmount = 0;
- var data = 'pid={/literal}{$id}{literal}}&amount={/literal}{$total_amount}{literal}';
+ var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/finalize'}"{literal};
      cj.ajax({ 
          url: dataURL,	

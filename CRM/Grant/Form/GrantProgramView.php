@@ -208,8 +208,9 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function finalize() {   
     $grantedAmount = 0;
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
+    $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     $params = array(
-      'status_id' => $grantStatus['Eligible'],
+      'status_id' => $statuses,
       'grant_program_id' => $_POST['pid'],
     );
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
@@ -235,8 +236,9 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     
   public function processFinalization() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
+    $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     $params = array(
-      'status_id' => $grantStatus['Eligible'],
+      'status_id' => $statuses,
       'grant_program_id' => $_POST['pid'],
     );
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
@@ -244,7 +246,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       foreach ($result as $key => $row) {
         if ( $row['amount_granted'] > 0 ) {
           $ids['grant'] = $key;
-          $row['status_id'] = $grantStatus['Granted'];
+          $row['status_id'] = $grantStatus['Approved for Payment'];
                     
           $result = CRM_Grant_BAO_Grant::add(&$row, &$ids);
         } 
