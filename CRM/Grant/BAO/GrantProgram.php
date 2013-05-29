@@ -297,6 +297,9 @@ WHERE civicrm_contact.id = $id ";
         if ($grantStatus == 'Awaiting Information') {
           $explode = explode(' ', $grantStatus);
           $valueName = strtolower($explode[0]) . '_info';
+        } 
+        elseif (strstr($grantStatus, 'Approved')) {
+          $valueName = strtolower('Approved');
         }
         $sendTemplateParams = array(
           'groupName' => 'msg_tpl_workflow_grant',
