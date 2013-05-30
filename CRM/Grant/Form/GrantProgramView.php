@@ -250,7 +250,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function processFinalization() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
-    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping', 'name');
+    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
     if ($algoName == "immediate") {
       $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     }
@@ -278,7 +278,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function reject() {
     $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE);
     $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
-    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping', 'name');
+    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
     if ($algoName == "immediate") {
       $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     }
