@@ -1,4 +1,4 @@
-{*
+{debug}{*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
@@ -23,6 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+{if $action neq 8}
 <table class='removeAfter'><tbody>
   <tr class="crm-grant-form-block-grant_rejected_reason_id grant_rejected_reason_id">
     <td class="label">{$form.grant_rejected_reason_id.label}</td>
@@ -61,6 +62,7 @@
     {* include file="CRM/Grant/Form/Selector.tpl" context="DashBoard" *}
   </div>
 {*/if*}
+{/if}
 <script type="text/javascript">
 {literal}
 cj(document).ready(function(){
