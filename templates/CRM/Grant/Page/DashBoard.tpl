@@ -51,14 +51,15 @@ You have {$grantSummary.no_of_grants} grant(s) registered in your database.
 
 {foreach from=$grantSummary.per_status item=status key=id}
  {foreach from=$status item=value key=index}
+{$grantSummary.grant_program}
 <tr>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$id}</a>{else}{$id}{/if}</td>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.label}</a>{else}{$value.label}{/if}</td>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.total}</a>{else}{$value.total}{/if}</td>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.amount_requested}</a>{else}{$value.amount_requested}{/if}</td>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.amount_granted}</a>{else}{$value.amount_granted}{/if}</td>
-<td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.total_paid}</a>{else}{$value.total_paid}{/if}</td>
-    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&force=1"}">{$value.average_amount}</a>{else}{$value.average_amount}{/if}</td></tr>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$id}</a>{else}{$id}{/if}</td>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.label}</a>{else}{$value.label}{/if}</td>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.total}</a>{else}{$value.total}{/if}</td>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.amount_requested}</a>{else}{$value.amount_requested}{/if}</td>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.amount_granted}</a>{else}{$value.amount_granted}{/if}</td>
+<td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.total_paid}</a>{else}{$value.total_paid}{/if}</td>
+    <td>{if $value.total neq 0 and $value.label neq ''}<a href="{crmURL p="civicrm/grant/search" q="reset=1&status=`$value.value`&pid=`$value.pid`&force=1"}">{$value.average_amount}</a>{else}{$value.average_amount}{/if}</td></tr>
  {/foreach}
 {/foreach}
 <tr>
