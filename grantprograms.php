@@ -245,7 +245,7 @@ function grantprograms_civicrm_permission(&$permissions) {
 */
 function grantprograms_civicrm_buildForm($formName, &$form) {
 
-  if ($formName == 'CRM_Grant_Form_Grant') {
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
@@ -529,7 +529,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
       CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because '. implode(' and ', $error ) .' are currently using it.'), ts("Sorry"), "error");
     }
   }
-  if ($formName == 'CRM_Grant_Form_Grant') {
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $defaults = array();
     $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
@@ -791,10 +791,10 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
     CRM_Core_BAO_OptionValue::create($params);
   }
 
-  if ($formName == 'CRM_Grant_Form_Grant') {
+  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
    
     // FIXME: cookies error
-    if ($form->getVar('_context') == 'search' && 0) {
+    if ($form->getVar('_context') == 'search') {
       $array['contact_id'] = $form->getVar('_contactID');
       $grants = CRM_Grant_BAO_GrantProgram::getGrants($array);
       $grants = array_flip(array_keys($grants));
