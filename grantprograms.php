@@ -112,13 +112,12 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     else {
       $priority = -10;
     }
-    if (array_key_exists('assessment', $params)) {
+    if (array_key_exists('assessment', $params) && $params['adjustment_value']) {
       if ($params['assessment'] != 0) {
         $params['assessment'] = $params['assessment'] - $priority;
       }
     }
   }
-  
    
   $defaults = array();
   $programParams = array('id' => $params['grant_program_id']);
@@ -546,6 +545,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) { 
     $assessmentAmount = 0;
     $calculateAssessment = FALSE;
+    $params['adjustment_value'] = TRUE;
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
@@ -553,7 +553,6 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
         $calculateAssessment = TRUE;
       }
     }
-
     if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
       if (CRM_Utils_Array::value('custom', $params)) {
         foreach ($params['custom'] as $key => $value) {
@@ -573,8 +572,12 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     }
     if(!empty($assessmentAmount)) {
       $params['assessment'] = $assessmentAmount;
+    } 
+    elseif ($objectName == 'Grant' && $op == "edit") {
+      $params['adjustment_value'] = FALSE;
     }
-    else if ($objectName == 'Grant' && $op == "edit") {
+    
+    if ($objectName == 'Grant' && $op == "edit") {
       if (!empty($previousGrant->amount_granted) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($previousGrant->amount_granted) != CRM_Utils_Money::format($params['amount_granted']) && !CRM_Utils_Array::value('allocation', $params)) {
         $programParams = array('id' => $previousGrant->grant_program_id);
         $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, CRM_Core_DAO::$_nullArray);
