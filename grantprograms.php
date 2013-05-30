@@ -424,7 +424,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $grantType   = CRM_Grant_PseudoConstant::grantType( );
     $grantStatus = CRM_Grant_BAO_GrantProgram::grantProgramStatus( );
     foreach ( $grantProgram as $key => $value ) {
-      $grantProgram[$key]['grant_type_id'] = $grantType[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['grant_type_id'])];
+      $grantProgram[$key]['grant_type_id'] = $grantType[$grantProgram[$key]['grant_type_id']];
       $grantProgram[$key]['status_id'] = $grantStatus[CRM_Grant_BAO_GrantProgram::getOptionValue($grantProgram[$key]['status_id'])];
     }
     $form->assign('programs',$grantProgram );
