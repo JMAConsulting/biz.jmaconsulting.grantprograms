@@ -602,7 +602,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   //send mail after grant save
   $config = CRM_Core_Config::singleton();
-  if ($objectName == 'Grant' && $config->_params) {
+  if ($objectName == 'Grant' && isset($config->_params)) {
     $params = $config->_params;
     // added by JMA fixme in module
     $grantProgram  = new CRM_Grant_DAO_GrantProgram();
