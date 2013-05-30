@@ -15,6 +15,10 @@ define('INITIATIVE', 72);
 define('INITIATIVE_OTHER', 73);
 define('COURSE', 74);
 define('COURSE_OTHER', 75);
+//define custom groups
+define('NEI_EMPLOYMENT', 'NEI_Employment_Information');
+define('NEI_GENERAL', 'NEI_General_information');
+define('NEI_CONFERENCE', 'NEI_Course_conference_details');
 /**
  * Implementation of hook_civicrm_config
  */
@@ -245,16 +249,29 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
-    $form->assign('employment', 'custom_'.EMPLOYMENT.'_-1');
-    $form->assign('employment_other', 'custom_'.EMPLOYMENT_OTHER.'_-1');
-    $form->assign('position', 'custom_'.POSITION.'_-1');
-    $form->assign('position_other', 'custom_'.POSITION_OTHER.'_-1');
-    $form->assign('employment_setting', 'custom_'.EMPLOYMENT_SETTING.'_-1');
-    $form->assign('employment_setting_other', 'custom_'.EMPLOYMENT_SETTING_OTHER.'_-1');
-    $form->assign('init', 'custom_'.INITIATIVE.'_-1');
-    $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_-1');
-    $form->assign('course', 'custom_'.COURSE.'_-1');
-    $form->assign('course_other', 'custom_'.COURSE_OTHER.'_-1');
+    $empId = $genId = $ccId = '-1';
+    if ($form->getVar('_id')) {
+      $tableName1 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_EMPLOYMENT, 'table_name', 'name');
+      $query1 = "SELECT id FROM {$tableName1} WHERE entity_id = {$form->getVar('_id')}";
+      $empId = CRM_Core_DAO::singleValueQuery($query1);
+      $tableName2 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_GENERAL, 'table_name', 'name');
+      $query2 = "SELECT id FROM {$tableName2} WHERE entity_id = {$form->getVar('_id')}";
+      $genId = CRM_Core_DAO::singleValueQuery($query2);
+      $tableName3 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_CONFERENCE, 'table_name', 'name');
+      $query3 = "SELECT id FROM {$tableName3} WHERE entity_id = {$form->getVar('_id')}";
+      $ccId = CRM_Core_DAO::singleValueQuery($query3);
+    }
+    
+      $form->assign('employment', 'custom_'.EMPLOYMENT.'_'.$empId);
+      $form->assign('employment_other', 'custom_'.EMPLOYMENT_OTHER.'_'.$empId);
+      $form->assign('position', 'custom_'.POSITION.'_'.$empId);
+      $form->assign('position_other', 'custom_'.POSITION_OTHER.'_'.$empId);
+      $form->assign('employment_setting', 'custom_'.EMPLOYMENT_SETTING.'_'.$empId);
+      $form->assign('employment_setting_other', 'custom_'.EMPLOYMENT_SETTING_OTHER.'_'.$empId);
+      $form->assign('init', 'custom_'.INITIATIVE.'_'.$genId);
+      $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_'.$genId);
+      $form->assign('course', 'custom_'.COURSE.'_'.$ccId);
+      $form->assign('course_other', 'custom_'.COURSE_OTHER.'_'.$ccId);
     CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
       ));
