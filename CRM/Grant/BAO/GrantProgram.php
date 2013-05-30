@@ -257,6 +257,7 @@ WHERE civicrm_contact.id = $id ";
   }
     
   static function getGrants($params) {
+    $grants = array();
     if (!empty($params)) {
       $where = "WHERE "; 
       foreach ($params as $key => $value) {
@@ -359,7 +360,7 @@ WHERE civicrm_contact.id = $id ";
   }
 
   static function getPriorities($id, $contactId) {
-
+    $priority = NULL;
     $prevGrantProgram = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $id, 'grant_program_id');
     $amount = 0;
     $params = array(
