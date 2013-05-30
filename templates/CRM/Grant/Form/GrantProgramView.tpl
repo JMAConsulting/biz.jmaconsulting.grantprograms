@@ -132,7 +132,6 @@ cj('#finalize').click(function(){
 	   alert(data);
 	 }
          });
-	 alert(data);
 	 if (confirmed == 'confirm' ) {
 	    var r=confirm("Do you want finalize the award of grants for this grant program to the amounts currently allocated?");
 	    if (r==true)
