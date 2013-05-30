@@ -96,30 +96,29 @@ function grantprograms_civicrm_managed(&$entities) {
  *
  */
 function grantprograms_civicrm_grantAssessment(&$params) {
-  if (isset($params['action'])) {
-    $grantProgramParams['id'] = $params['grant_program_id'];
-    $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
-    if (!empty($grantProgram->grant_program_id)) {
-      $sumAmountGranted = CRM_Core_DAO::singleValueQuery("SELECT SUM(amount_granted) as sum_amount_granted  FROM civicrm_grant WHERE status_id = " . CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name') . " AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
-      $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
-      if (!empty($sumAmountGranted)) {
-        if ($sumAmountGranted >= $grantThresholds['Maximum Grant']) {
-          $priority = 10;
-        } 
-        elseif ($sumAmountGranted > 0) {
-          $priority = 0;
-        }
+  $grantProgramParams['id'] = $params['grant_program_id'];
+  $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
+  if (!empty($grantProgram->grant_program_id)) {
+    $sumAmountGranted = CRM_Core_DAO::singleValueQuery("SELECT SUM(amount_granted) as sum_amount_granted  FROM civicrm_grant WHERE status_id = " . CRM_Core_OptionGroup::getValue('grant_status', 'Paid', 'name') . " AND grant_program_id = {$grantProgram->grant_program_id} AND contact_id = {$params['contact_id']}");
+    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
+    if (!empty($sumAmountGranted)) {
+      if ($sumAmountGranted >= $grantThresholds['Maximum Grant']) {
+        $priority = 10;
       } 
-      else {
-        $priority = -10;
+      elseif ($sumAmountGranted > 0) {
+        $priority = 0;
       }
-      if (array_key_exists('assessment', $params)) {
-        if ($params['assessment'] != 0) {
-          $params['assessment'] = $params['assessment'] - $priority;
-        }
+    } 
+    else {
+      $priority = -10;
+    }
+    if (array_key_exists('assessment', $params)) {
+      if ($params['assessment'] != 0) {
+        $params['assessment'] = $params['assessment'] - $priority;
       }
     }
   }
+  
    
   $defaults = array();
   $programParams = array('id' => $params['grant_program_id']);
@@ -541,7 +540,16 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
 function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) { 
     $assessmentAmount = 0;
-    if (empty($params['assessment'])) {
+    $calculateAssessment = FALSE;
+    if ($objectName == 'Grant' && $op == "edit") {
+      $grantParams = array('id' => $id);
+      $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
+      if (($params['assessment'] == $previousGrant->assessment)) {
+        $calculateAssessment = TRUE;
+      }
+    }
+
+    if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
       if (CRM_Utils_Array::value('custom', $params)) {
         foreach ($params['custom'] as $key => $value) {
           foreach($value as $fieldKey => $fieldValue) {
@@ -561,13 +569,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     if(!empty($assessmentAmount)) {
       $params['assessment'] = $assessmentAmount;
     }
-    // RG-97
-    if ($objectName == 'Grant' && $op == "create") {
-      $params['action'] = TRUE;
-    }
     else if ($objectName == 'Grant' && $op == "edit") {
-      $grantParams = array('id' => $id);
-      $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
       if (!empty($previousGrant->amount_granted) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($previousGrant->amount_granted) != CRM_Utils_Money::format($params['amount_granted']) && !CRM_Utils_Array::value('allocation', $params)) {
         $programParams = array('id' => $previousGrant->grant_program_id);
         $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, CRM_Core_DAO::$_nullArray);
@@ -592,7 +594,6 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     $config->_params = $params;
   }
 }
-
 
 /*
  * hook_civicrm_post
@@ -736,7 +737,6 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     }
   }
 }
-
 
 /*
  * hook_civicrm_postProcess
