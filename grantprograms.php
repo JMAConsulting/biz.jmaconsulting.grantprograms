@@ -434,6 +434,9 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') & CRM_Core_Action::UPDATE) && $form->getVar('_id') && $form->getVar('_name') == 'Grant') {
     // RG-116 Hide attachments on edit
     $form->assign('hideAttachments', 1);
+    $form->add('text', 'prev_assessment', ts('Prior Year\'s Assessment'));
+    $priority = CRM_Grant_BAO_GrantProgram::getPriorities($form->_defaultValues['grant_program_id'], $form->getVar('_contactID'));
+    $form->setDefaults(array('prev_assessment' => $priority));
     // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
     // freeze fields based on permissions
@@ -456,8 +459,10 @@ function grantprograms_civicrm_pageRun( &$page ) {
       CRM_Utils_System::setTitle('Grant - '.$name[0] );
     }
     $smarty = CRM_Core_Smarty::singleton();
-    if ($smarty->_tpl_vars['action'] == CRM_Core_Action::VIEW) {
+    if ($smarty->_tpl_vars['action'] & CRM_Core_Action::VIEW) {
       $smarty->_tpl_vars['assessment'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $smarty->_tpl_vars['id'], 'assessment', 'id');
+      $grantProgram = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $smarty->_tpl_vars['id'], 'grant_program_id', 'id');
+      $smarty->_tpl_vars['prev_assessment'] = CRM_Grant_BAO_GrantProgram::getPriorities($grantProgram, $smarty->_tpl_vars['contactId']);
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Page/GrantExtra.tpl',
       ));

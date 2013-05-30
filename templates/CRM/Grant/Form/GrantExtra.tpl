@@ -36,6 +36,12 @@
     <td class="label">{$form.assessment.label}</td>
     <td>{$form.assessment.html}</td>
   </tr>
+  {if $form.prev_assessment}
+  <tr class="crm-grant-form-block-prev_assessment">
+    <td class="label">{$form.prev_assessment.label}</td>
+    <td>{$form.prev_assessment.html}</td>
+  </tr>
+  {/if}
   <tr class="crm-grant-form-block-financial_type">
     <td class="label">{$form.financial_type_id.label}</td>
     <td>
@@ -61,6 +67,7 @@ cj(document).ready(function(){
   cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
   cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
+  cj('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
   cj('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
 if ( cj("#status_id option:selected").text() == 'Ineligible') {
   cj('.grant_rejected_reason_id').show();

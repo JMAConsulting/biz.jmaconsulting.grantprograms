@@ -357,4 +357,33 @@ WHERE civicrm_contact.id = $id ";
     }
     return empty($amountGranted) ? 0 : $amountGranted;
   }
+
+  static function getPriorities($id, $contactId) {
+
+    $prevGrantProgram = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $id, 'grant_program_id');
+    $amount = 0;
+    $params = array(
+      'grant_program_id' => $prevGrantProgram,
+      'contact_id' => $contactId,
+    );
+    $grants = CRM_Grant_BAO_GrantProgram::getGrants($params);
+    if (!empty($grants)) {
+      foreach ($grants as $values) {
+        $amount += $values['amount_granted'];
+      }
+    }
+    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
+    if (!empty($amount)) {
+      if ($amount == $grantThresholds['Maximum Grant']) {
+        $priority = -10;
+      } 
+      elseif ($amount == 0) {
+        $priority = 10;
+      }
+      elseif ((0 <= $amount) && ($amount <= $grantThresholds['Maximum Grant'])) {
+        $priority = 0;
+      }
+    } 
+    return $priority;
+  }
 }
