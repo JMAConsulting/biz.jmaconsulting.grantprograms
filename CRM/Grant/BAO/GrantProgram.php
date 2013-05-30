@@ -360,7 +360,7 @@ WHERE civicrm_contact.id = $id ";
   }
 
   static function getPriorities($id, $contactId) {
-    $priority = NULL;
+    $priority = 10;
     $prevGrantProgram = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $id, 'grant_program_id');
     $amount = 0;
     $params = array(
