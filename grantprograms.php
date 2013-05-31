@@ -646,9 +646,9 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       if (!CRM_Utils_Array::value('custom', $params)) {
         $params['custom'] = array();
       }
-      foreach($params['custom'] as $key => $value) {
+      foreach ($params['custom'] as $key => $value) {
         foreach ($value as $index => $field) {
-          if (!empty( $field['value'])) {
+          if (!empty($field['value'])) {
             $customData[$field['custom_group_id']][$field['custom_field_id']] = $field['value'];
             if (strstr($field['column_name'], 'start_date')) {
               $startDate = $field['value'];
@@ -661,12 +661,21 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       }
       if (!empty( $customData)) {
         foreach ($customData as $dataKey => $dataValue) {
-          $customGroupName = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_CustomGroup',$dataKey,'title' );
+          $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',$dataKey,'title');
           $customGroup[$customGroupName] = $customGroupName;
           $count = 0;
           foreach ($dataValue  as $dataValueKey => $dataValueValue) {
             $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
-            $customField[$customGroupName][$count]['value'] = $dataValueValue;
+            $customFieldData = grantprograms_getCustomFieldData($dataValueKey);
+            if ($customFieldData['html_type'] == 'Select') {
+              $customField[$customGroupName][$count]['value'] = grantprograms_getOptionValueLabel($customFieldData['option_group_id'],$dataValueValue);
+            } 
+            elseif ($customFieldData['html_type'] ==  'Select Date') {
+              $customField[$customGroupName][$count]['value'] = date('Y-m-d', strtotime($dataValueValue));
+            } 
+            else {
+              $customField[$customGroupName][$count]['value'] = $dataValueValue;
+            }
             $count++;
           }
         }
@@ -849,7 +858,6 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
  *
  */
 function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
-
   if ($objectName == 'grant') {
     $tasks[PAY_GRANTS] = array( 
       'title' => ts('Pay Grants'),
@@ -859,4 +867,19 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
       'result' => FALSE,
     );
   }
+}
+
+function grantprograms_getOptionValueLabel($optioGroupID, $value) {
+  $query = "SELECT label FROM civicrm_option_value WHERE  option_group_id = {$optioGroupID} AND value = '{$value}' ";
+  return CRM_Core_DAO::singleValueQuery($query);
+}
+function grantprograms_getCustomFieldData($id) {
+  $customFieldData = array();
+  $query = "SELECT html_type, option_group_id FROM civicrm_custom_field WHERE id = {$id} ";
+  $DAO = CRM_Core_DAO::executeQuery($query);
+  while ($DAO->fetch()) {
+    $customFieldData['html_type'] = $DAO->html_type;
+    $customFieldData['option_group_id'] = $DAO->option_group_id;
+  }
+  return $customFieldData;
 }
