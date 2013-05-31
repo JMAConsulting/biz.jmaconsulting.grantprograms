@@ -144,7 +144,7 @@ function quickAllocate($grantProgram, $value) {
   $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
   $amountGranted = NULL;
   $grant_id = NULL;
-  if (isset($value['assessment'])) {
+  if (CRM_Utils_Array::value('assessment', $value)) {
     $userparams['contact_id'] = $value['contact_id'];
     $userparams['grant_program_id'] = $grantProgram->id;
     if (!empty($value['id'])) {
