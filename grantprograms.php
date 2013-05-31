@@ -606,6 +606,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
         $params['manualEdit'] = TRUE;
       }
     }
+    elseif ($objectName == 'Grant' && $op == "create" && CRM_Utils_Array::value('amount_granted', $params)) {
+      $params['manualEdit'] = TRUE;
+    }
     
     if (!empty($id)) {
       $params['id'] = $id;
