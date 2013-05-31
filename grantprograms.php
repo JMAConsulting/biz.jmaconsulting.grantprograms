@@ -301,10 +301,27 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       array('' => ts('- Select Financial Type -')) + $financialType,
       FALSE 
     );      
-
-    if (CRM_Core_Permission::check('administer CiviGrant')) {
-      $form->add('text', 'assessment', ts('Assessment'));
+    $showFields = FALSE;
+    if ($form->getVar('_id')) {
+      if (CRM_Core_Permission::check('administer CiviGrant')) {
+        $form->add('text', 'assessment', ts('Assessment'));
+      }
+    
+      // freeze fields based on permissions
+      if (CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')) {
+        if (CRM_Utils_Array::value('amount_granted', $form->_elementIndex)) {
+          $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
+          if (array_key_exists('assessment', $form->_elementIndex)) {
+            $form->_elements[$form->_elementIndex['assessment']]->freeze();
+          }
+        }
+        CRM_Core_Region::instance('page-body')->add(array(
+          'template' => 'CRM/Grant/Form/Freeze.tpl',
+        ));
+      }
+      $showFields = TRUE;
     }
+    $form->assign('showFields', $showFields);
   }
   if ($formName == "CRM_Grant_Form_Search") {
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
@@ -455,15 +472,6 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->setDefaults(array('prev_assessment' => $priority));
     // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
-    // freeze fields based on permissions
-    if ( CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')  ) {
-      if (CRM_Utils_Array::value('amount_granted', $form->_elementIndex)) {
-        $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
-      }
-      CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/Grant/Form/Freeze.tpl',
-      ));
-    }
  }
 }
 
@@ -533,7 +541,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     $defaults = array();
     $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
-    if (CRM_Utils_Array::value('remainder_amount', $defaults) < $form->_submitValues['amount_granted']) {
+    if (array_key_exists('amount_granted', $form->_submitValues) && CRM_Utils_Array::value('remainder_amount', $defaults) < $form->_submitValues['amount_granted']) {
       $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
     }
     
@@ -560,15 +568,21 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
 
 function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) { 
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
     $assessmentAmount = 0;
     $calculateAssessment = FALSE;
     $params['adjustment_value'] = TRUE;
+    $previousGrant = NULL;
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
       if (($params['assessment'] == $previousGrant->assessment)) {
         $calculateAssessment = TRUE;
       }
+    }
+    $grantStatusApproved = array_search('Approved for Payment', $grantStatus);
+    if ($grantStatusApproved == $params['status_id']  && ($op == 'create') || ($previousGrant && $previousGrant->status_id != $params['status_id'])) {
+      $params['decision_date'] = date('Ymd');
     }
     if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
       if (CRM_Utils_Array::value('custom', $params)) {
