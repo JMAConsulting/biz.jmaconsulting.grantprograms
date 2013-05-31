@@ -163,9 +163,9 @@ function quickAllocate($grantProgram, $value) {
     }
     if ($requestedAmount > 0) {
       $remainderDifference = $requestedAmount - $defalutGrantedAmount;
-    }
-    if ($remainderDifference < $grantProgram->remainder_amount) {
-      $amountGranted = $requestedAmount;
+      if ($remainderDifference < $grantProgram->remainder_amount) {
+        $amountGranted = $requestedAmount;
+      }
     }
   }
    
