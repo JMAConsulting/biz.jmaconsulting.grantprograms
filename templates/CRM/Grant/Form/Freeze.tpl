@@ -11,15 +11,6 @@ cj('#decision_date').replaceWith( function() {
     return cj( this ).val();
 });
 
-// freeze money transfer date 
-cj('#money_transfer_date_display').hide();
-cj('#money_transfer_date_display').next().hide();
-
-cj('#money_transfer_date').show(); 
-cj('#money_transfer_date').replaceWith( function() {
-    return cj( this ).val();
-});
-
 });
 </script>
 {/literal}

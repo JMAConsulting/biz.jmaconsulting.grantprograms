@@ -71,6 +71,13 @@ cj(document).ready(function(){
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
   cj('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
   cj('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
+{/literal} 
+{if !$showFields}
+{literal} 
+  cj('.crm-grant-form-block-amount_granted').remove();
+{/literal} 
+{/if}
+{literal} 
 if ( cj("#status_id option:selected").text() == 'Ineligible') {
   cj('.grant_rejected_reason_id').show();
 } else {
