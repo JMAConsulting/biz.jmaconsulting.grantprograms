@@ -71,7 +71,7 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
         
         $paidGrants = $approvedGrants = array();
         CRM_Core_PseudoConstant::populate( &$paidGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}" );
-        CRM_Core_PseudoConstant::populate( &$approvedGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Eligible']}" );
+        CRM_Core_PseudoConstant::populate( &$approvedGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Approved for Payment']}" );
         
         $this->_paidGrants = $paidGrants;
         $this->_notApproved = count($this->_grantIds) - count( $this->_paidGrants ) - count( $approvedGrants );
