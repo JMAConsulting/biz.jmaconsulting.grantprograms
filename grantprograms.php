@@ -581,7 +581,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       }
     }
     $grantStatusApproved = array_search('Approved for Payment', $grantStatus);
-    if ($grantStatusApproved == $params['status_id']  && ($op == 'create') || ($previousGrant && $previousGrant->status_id != $params['status_id'])) {
+    if ($grantStatusApproved == $params['status_id']  && empty($params['decision_date']) && 
+      ($op == 'create') || ($previousGrant && !$previousGrant->decision_date && 
+      $previousGrant->status_id != $params['status_id'])) {
       $params['decision_date'] = date('Ymd');
     }
     if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
