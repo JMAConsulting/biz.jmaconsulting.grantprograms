@@ -27,12 +27,12 @@
 {if $approved}
 <div class="messages status">
         <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}'{if $paid neq 0}{$paid} of the {$total} selected grants have already been paid.{/if} {if $notApproved neq 0}{$notApproved} of the {$total} selected grants are not approved.{/if} {if $multipleCurrency } {$multipleCurrency} of {$total} grants have different currency of same user. {/if} Would you like to proceed to paying the {$approved} approved or granted but unpaid grants?'{/ts}</p>
+        {ts}'{if $paid neq 0}{$paid} of the {$total} selected grants have already been paid.{/if} {if $notApproved neq 0}{$notApproved} of the {$total} selected grants are not eligible.{/if} {if $multipleCurrency } {$multipleCurrency} of {$total} grants have different currency of same user. {/if} Would you like to proceed to paying the {$approved} eligible or approved for payment but unpaid grants?'{/ts}</p>
 </div>
 {else if}
 <div class="messages status">
         <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}Please select at least one grant that has been approved or granted and not been paid.{/ts}</p>
+        {ts}Please select at least one grant that has been approved for payment or eligible and not been paid.{/ts}</p>
 </div>
 {/if}
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl"}</div>
