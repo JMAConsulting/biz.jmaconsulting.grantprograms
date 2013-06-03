@@ -66,17 +66,5 @@
 
 {literal} 
 <script type="text/javascript">
-cj(document).ready( function() {
-cj("#amount_granted").parent().parent().hide();
-cj('input[name="radio_ts"]').click(function(){
-  if (this.value == 'amount_total' || this.value == 'no_update') {
-    cj("#amount_granted").parent().parent().hide();
-    cj("#amount_granted").val(null);
-  }
-  else {
-    cj("#amount_granted").parent().parent().show();
-  }
-});
-});
 </script>
 {/literal}
