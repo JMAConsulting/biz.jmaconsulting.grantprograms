@@ -874,7 +874,7 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
  *
  */
 function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
-  if ($objectName == 'grant') {
+  if ($objectName == 'grant' && !strstr($_GET['q'], 'payment/search')) {
     $tasks[PAY_GRANTS] = array( 
       'title' => ts('Pay Grants'),
       'class' => array('CRM_Grant_Form_Task_Pay',
