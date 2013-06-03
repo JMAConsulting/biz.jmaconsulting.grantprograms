@@ -84,7 +84,7 @@
 <script type="text/javascript">
 
 cj(document).ready(function(){
-cj('ul.panel').css('width','205px');
+cj('ul.panel').css('width','250px');
 
 cj('#allocation').click(function(event){
 var r=confirm("Do you want to do a trial allocation?");
