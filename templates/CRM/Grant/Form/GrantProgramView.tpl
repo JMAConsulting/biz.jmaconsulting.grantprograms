@@ -45,9 +45,9 @@
         
     </div>
     <div class="buttonset" style="width:50px">
-    <input type="button" id="allocation" value="Allocate Approved (Trial)">
-    <input type="button" id="finalize" value="Finalize Approved Allocations">
-    <input type="button" id="reject" value="Reject Submitted and Approved Grants">
+    <input type="button" class="allocation" value="Allocate Approved (Trial)">
+    <input type="button" class="finalize" value="Finalize Approved Allocations">
+    <input type="button" class="reject" value="Mark remaining unapproved Grants as Ineligible">
     </div>
     <table class="crm-info-panel">
         <tr class="crm-grant-program-view-form-block-name"><td class="label">{ts}Name{/ts}</td><td class="bold">{$name}</td></tr>    
@@ -80,9 +80,9 @@
         {/if}
         {include file="CRM/common/formButtons.tpl" location="bottom"}<br/>
         <div class="buttonset" style="width:50px">
-        <input type="button" id="allocation" value="Allocate Approved (Trial)">
-        <input type="button" id="finalize" value="Finalize Approved Allocations">
-        <input type="button" id="reject" value="Reject Submitted and Approved Grants">
+        <input type="button" class="allocation" value="Allocate Approved (Trial)">
+        <input type="button" class="finalize" value="Finalize Approved Allocations">
+        <input type="button" class="reject" value="Mark remaining unapproved Grants as Ineligible">
         </div>
     </div>
 </div>
@@ -90,7 +90,7 @@
 
 {literal}
 <script type="text/javascript">
-cj('#allocation').click(function(){
+cj('.allocation').click(function(){
 var r = confirm("Do you want to do a trial allocation?");
 if (r == true)
   {    
@@ -107,7 +107,7 @@ if (r == true)
    }
 });
 
-cj('#finalize').click(function(){
+cj('.finalize').click(function(){
  var confirmed = 0;
  var totalAmounts = 0;
  var grantedAmount = 0;
@@ -152,12 +152,12 @@ alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater 
 	}
    });  
 });
-cj('#reject').click(function(){
+cj('.reject').click(function(){
 
 var r=confirm("Do you want to reject all Pending grant applications for this Grant Program??");
 if (r==true)
   {
- var data = 'pid={/literal}{$id}{literal}';
+ var data = 'pid={/literal}{$id}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
      cj.ajax({ 
          url: dataURL,	

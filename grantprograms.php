@@ -219,11 +219,11 @@ function &links() {
       'title' => ts('Finalize Approved Allocations') 
     ),
     CRM_Core_Action::MAP  => array(
-      'name'  => ts('Reject Submitted and Approved Grants'),
+      'name'  => ts('Mark remaining unapproved Grants as Ineligible'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
       'extra'   => 'id=reject',
-      'title' => ts('Reject Submitted and Approved Grants') 
+      'title' => ts('Mark remaining unapproved Grants as Ineligible') 
     ),
   );
   return $_links;

@@ -292,15 +292,20 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     );
 
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
-      
+    $remainderAmount = $_POST['remainder_amount'];
     if (!empty($result)) {
       foreach ($result as $key => $value) {
+        $remainderAmount += $value['amount_granted'];
         $value['status_id'] = $grantStatus['Ineligible'];
         $value['amount_granted'] = 0.00;
         $ids['grant'] = $key;
         $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
-      } 
-      CRM_Core_Session::setStatus('Submitted and Approved grants rejected successfully.');
+      }
+      $grantProgramParams['remainder_amount'] = $remainderAmount;
+      $grantProgramParams['id'] = $_POST['pid'];
+      $ids['grant_program'] = $_POST['pid'];
+      CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
+      CRM_Core_Session::setStatus('Marked remaining unapproved Grants as Ineligible successfully.');
     }
   }
 }
