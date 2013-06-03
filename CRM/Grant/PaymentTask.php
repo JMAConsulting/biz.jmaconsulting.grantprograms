@@ -105,7 +105,7 @@ class CRM_Grant_PaymentTask {
    * @static
    * @access public
    */
-  static function &taskTitles() 
+  static function &taskTitles() {
     self::tasks( );
     $titles = array( );
     foreach (self::$_tasks as $id => $value) {
