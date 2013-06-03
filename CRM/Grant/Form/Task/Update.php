@@ -148,6 +148,7 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
         }
       }
       
+      //CRM_Core_Error::debug( '$this', $this->sorted );
       foreach ($this->sorted as $grantId) {
         $ids['grant_id'] = $grantId;
         $grantParams = array('id' => $grantId);
@@ -158,18 +159,18 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
         $values['id'] = $grantId;
         $values['status_id'] = $grant->status_id;
         $values['amount_total'] = $grant->amount_total;
-        if ( $params['radio_ts'] == 'amount_total') {
+        if ($params['radio_ts'] == 'amount_total') {
           unset($params['amount_granted']);
           unset($values['amount_granted']);
           $values['assessment'] = $grant->assessment;
           $values['allocation'] = TRUE;
           CRM_Grant_BAO_Grant::add($values, $ids);
         } 
-        else {
-          CRM_Grant_BAO_Grant::add($values, $ids);
-          if (!empty($params['amount_granted'])) {
-            CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
+        else {  
+          if ($params['radio_ts'] == 'no_update') {
+            unset($values['amount_granted']);
           }
+          CRM_Grant_BAO_Grant::add($values, $ids);
         }
         $updatedGrants++;
       }
