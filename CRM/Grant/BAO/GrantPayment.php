@@ -296,14 +296,14 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     
     $rows = array_merge($headers, $grantPayment);
     $fp = fopen($filename, "w");
-    $line = "";
+    $line = '';
     $comma = "";
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
     foreach ($rows as $value) {
       if (isset($value['financial_type_id'])) {
         $value['financial_type_id'] = $contributionTypes[$value['financial_type_id']];
       }
-      $line .= implode(', ', $value);
+      $line .= '"'.implode('","', $value).'"';
       $line .= "\n";
     }
     fputs($fp, $line);
