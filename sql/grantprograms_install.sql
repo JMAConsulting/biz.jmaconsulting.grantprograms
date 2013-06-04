@@ -196,17 +196,32 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 -- grant_status
 SET @opv1 := '';
 SET @opv2 := '';
+SET @opv3 := '';
+SET @opv4 := '';
+SET @opv5 := '';
+SET @opv6 := '';
+SET @opv7 := '';
 
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_status';
 
 -- option values
-SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Granted' AND option_group_id = @opGId;
-SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
+SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Approved' AND option_group_id = @opGId;
+SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Rejected' AND option_group_id = @opGId;
+SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Awaiting Information' AND option_group_id = @opGId;
+SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Paid' AND option_group_id = @opGId;
+SELECT @opv6 := id FROM civicrm_option_value WHERE  name = 'Eligible' AND option_group_id = @opGId;
+SELECT @opv7 := id FROM civicrm_option_value WHERE  name = 'Approved for Payment' AND option_group_id = @opGId;
+
+UPDATE `civicrm_option_value` SET weight = 7 WHERE id = @opv4;
+UPDATE `civicrm_option_value` SET label = 'Ineligible', name = 'Ineligible', weight = 6 WHERE id = @opv2;
+UPDATE `civicrm_option_value` SET label = 'Eligible', name = 'Eligible', weight = 3 WHERE id = @opv1;
+UPDATE `civicrm_option_value` SET label = 'Awaiting Information', weight = 2 WHERE id = @opv3;
+UPDATE `civicrm_option_value` SET weight = 5 WHERE id = @opv5;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
-(@opv2, @opGId, 'Ineligible', '7', 'Ineligible', NULL, 0, 0, 6, NULL, 0, 1, 1, NULL, NULL, NULL),
-(@opv1, @opGId, 'Granted', '7', 'Granted', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv7, @opGId, 'Approved for Payment', '7', 'Approved for Payment', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL);
 
 -- reason_grant_ineligible
 SET @opGId := '';
