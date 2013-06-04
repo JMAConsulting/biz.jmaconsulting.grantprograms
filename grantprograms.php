@@ -646,7 +646,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   //send mail after grant save
   $config = CRM_Core_Config::singleton();
-  if ($objectName == 'Grant' && isset($config->_params)) {
+  if ($objectName == 'Grant' && isset($config->_params) && !isset($config->_params['restrictEmail'])) {
     $params = $config->_params;
     // added by JMA fixme in module
     $grantProgram  = new CRM_Grant_DAO_GrantProgram();
@@ -683,10 +683,10 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           foreach ($dataValue  as $dataValueKey => $dataValueValue) {
             $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
             $customFieldData = grantprograms_getCustomFieldData($dataValueKey);
-            if ($customFieldData['html_type'] == 'Select') {
+            if (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select') {
               $customField[$customGroupName][$count]['value'] = grantprograms_getOptionValueLabel($customFieldData['option_group_id'],$dataValueValue);
             } 
-            elseif ($customFieldData['html_type'] ==  'Select Date') {
+            elseif (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select Date') {
               $customField[$customGroupName][$count]['value'] = date('Y-m-d', strtotime($dataValueValue));
             } 
             else {
