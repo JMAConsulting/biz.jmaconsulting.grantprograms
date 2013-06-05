@@ -576,7 +576,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
-      if (($params['assessment'] == $previousGrant->assessment)) {
+      if ((CRM_Utils_Array::value('assessment', $params) == $previousGrant->assessment)) {
         $calculateAssessment = TRUE;
       }
     }
