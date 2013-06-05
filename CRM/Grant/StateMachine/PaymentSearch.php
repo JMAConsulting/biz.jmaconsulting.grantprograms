@@ -94,7 +94,7 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
     }
     $this->_controller->set('task', $value);
         
-    return CRM_Grant_PaymentTask::getTask($value);  
+    return !empty($value) ? CRM_Grant_PaymentTask::getTask($value) : CRM_Core_DAO::$_nullArray;  
   }
     
   /**
