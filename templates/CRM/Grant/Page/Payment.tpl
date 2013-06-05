@@ -23,6 +23,6 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{if $action eq 4 or $action eq 524288 or $action eq 1048576 or $action eq 2097152 }
+{if $action eq 4 or $action eq 4194304 or $action eq 8388608 or $action eq 2097152 }
         {include file="CRM/Grant/Form/Payment/View.tpl"}
 {/if}

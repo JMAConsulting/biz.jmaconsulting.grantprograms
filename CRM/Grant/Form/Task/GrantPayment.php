@@ -38,7 +38,7 @@
  * This class generates form components for Payments
  * 
  */    
-class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
+class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
 {
     
   protected $_id     = null;
@@ -49,7 +49,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Grant_Form_Task
     $this->_prid = CRM_Utils_Request::retrieve('prid', 'Positive', $this );
     if ( $this->_prid ) {
       $session = CRM_Core_Session::singleton();
-      $url = CRM_Utils_System::url('civicrm/grant/payment/search', '_qf_PaymentSearch_display=true&qfKey='.CRM_Utils_Request::retrieve('prid', 'Positive', $this ));
+      $url = CRM_Utils_System::url('civicrm/grant/payment/search', '_qf_PaymentSearch_display=true&force=1&reset=1');
       $session->pushUserContext( $url );
     }
   }
