@@ -46,7 +46,7 @@
         {include file="CRM/common/formButtons.tpl" location="bottom"}
     </div>
 </div>
-{elseif $action eq 524288 }
+{elseif $action eq 2097152}
 <h3>{ts}Stop Payment{/ts}</h3>
 <div class="crm-block crm-content-block crm-grant-view-block">  
      <div class="messages status">
@@ -59,7 +59,7 @@
 </div>
 
 
-{elseif $action eq 1048576 }
+{elseif $action eq 4194304}
 <h3>{ts}Reprint Payment{/ts}</h3>
 <div class="crm-block crm-content-block crm-grant-view-block">
     <div class="crm-submit-buttons">
@@ -81,7 +81,7 @@
         {include file="CRM/common/formButtons.tpl" location="bottom"}
     </div>
 </div>
-{elseif $action eq 2097152 }
+{elseif $action eq 8388608}
 <h3>{ts}Withdraw Payment{/ts}</h3>
 
 <div class="crm-block crm-content-block crm-grant-view-block">  

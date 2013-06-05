@@ -364,7 +364,7 @@ class CRM_Core_Action {
     if (in_array(CRM_Core_Permission::EDIT, $permissions)) {
       //make sure we make self::MAX_ACTION = 2^n - 1
       //if we add more actions; ( n = total number of actions )
-      $mask |= (self::MAX_ACTION & ~self::DELETE);
+      $mask |= (self::MAX_ACTION & ~self::DELETE) | self::STOP | self::REPRINT | self::WITHDRAW;
     }
 
     return $mask;
