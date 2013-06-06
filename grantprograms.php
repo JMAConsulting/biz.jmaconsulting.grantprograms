@@ -244,11 +244,28 @@ function grantprograms_civicrm_permission(&$permissions) {
  *
 */
 function grantprograms_civicrm_buildForm($formName, &$form) {
-
+  
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
-    $form->_key= CRM_Utils_Request::retrieve('key', 'String', $form);
-    $form->_next= CRM_Utils_Request::retrieve('next', 'Positive', $form);
-    $form->_prev= CRM_Utils_Request::retrieve('prev', 'Positive', $form);
+    $form->_key = CRM_Utils_Request::retrieve('key', 'String', $form);
+    $form->_next = CRM_Utils_Request::retrieve('next', 'Positive', $form);
+    $form->_prev = CRM_Utils_Request::retrieve('prev', 'Positive', $form);
+    if (CRM_Utils_Request::retrieve('context', 'String', $form) == 'search' && isset($form->_next)) {
+      $form->addButtons(array( 
+        array ('type' => 'upload',
+          'name' => ts('Save'), 
+          'isDefault' => true),
+        array ('type' => 'submit',
+          'name' => ts('Save and Next'),
+          'subName' => 'savenext'),   
+        array ('type' => 'upload',
+          'name' => ts('Save and New'), 
+          'js' => array('onclick' => "return verify();"),
+          'subName' => 'new' ),
+        array ('type' => 'cancel', 
+          'name' => ts('Cancel')),
+        ) 
+      );
+    }
     $empId = $genId = $ccId = '-1';
     if ($form->getVar('_id')) {
       $tableName1 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_EMPLOYMENT, 'table_name', 'name');
@@ -272,7 +289,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_'.$genId);
       $form->assign('course', 'custom_'.COURSE.'_'.$ccId);
       $form->assign('course_other', 'custom_'.COURSE_OTHER.'_'.$ccId);
-    CRM_Core_Region::instance('page-body')->add(array(
+      CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
       ));
     $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
@@ -844,9 +861,9 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       }
 
       if (CRM_Utils_Array::value($form->getButtonName('submit', 'savenext'), $_POST)) {
-        if ($form->_id != $form->_prev) {
+        if ($form->getVar('_id') != $form->_prev) {
           CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
-            "reset=1&action=update&id={$form->_next}&cid={$form->_contactID}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}"));
+            "reset=1&action=update&id={$form->_next}&cid={$array['contact_id']}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}"));
         } 
         else {
           CRM_Core_Session::setStatus( ts('The next record in the Search no longer exists. Select another record to edit if desired.'));
@@ -856,7 +873,7 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       } 
       elseif (CRM_Utils_Array::value( $form->getButtonName('upload', 'new'), $_POST)) {
         CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
-          "reset=1&action=add&context=grant&cid={$form->_contactID}"));
+          "reset=1&action=add&context=grant&cid={$array['contact_id']}"));
       } 
       else {
         CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 
