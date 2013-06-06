@@ -569,7 +569,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     }
   }
   if ($formName == 'CRM_Grant_Form_Search') {
-    if (isset($fields['task']) && $fields['task'] == PAY_GRANTS || $fields['task'] == DELETE_GRANTS) {
+    if (isset($fields['task']) && CRM_Utils_Array::value('task', $fields) == PAY_GRANTS || CRM_Utils_Array::value('task', $fields) == DELETE_GRANTS) {
       foreach ($fields as $fieldKey => $fieldValue) {
         if (strstr($fieldKey, 'mark_x_')) {
           $grantID = ltrim( $fieldKey, 'mark_x_' );
