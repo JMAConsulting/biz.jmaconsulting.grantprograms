@@ -92,7 +92,7 @@ if ( this.options[this.selectedIndex].text == 'Ineligible' ) {
 });
 var grantId = {/literal}{if $grant_id}{$grant_id}{else}{literal}0{/literal}{/if}{literal};
 var dataUrl = {/literal}"{crmURL p='civicrm/grant/search' h=0 q="snippet=1&force=1"}"{literal};
-dataUrl = dataUrl + '&key=' + "{/literal}{$qfKey}{literal}";
+dataUrl = dataUrl + '&cid=' + "{/literal}{$contactId}{literal}" + '&key=' + "{/literal}{$qfKey}{literal}";
 var response = cj.ajax({
   url: dataUrl,
   async: false,
