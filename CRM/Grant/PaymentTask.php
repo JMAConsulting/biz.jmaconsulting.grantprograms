@@ -152,7 +152,7 @@ class CRM_Grant_PaymentTask {
     self::tasks();
     if (! $value || ! CRM_Utils_Array::value($value, self::$_tasks)) {
       // make the print task by default
-      $value = '5';
+      return;
     }
     return array(self::$_tasks[$value]['class'],
              self::$_tasks[$value]['result']); 
