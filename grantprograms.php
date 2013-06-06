@@ -4,6 +4,8 @@ require_once 'grantprograms.civix.php';
 
 //define pay grants
 define('PAY_GRANTS', 5);
+//define delete grants
+define('DELETE_GRANTS', 1);
 //RG-116 hide other fields
 define('EMPLOYMENT', 62);
 define('EMPLOYMENT_OTHER', 63);
@@ -567,14 +569,25 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     }
   }
   if ($formName == 'CRM_Grant_Form_Search') {
-    if (isset($fields['task']) && $fields['task'] == PAY_GRANTS) {
+    if (isset($fields['task']) && $fields['task'] == PAY_GRANTS || $fields['task'] == DELETE_GRANTS) {
       foreach ($fields as $fieldKey => $fieldValue) {
         if (strstr($fieldKey, 'mark_x_')) {
           $grantID = ltrim( $fieldKey, 'mark_x_' );
-          $grantDetails = CRM_Grant_BAO_GrantProgram::getGrants(array('id' => $grantID));
-          if (!$grantDetails[$grantID]['amount_granted']) {
-            $errors['task'] = ts('Payments are only possible when there is an amount owing.');
-            break;
+          if ($fields['task'] == PAY_GRANTS) {
+            $grantDetails = CRM_Grant_BAO_GrantProgram::getGrants(array('id' => $grantID));
+            if (!$grantDetails[$grantID]['amount_granted']) {
+              $errors['task'] = ts('Payments are only possible when there is an amount owing.');
+              break;
+            }
+          }
+          elseif ($fields['task'] == DELETE_GRANTS) {
+            $params['entity_table'] = 'civicrm_grant';
+            $params['entity_id'] = $grantID;
+            $grantPayment = CRM_Grant_BAO_EntityPayment::retrieve($params, $defaults = CRM_Core_DAO::$_nullArray);
+            if ($grantPayment) {
+              $errors['task'] = ts('You cannot delete grant because grant payment is currently using it.');
+              break;
+            }
           }
         }
       }
