@@ -33,9 +33,6 @@
  * $Id$
  *
  */
-define('CONFERENCE_DETAILS_TABLE', 'civicrm_value_nei_course_conference_details_16');
-define('COURSE_TYPE', 'course_conference_type_74');
-define('COURSE_NAME', 'course_conference_name_77');
 class CRM_Grant_BAO_Query {
   static function &getFields() {
     $fields = array();
@@ -103,14 +100,14 @@ class CRM_Grant_BAO_Query {
         $query->_tables['grant_note'] = 1;
       }
       
-        if (CRM_Utils_Array::value(COURSE_TYPE, $query->_returnProperties)) { 
-        $query->_select['course_type']  = CONFERENCE_DETAILS_TABLE.'.'.COURSE_TYPE.' as course_type';
+        if (CRM_Utils_Array::value(COURSE_CONFERENCE_TYPE_COLUMN, $query->_returnProperties)) { 
+        $query->_select['course_type']  = COURSE_CONFERENCE_DETAILS.'.'.COURSE_CONFERENCE_TYPE_COLUMN.' as course_type';
         $query->_element['course_type'] = 1;
         $query->_tables['course_type']  = 1;
       }
             
-      if (CRM_Utils_Array::value(COURSE_NAME, $query->_returnProperties)) {
-        $query->_select['course_name']  = CONFERENCE_DETAILS_TABLE.'.'.COURSE_NAME.' as course_name';
+      if (CRM_Utils_Array::value(COURSE_CONFERENCE_NAME_COLUMN, $query->_returnProperties)) {
+        $query->_select['course_name']  = COURSE_CONFERENCE_DETAILS.'.'.COURSE_CONFERENCE_NAME_COLUMN.' as course_name';
         $query->_element['course_name'] = 1;
         $query->_tables['course_name']  = 1;
       }
@@ -320,7 +317,7 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         break;
 
       case 'course_name':
-        $from .= ' '.$side.' JOIN '.CONFERENCE_DETAILS_TABLE.' ON ( civicrm_grant.id = '.CONFERENCE_DETAILS_TABLE.'.entity_id )';
+        $from .= ' '.$side.' JOIN '.COURSE_CONFERENCE_DETAILS.' ON ( civicrm_grant.id = '.COURSE_CONFERENCE_DETAILS.'.entity_id )';
         break;
 
       case 'grant_program':
@@ -356,8 +353,8 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         'grant_amount_requested' => 1,
         'grant_application_received_date' => 1,
         'grant_payment_created' => 1,
-        COURSE_TYPE => 1,
-        COURSE_NAME => 1,
+        COURSE_CONFERENCE_TYPE_COLUMN => 1,
+        COURSE_CONFERENCE_NAME_COLUMN => 1,
         'grant_report_received' => 1,
         'grant_money_transfer_date' => 1,
         'grant_note' => 1,
