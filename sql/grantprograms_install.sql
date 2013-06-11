@@ -280,3 +280,41 @@ INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permissi
 (1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search&reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
 (1, 'New Grant Program', 'New Grant Program', 'civicrm/grant_program?action=add&reset=1', 'access CiviCRM,access CiviGrant,edit grants', 'AND', @parentId2, 1, 0, @weight = @weight + 1),
 (1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program&reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
+
+
+-- Accounting integration RG-125
+SELECT @contactId := contact_id FROM civicrm_domain WHERE  id = 1;
+
+SELECT @option_group_id_arel := max(id) from civicrm_option_group where name = 'account_relationship';
+
+SELECT @weight := max(weight) from civicrm_option_value where option_group_id = @option_group_id_arel; 
+SET @weight := @weight + 1;
+
+
+SELECT @option_value_rel_id_exp  := value FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Expense Account is';
+SELECT @option_value_rel_id_as  := value FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Asset Account is';
+
+INSERT INTO
+   `civicrm_option_value` (`option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `visibility_id`)
+VALUES
+    (@option_group_id_arel, 'Accounts Payable', @weight, 'Accounts Payable', NULL, 0, 1, @weight, 'Accounts Payable', 0, 1, 1, 2, NULL);
+
+SELECT @financialAccount := id FROM civicrm_financial_account WHERE  name = 'NEI Grant';
+SELECT @depositAccount := id FROM civicrm_financial_account WHERE  name = 'Deposit Bank Account';
+SELECT @accountPayable := id FROM civicrm_financial_account WHERE  name = 'Accounts Payable';
+
+INSERT IGNORE INTO civicrm_financial_account (id, name, contact_id, is_header_account, financial_account_type_id, accounting_code, account_type_code, is_active) 
+VAlUES (@financialAccount, 'NEI Grant', @contactId, 0, 5, 5555, 'EXP', 1);
+SET @financialAccountID := LAST_INSERT_ID();
+
+INSERT INTO civicrm_financial_type (name, is_deductible, is_reserved, is_active)
+VALUES ('NEI Grant', 0, 0, 1);
+SET @financialTypeID := LAST_INSERT_ID();
+
+INSERT INTO civicrm_entity_financial_account (entity_table, entity_id, account_relationship, financial_account_id) 
+-- Expense account
+VALUES('civicrm_financial_type', @financialTypeID, @option_value_rel_id_exp, IFNULL(@financialAccount, @financialAccountID)),
+-- Asset Account of
+('civicrm_financial_type', @financialTypeID, @option_value_rel_id_as, @depositAccount),
+-- Account Payable
+('civicrm_financial_type', @financialTypeID, @weight, @accountPayable);

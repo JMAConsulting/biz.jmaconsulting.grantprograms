@@ -765,6 +765,14 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $financialItemStatusID = array_search('Paid', $financialItemStatus);
       $createItem = FALSE;
     }
+    elseif ($objectRef->status_id == array_search('Withdrawn', $status)) {
+      $params['to_financial_account_id'] = CRM_Core_DAO::singleValueQuery("SELECT to_financial_account_id FROM civicrm_financial_trxn  cft
+INNER JOIN civicrm_entity_financial_trxn ecft ON ecft.entity_id = cft.id
+WHERE  ecft.entity_id = 45 and ecft.entity_table = 'civicrm_grant'
+ORDER BY cft.id DESC LIMIT 1");
+      $statusID = array_search('Cancelled', $contributionStatuses);
+      $amount = -$amount;
+    }
     if (CRM_Utils_Array::value('to_financial_account_id', $params)) {
       //build financial transaction params
       $trxnParams = array(

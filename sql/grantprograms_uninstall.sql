@@ -25,3 +25,16 @@
  *          Toronto, ON  
  *          Canada   M5T 2C7
  */
+
+-- Accounting integration
+SELECT @option_group_id_arel := max(id) from civicrm_option_group where name = 'account_relationship';
+
+DELETE FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Accounts Payable';
+
+SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
+
+DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_financial_type' AND entity_id = @financialType;
+
+DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
+
+DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
