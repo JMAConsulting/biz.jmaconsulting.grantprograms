@@ -101,7 +101,7 @@ ALTER TABLE `civicrm_grant_program`
 -- add columns to civicrm_grant
 ALTER TABLE `civicrm_grant` 
   ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
-  ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NOT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
+  ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
   ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL AFTER `grant_rejected_reason_id`;
 
 --
@@ -205,23 +205,33 @@ SET @opv7 := '';
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_status';
 
 -- option values
-SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Approved' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Rejected' AND option_group_id = @opGId;
+
+UPDATE `civicrm_option_value` SET label = 'Awaiting Information', weight = 2 WHERE name = 'Awaiting Information' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET weight = 5 WHERE name = 'Paid' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET weight = 7 WHERE name = 'Withdrawn' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET label = 'Ineligible', name = 'Ineligible', weight = 6 WHERE name = 'Rejected' AND id = @opv2;
+UPDATE `civicrm_option_value` SET label = 'Eligible', name = 'Eligible', weight = 3 WHERE name = 'Approved' OR name = 'Granted' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET label = 'Submitted', name = 'Submitted'WHERE name = 'Pending' AND option_group_id = @opGId;
+
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Awaiting Information' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
 SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Paid' AND option_group_id = @opGId;
-SELECT @opv6 := id FROM civicrm_option_value WHERE  name = 'Eligible' AND option_group_id = @opGId;
 SELECT @opv7 := id FROM civicrm_option_value WHERE  name = 'Approved for Payment' AND option_group_id = @opGId;
+SELECT @opv8 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
+SELECT @opv10 := id FROM civicrm_option_value WHERE  name = 'Submitted' AND option_group_id = @opGId;
 
-UPDATE `civicrm_option_value` SET weight = 7 WHERE id = @opv4;
-UPDATE `civicrm_option_value` SET label = 'Ineligible', name = 'Ineligible', weight = 6 WHERE id = @opv2;
-UPDATE `civicrm_option_value` SET label = 'Eligible', name = 'Eligible', weight = 3 WHERE id = @opv1;
-UPDATE `civicrm_option_value` SET label = 'Awaiting Information', weight = 2 WHERE id = @opv3;
-UPDATE `civicrm_option_value` SET weight = 5 WHERE id = @opv5;
+SELECT @gtype := id FROM civicrm_option_group WHERE name = 'grant_type';
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
-(@opv7, @opGId, 'Approved for Payment', '7', 'Approved for Payment', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv7, @opGId, 'Approved for Payment', '7', 'Approved for Payment', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv3, @opGId, 'Awaiting Information', 5, 'Awaiting Information', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv8, @opGId, 'Ineligible', 3, 'Ineligible', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv5, @opGId, 'Paid', 4, 'Paid', NULL, 0, 0, 5, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv10, @opGId, 'Submitted', 1, 'Submitted', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv4, @opGId, 'Withdrawn', 6, 'Withdrawn', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL),
+('', @gtype, 'NEI Grant', 6, 'NEI Grant', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, 1, NULL);
 
 -- reason_grant_ineligible
 SET @opGId := '';
@@ -280,3 +290,42 @@ INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permissi
 (1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search&reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
 (1, 'New Grant Program', 'New Grant Program', 'civicrm/grant_program?action=add&reset=1', 'access CiviCRM,access CiviGrant,edit grants', 'AND', @parentId2, 1, 0, @weight = @weight + 1),
 (1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program&reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
+
+
+-- Accounting integration RG-125
+SELECT @contactId := contact_id FROM civicrm_domain WHERE  id = 1;
+
+SELECT @option_group_id_arel := max(id) from civicrm_option_group where name = 'account_relationship';
+
+SELECT @weight := max(weight) from civicrm_option_value where option_group_id = @option_group_id_arel; 
+SET @weight := @weight + 1;
+
+
+SELECT @option_value_rel_id_exp  := value FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Expense Account is';
+SELECT @option_value_rel_id_as  := value FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Asset Account is';
+
+INSERT INTO
+   `civicrm_option_value` (`option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `visibility_id`)
+VALUES
+    (@option_group_id_arel, 'Accounts Payable Account is', @weight, 'Accounts Payable Account is', NULL, 0, 0, @weight, 'Accounts Payable Account is', 0, 1, 1, 2, NULL);
+
+SELECT @financialAccount := id FROM civicrm_financial_account WHERE  name = 'NEI Grant';
+SELECT @depositAccount := id FROM civicrm_financial_account WHERE  name = 'Deposit Bank Account';
+SELECT @accountPayable := id FROM civicrm_financial_account WHERE  name = 'Accounts Payable';
+
+INSERT IGNORE INTO civicrm_financial_account (id, name, contact_id, is_header_account, financial_account_type_id, accounting_code, account_type_code, is_active) 
+VAlUES (@financialAccount, 'NEI Grant', @contactId, 0, 5, 5555, 'EXP', 1);
+SET @financialAccountID := LAST_INSERT_ID();
+
+INSERT INTO civicrm_financial_type (name, is_deductible, is_reserved, is_active)
+VALUES ('NEI Grant', 0, 0, 1);
+SET @financialTypeID := LAST_INSERT_ID();
+
+INSERT INTO civicrm_entity_financial_account (entity_table, entity_id, account_relationship, financial_account_id) 
+-- Expense account
+VALUES('civicrm_financial_type', @financialTypeID, @option_value_rel_id_exp, IFNULL(@financialAccount, @financialAccountID)),
+-- Asset Account of
+('civicrm_financial_type', @financialTypeID, @option_value_rel_id_as, @depositAccount),
+-- Account Payable
+('civicrm_financial_type', @financialTypeID, @weight, @accountPayable);
+

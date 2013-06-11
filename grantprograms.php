@@ -762,8 +762,16 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Asset Account is' "));
       $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
       $statusID = array_search('Completed', $contributionStatuses);
-      $financialItemStatusID = array_search('Paid', $financialItemStatus);
       $createItem = FALSE;
+    }
+    elseif ($objectRef->status_id == array_search('Withdrawn', $status)) {
+      $params['to_financial_account_id'] = CRM_Core_DAO::singleValueQuery("SELECT to_financial_account_id FROM civicrm_financial_trxn  cft
+INNER JOIN civicrm_entity_financial_trxn ecft ON ecft.financial_trxn_id = cft.id
+WHERE  ecft.entity_id = {$objectRef->id} and ecft.entity_table = 'civicrm_grant'
+ORDER BY cft.id DESC LIMIT 1");
+      $statusID = array_search('Cancelled', $contributionStatuses);
+      $financialItemStatusID = array_search('Unpaid', $financialItemStatus);
+      $amount = -$amount;
     }
     if (CRM_Utils_Array::value('to_financial_account_id', $params)) {
       //build financial transaction params
