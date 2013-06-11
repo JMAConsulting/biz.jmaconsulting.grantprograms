@@ -205,22 +205,20 @@ SET @opv7 := '';
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_status';
 
 -- option values
-UPDATE `civicrm_option_value` SET label = 'Awaiting Information', weight = 2 WHERE name = 'Awaiting Information';
-UPDATE `civicrm_option_value` SET weight = 5 WHERE name = 'Paid';
-UPDATE `civicrm_option_value` SET weight = 7 WHERE name = 'Withdrawn';
-UPDATE `civicrm_option_value` SET label = 'Ineligible', name = 'Ineligible', weight = 6 WHERE name = 'Rejected';
-UPDATE `civicrm_option_value` SET label = 'Eligible', name = 'Eligible', weight = 3 WHERE name = 'Approved' OR name = 'Granted';
-UPDATE `civicrm_option_value` SET label = 'Submitted', name = 'Submitted'WHERE name = 'Pending';
-
-SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Approved' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Rejected' AND option_group_id = @opGId;
+
+UPDATE `civicrm_option_value` SET label = 'Awaiting Information', weight = 2 WHERE name = 'Awaiting Information' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET weight = 5 WHERE name = 'Paid' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET weight = 7 WHERE name = 'Withdrawn' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET label = 'Ineligible', name = 'Ineligible', weight = 6 WHERE name = 'Rejected' AND id = @opv2;
+UPDATE `civicrm_option_value` SET label = 'Eligible', name = 'Eligible', weight = 3 WHERE name = 'Approved' OR name = 'Granted' AND option_group_id = @opGId;
+UPDATE `civicrm_option_value` SET label = 'Submitted', name = 'Submitted'WHERE name = 'Pending' AND option_group_id = @opGId;
+
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Awaiting Information' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
 SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Paid' AND option_group_id = @opGId;
-SELECT @opv6 := id FROM civicrm_option_value WHERE  name = 'Eligible' AND option_group_id = @opGId;
 SELECT @opv7 := id FROM civicrm_option_value WHERE  name = 'Approved for Payment' AND option_group_id = @opGId;
 SELECT @opv8 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
-SELECT @opv9 := id FROM civicrm_option_value WHERE  name = 'Granted' AND option_group_id = @opGId;
 SELECT @opv10 := id FROM civicrm_option_value WHERE  name = 'Submitted' AND option_group_id = @opGId;
 
 SELECT @gtype := id FROM civicrm_option_group WHERE name = 'grant_type';
@@ -232,8 +230,8 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 (@opv8, @opGId, 'Ineligible', 3, 'Ineligible', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv5, @opGId, 'Paid', 4, 'Paid', NULL, 0, 0, 5, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv10, @opGId, 'Submitted', 1, 'Submitted', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
-(@opv7, @opGId, 'Withdrawn', 6, 'Withdrawn', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL),
-('', @gtype, 'NEI Grant', 6, 'NEI Grant', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv4, @opGId, 'Withdrawn', 6, 'Withdrawn', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL),
+('', @gtype, 'NEI Grant', 6, 'NEI Grant', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, 1, NULL);
 
 -- reason_grant_ineligible
 SET @opGId := '';
