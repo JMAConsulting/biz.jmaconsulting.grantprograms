@@ -29,6 +29,12 @@ function grantprograms_civicrm_install() {
   $data = $smarty->fetch($config->extensionsDir . DIRECTORY_SEPARATOR . 'biz.jmaconsulting.grantprograms/sql/civicrm_msg_template.tpl');
   file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
+  $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
+  $params['enableComponents'] = $config_backend['enableComponents'];
+  $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
+  $params['enableComponents'][] = 'CiviGrant';
+  $params['enableComponentIDs'][] = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'");
+  CRM_Core_BAO_ConfigSetting::create($params);
   return TRUE;
 }
 
@@ -38,6 +44,16 @@ function grantprograms_civicrm_install() {
 function grantprograms_civicrm_uninstall() {
   $config = CRM_Core_Config::singleton();
   unlink($config->extensionsDir.'biz.jmaconsulting.grantprograms/grantprograms_data_define.php');
+  $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
+  $params['enableComponents'] = $config_backend['enableComponents'];
+  $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
+  foreach (array_keys($params['enableComponents'], 'CiviGrant', TRUE) as $key) {
+    unset($params['enableComponents'][$key]);
+  }
+  foreach (array_keys($params['enableComponentIDs'], (int)CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'"), TRUE) as $key) {
+    unset($params['enableComponentIDs'][$key]);
+  }
+  CRM_Core_BAO_ConfigSetting::create($params);
   return _grantprograms_civix_civicrm_uninstall();
 }
 
