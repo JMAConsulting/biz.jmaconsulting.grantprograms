@@ -38,3 +38,8 @@ DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_finan
 DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
 
 DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
+
+-- RG-149
+DELETE cg, cv FROM civicrm_option_group cg
+INNER JOIN civicrm_option_value cv ON cg.id = cv.option_group_id
+WHERE cg.name = 'grant_info_too_late';
