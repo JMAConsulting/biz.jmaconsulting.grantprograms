@@ -329,3 +329,13 @@ VALUES('civicrm_financial_type', @financialTypeID, @option_value_rel_id_exp, IFN
 -- Account Payable
 ('civicrm_financial_type', @financialTypeID, @weight, @accountPayable);
 
+-- RG-149
+INSERT INTO `civicrm_option_group` (`name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
+('grant_info_too_late', 'Grant Info Too Late', 'Grant becomes ineligible due to information being provided too late if the information is still being waited for when the course end date is more than this number of days in the past.', 1, 1);
+
+SET @ogId := LAST_INSERT_ID();
+
+INSERT INTO
+   `civicrm_option_value` (`option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `visibility_id`)
+VALUES
+    (@ogId, 'Number of Days after Course till Ineligible', 120, 'number_of_days_after_course_till_ineligible', NULL, 0, 0, 1, 'Number of Days after Course till Ineligible', 0, 1, 1, 2, NULL);
