@@ -2,6 +2,7 @@
 require_once 'grantprograms.civix.php';
 require_once 'grantprograms_data_define.php';
 
+define('AUTO_CHANGE_STATUS_DAYS', 90);
 /**
  * Implementation of hook_civicrm_config
  */
@@ -747,13 +748,15 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
 
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     if (isset($endDate)) {
-      $newDate = date('Y-m-d', strtotime($endDate." +60 days"));
+      $days = ' +' . AUTO_CHANGE_STATUS_DAYS . ' days';
+      $newDate = date('Y-m-d', strtotime($endDate . $days));
       if (($newDate <= date('Y-m-d') || date('Y') < date('Y',strtotime($endDate))) && $params['status_id'] == $grantStatus['Submitted']) {
         $reasonGranItneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
         $reasonGranItneligible = array_flip($reasonGranItneligible);
         $params['status_id'] = $grantStatus['Ineligible'];
         $params['grant_rejected_reason_id'] = $reasonGranItneligible['Outside dates'];
-        $result = CRM_Grant_BAO_Grant::create( $params, $ids );
+        $ids['grant_id'] = $objectId;
+        $result = CRM_Grant_BAO_Grant::create($params, $ids);
       }
     }
   }
