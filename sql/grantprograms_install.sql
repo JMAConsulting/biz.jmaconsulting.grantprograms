@@ -102,7 +102,7 @@ ALTER TABLE `civicrm_grant_program`
 ALTER TABLE `civicrm_grant` 
   ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
   ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
-  ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL AFTER `grant_rejected_reason_id`;
+  ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL AFTER `grant_rejected_reason_id`;
 
 --
 -- Constraints for table `civicrm_grant`
