@@ -43,7 +43,9 @@ function grantprograms_civicrm_install() {
  */
 function grantprograms_civicrm_uninstall() {
   $config = CRM_Core_Config::singleton();
-  unlink($config->extensionsDir.'biz.jmaconsulting.grantprograms/grantprograms_data_define.php');
+  $file = fopen($config->extensionsDir .'biz.jmaconsulting.grantprograms/grantprograms_data_define.php', 'w'); 
+  fwrite($file, "<?php\n// placeholder which ensures custom group and custom fields and custom tables.\n?>");
+  fclose($file);
   $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
   $params['enableComponents'] = $config_backend['enableComponents'];
   $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
@@ -940,7 +942,7 @@ function grantprograms_getCustomFieldData($id) {
 }
 
 function grantprograms_define($extensionsDir) {
-  $file  = fopen($extensionsDir .'biz.jmaconsulting.grantprograms/grantprograms_data_define.php', 'w' ); 
+  $file  = fopen($extensionsDir .'biz.jmaconsulting.grantprograms/grantprograms_data_define.php', 'w'); 
   fwrite($file, "<?php\n\n//define custom table Names.\ndefine('COURSE_CONFERENCE_DETAILS', 'civicrm_value_nei_course_conference_details');\ndefine('EMPLOYMENT_INFORMATION', 'civicrm_value_nei_employment_information');\ndefine('GENERAL_INFORMATION', 'civicrm_value_nei_general_information');\ndefine('NEI_ID_TABLE', 'civicrm_value_nei_id');\n\n");
 
   fwrite($file, "//define custom group Names.\ndefine('NEI_EMPLOYMENT', 'NEI_Employment_Information');\ndefine('NEI_GENERAL', 'NEI_General_information');\ndefine('NEI_CONFERENCE', 'NEI_Course_conference_details');\n\n");
