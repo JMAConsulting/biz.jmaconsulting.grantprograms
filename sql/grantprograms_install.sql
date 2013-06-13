@@ -1,6 +1,6 @@
 /**
- * Enhanced Event Registration extension improves how parents register kids
- * in CiviEvent 
+ * Grant Programs extension improves grant allocation
+ * in CiviGrant 
  * 
  * Copyright (C) 2012 JMA Consulting
  *

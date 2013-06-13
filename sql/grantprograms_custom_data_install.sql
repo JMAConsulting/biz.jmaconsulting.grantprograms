@@ -1,30 +1,43 @@
 -- Create custom groups
-INSERT INTO `civicrm_custom_group` (`name`, `title`, `extends`, `extends_entity_column_id`, `extends_entity_column_value`, `style`, `collapse_display`, `help_pre`, `help_post`, `weight`, `is_active`, `table_name`, `is_multiple`, `min_multiple`, `max_multiple`, `collapse_adv_display`, `created_id`, `created_date`) VALUES
-('NEI_Employment_Information', 'NEI Employment Information', 'Grant', NULL, NULL, 'Inline', 1, '', '', 7, 1, 'civicrm_value_nei_employment_information', 0, NULL, NULL, 0, NULL, Now()),
-('NEI_General_information', 'NEI General information', 'Grant', NULL, NULL, 'Inline', 1, '', '', 8, 1, 'civicrm_value_nei_general_information', 0, NULL, NULL, 0, NULL, Now()),
-('NEI_Course_conference_details', 'NEI Course/conference details', 'Grant', NULL, NULL, 'Inline', 1, '', '', 9, 1, 'civicrm_value_nei_course_conference_details', 0, NULL, NULL, 0, NULL, Now()),
-('NEI_ID', 'NEI ID', 'Individual', NULL, NULL, 'Inline', 1, '', '', 8, 1, 'civicrm_value_nei_id', 0, NULL, NULL, 0, NULL, Now());
+SELECT @EInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_Employment_Information';
+SELECT @GInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_General_information';
+SELECT @CInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_Course_conference_details';
+SELECT @CInfoNIId := id FROM civicrm_custom_group WHERE name = 'NEI_ID';
+
+INSERT IGNORE INTO `civicrm_custom_group` (`id`, `name`, `title`, `extends`, `extends_entity_column_id`, `extends_entity_column_value`, `style`, `collapse_display`, `help_pre`, `help_post`, `weight`, `is_active`, `table_name`, `is_multiple`, `min_multiple`, `max_multiple`, `collapse_adv_display`, `created_id`, `created_date`) VALUES
+(@EInfoGId, 'NEI_Employment_Information', 'NEI Employment Information', 'Grant', NULL, NULL, 'Inline', 1, '', '', 7, 1, 'civicrm_value_nei_employment_information', 0, NULL, NULL, 0, NULL, Now()),
+(@GInfoGId, 'NEI_General_information', 'NEI General information', 'Grant', NULL, NULL, 'Inline', 1, '', '', 8, 1, 'civicrm_value_nei_general_information', 0, NULL, NULL, 0, NULL, Now()),
+(@CInfoGId, 'NEI_Course_conference_details', 'NEI Course/conference details', 'Grant', NULL, NULL, 'Inline', 1, '', '', 9, 1, 'civicrm_value_nei_course_conference_details', 0, NULL, NULL, 0, NULL, Now()),
+(@CInfoNIId, 'NEI_ID', 'NEI ID', 'Individual', NULL, NULL, 'Inline', 1, '', '', 8, 1, 'civicrm_value_nei_id', 0, NULL, NULL, 0, NULL, Now());
 
 SELECT @EInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_Employment_Information';
-
 SELECT @GInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_General_information';
-
 SELECT @CInfoGId := id FROM civicrm_custom_group WHERE name = 'NEI_Course_conference_details';
-
 SELECT @CInfoNIId := id FROM civicrm_custom_group WHERE name = 'NEI_ID';
 
 -- Create option groups
-INSERT INTO `civicrm_option_group` (`name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
-('predominant_clinical_area_of_pra_nei', 'Predominant clinical area of practice', NULL, 1, 1),
-('nei_employment_status_nei', 'NEI Employment status', NULL, 1, 1),
-('if_you_are_not_employed_indicate_nei', 'If you are NOT EMPLOYED, indicate how you are actively seeking employment', NULL, 1, 1),
-('province_of_employment_nei', 'Province of employment', NULL, 1, 1),
-('position_nei', 'Position', NULL, 1, 1),
-('employment_setting_nei', 'Employment setting', NULL, 1, 1),
-('how_did_you_hear_about_this_init_nei', 'How did you hear about this initiative?', NULL, 1, 1),
-('course_conference_type_nei', 'Course/conference type', NULL, 1, 1),
-('how_will_this_course_enhance_the_nei', 'How will this course enhance the nursing care you provide in Ontario?', NULL, 1, 1),
-('type_of_course_provider_nei', 'Type of Course Provider', NULL, 1, 1);
+SELECT @OGId1 := id FROM civicrm_option_group WHERE name = 'predominant_clinical_area_of_pra_nei';
+SELECT @OGId2 := id FROM civicrm_option_group WHERE name = 'nei_employment_status_nei';
+SELECT @OGId3 := id FROM civicrm_option_group WHERE name = 'if_you_are_not_employed_indicate_nei';
+SELECT @OGId4 := id FROM civicrm_option_group WHERE name = 'province_of_employment_nei';
+SELECT @OGId5 := id FROM civicrm_option_group WHERE name = 'position_nei';
+SELECT @OGId6 := id FROM civicrm_option_group WHERE name = 'employment_setting_nei';
+SELECT @OGId7 := id FROM civicrm_option_group WHERE name = 'how_did_you_hear_about_this_init_nei';
+SELECT @OGId8 := id FROM civicrm_option_group WHERE name = 'course_conference_type_nei';
+SELECT @OGId9 := id FROM civicrm_option_group WHERE name = 'how_will_this_course_enhance_the_nei';
+SELECT @OGId10 := id FROM civicrm_option_group WHERE name = 'type_of_course_provider_nei';
+
+INSERT INTO `civicrm_option_group` (`id`, `name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
+(@OGId1, 'predominant_clinical_area_of_pra_nei', 'Predominant clinical area of practice', NULL, 1, 1),
+(@OGId2, 'nei_employment_status_nei', 'NEI Employment status', NULL, 1, 1),
+(@OGId3, 'if_you_are_not_employed_indicate_nei', 'If you are NOT EMPLOYED, indicate how you are actively seeking employment', NULL, 1, 1),
+(@OGId4, 'province_of_employment_nei', 'Province of employment', NULL, 1, 1),
+(@OGId5, 'position_nei', 'Position', NULL, 1, 1),
+(@OGId6, 'employment_setting_nei', 'Employment setting', NULL, 1, 1),
+(@OGId7, 'how_did_you_hear_about_this_init_nei', 'How did you hear about this initiative?', NULL, 1, 1),
+(@OGId8, 'course_conference_type_nei', 'Course/conference type', NULL, 1, 1),
+(@OGId9, 'how_will_this_course_enhance_the_nei', 'How will this course enhance the nursing care you provide in Ontario?', NULL, 1, 1),
+(@OGId10, 'type_of_course_provider_nei', 'Type of Course Provider', NULL, 1, 1);
 
 SELECT @OGId1 := id FROM civicrm_option_group WHERE name = 'predominant_clinical_area_of_pra_nei';
 SELECT @OGId2 := id FROM civicrm_option_group WHERE name = 'nei_employment_status_nei';
