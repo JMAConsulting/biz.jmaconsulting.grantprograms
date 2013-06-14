@@ -99,17 +99,17 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
   }
 
   static function getOptionValueID($optioGroupID, $value) {
-    $query = "SELECT id FROM civicrm_option_value WHERE  option_group_id = {$optioGroupID} AND value = {$value} ";
+    $query = "SELECT id FROM civicrm_option_value WHERE  option_group_id = {$optioGroupID} AND value = {$value}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
     
   static function getOptionValue($id) {
-    $query = "SELECT value FROM civicrm_option_value WHERE id = {$id} ";
+    $query = "SELECT value FROM civicrm_option_value WHERE id = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
 
   static function getOptionName ($id) {
-    $query = "SELECT label FROM civicrm_option_value WHERE id = {$id} ";
+    $query = "SELECT label FROM civicrm_option_value WHERE id = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
 

@@ -222,7 +222,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
   }
     
   static function getMaxPayementBatchNumber() {
-    $query = "SELECT MAX(payment_number) as payment_number, MAX(payment_batch_number) as payment_batch_number FROM civicrm_payment ";
+    $query = "SELECT MAX(payment_number) as payment_number, MAX(payment_batch_number) as payment_batch_number FROM civicrm_payment";
     $dao = CRM_Core_DAO::executeQuery($query);
     while($dao->fetch()) {
       $grantPrograms['payment_number'] = $dao->payment_number;
@@ -232,12 +232,12 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
   }
     
   static function getPaymentNumber($id) {
-    $query = "SELECT id FROM civicrm_payment WHERE payment_number = {$id} ";
+    $query = "SELECT id FROM civicrm_payment WHERE payment_number = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
     
   static function getPaymentBatchNumber($id) {
-    $query = "SELECT id FROM civicrm_payment WHERE payment_batch_number = {$id} ";
+    $query = "SELECT id FROM civicrm_payment WHERE payment_batch_number = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
     
@@ -250,7 +250,8 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     if (!$dao->N) {
       if ($params['messageTemplateID']) {
         CRM_Core_Error::fatal(ts('No such message template: id=%1.', array(1 => $params['messageTemplateID'])));
-      } else {
+      } 
+      else {
         CRM_Core_Error::fatal(ts('No such message template: option group %1, option value %2.', array(1 => $params['groupName'], 2 => $params['valueName'])));
       }
     }
@@ -321,8 +322,8 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
     $query = "SELECT msg_subject subject, msg_html html
-                      FROM civicrm_msg_template 
-                      WHERE msg_title = 'Grant Payment Check' AND is_default = 1;";
+              FROM civicrm_msg_template 
+              WHERE msg_title = 'Grant Payment Check' AND is_default = 1;";
     $grantDao = CRM_Core_DAO::executeQuery($query);
     $grantDao->fetch();
                 
