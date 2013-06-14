@@ -115,3 +115,14 @@ DROP TABLE IF EXISTS civicrm_value_nei_employment_information;
 DROP TABLE IF EXISTS civicrm_value_nei_general_information;
 DROP TABLE IF EXISTS civicrm_value_nei_course_conference_details;
 DROP TABLE IF EXISTS civicrm_value_nei_id;
+
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Trial Allocation of Funds';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Eligible Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Awaiting Information Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Ineligible Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Paid Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Approved for Payment Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Submitted Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Withdrawn Receipt';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Check';
+DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Report';
