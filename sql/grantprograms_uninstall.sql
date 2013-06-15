@@ -29,7 +29,13 @@
 -- Accounting integration
 SELECT @option_group_id_arel := max(id) from civicrm_option_group where name = 'account_relationship';
 
-DELETE FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Accounts Payable';
+DELETE FROM civicrm_option_value WHERE option_group_id = @option_group_id_arel AND name = 'Accounts Payable Account is';
+
+DELETE ci, ceft, ceft1, cft FROM `civicrm_entity_financial_trxn` ceft
+LEFT JOIN civicrm_financial_trxn  cft ON cft.id = ceft.financial_trxn_id 
+LEFT JOIN civicrm_entity_financial_trxn ceft1 ON cft.id = ceft1.financial_trxn_id  AND ceft1.entity_table = 'civicrm_financial_item'
+LEFT JOIN civicrm_financial_item ci ON ci.id = ceft1.entity_id
+WHERE ceft.entity_table = 'civicrm_grant';
 
 SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
 
