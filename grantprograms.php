@@ -48,6 +48,8 @@ function grantprograms_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function grantprograms_civicrm_enable() {
+  $config = CRM_Core_Config::singleton();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprograms/sql/grantprograms_enable.sql');
   grantprograms_addRemoveMenu(TRUE);
   return _grantprograms_civix_civicrm_enable();
 }
@@ -56,6 +58,8 @@ function grantprograms_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function grantprograms_civicrm_disable() {
+  $config = CRM_Core_Config::singleton();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprograms/sql/grantprograms_disable.sql');
   grantprograms_addRemoveMenu(FALSE);
   return _grantprograms_civix_civicrm_disable();
 }
@@ -699,16 +703,16 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           $customGroup[$customGroupName] = $customGroupName;
           $count = 0;
           foreach ($dataValue  as $dataValueKey => $dataValueValue) {
-            $customField[$customGroupName][$count]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
+            $customField[$customGroupName]['custom_'.$dataValueKey]['label'] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $dataValueKey, 'label');
             $customFieldData = grantprograms_getCustomFieldData($dataValueKey);
             if (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select') {
-              $customField[$customGroupName][$count]['value'] = grantprograms_getOptionValueLabel($customFieldData['option_group_id'],$dataValueValue);
+              $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = grantprograms_getOptionValueLabel($customFieldData['option_group_id'],$dataValueValue);
             } 
             elseif (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select Date') {
-              $customField[$customGroupName][$count]['value'] = date('Y-m-d', strtotime($dataValueValue));
+              $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = date('Y-m-d', strtotime($dataValueValue));
             } 
             else {
-              $customField[$customGroupName][$count]['value'] = $dataValueValue;
+              $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = $dataValueValue;
             }
             $count++;
           }
@@ -716,7 +720,6 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $page->assign('customGroup', $customGroup);
         $page->assign('customField', $customField);
       }
-      // EOF FIXME
       
       $grantStatus = CRM_Core_OptionGroup::values('grant_status');
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
