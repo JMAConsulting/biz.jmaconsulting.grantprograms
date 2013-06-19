@@ -37,14 +37,6 @@ LEFT JOIN civicrm_entity_financial_trxn ceft1 ON cft.id = ceft1.financial_trxn_i
 LEFT JOIN civicrm_financial_item ci ON ci.id = ceft1.entity_id
 WHERE ceft.entity_table = 'civicrm_grant';
 
-SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
-
-DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_financial_type' AND entity_id = @financialType;
-
-DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
-
-DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
-
 -- RG-149
 DELETE cg, cv FROM civicrm_option_group cg
 INNER JOIN civicrm_option_value cv ON cg.id = cv.option_group_id
@@ -132,3 +124,11 @@ DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Submitted Receipt';
 DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Withdrawn Receipt';
 DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Check';
 DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Report';
+
+SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
+
+DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_financial_type' AND entity_id = @financialType;
+
+DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
+
+DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
