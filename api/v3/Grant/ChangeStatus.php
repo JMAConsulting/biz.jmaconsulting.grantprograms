@@ -9,7 +9,6 @@
  * @see http://wiki.civicrm.org/confluence/display/CRM/API+Architecture+Standards
  */
 function _civicrm_api3_grant_changestatus_spec(&$spec) {
-  $spec['magicword']['api.required'] = 1;
 }
 
 /**
@@ -22,19 +21,36 @@ function _civicrm_api3_grant_changestatus_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_grant_changestatus($params) {
-  if (array_key_exists('magicword', $params) && $params['magicword'] == 'sesame') {
-    $returnValues = array( // OK, return several data rows
-      12 => array('id' => 12, 'name' => 'Twelve'),
-      34 => array('id' => 34, 'name' => 'Thirty four'),
-      56 => array('id' => 56, 'name' => 'Fifty six'),
-    );
-    // ALTERNATIVE: $returnValues = array(); // OK, success
-    // ALTERNATIVE: $returnValues = array("Some value"); // OK, return a single value
 
-    // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
-    return civicrm_api3_create_success($returnValues, $params, 'grant', 'changestatus');
-  } else {
-    throw new API_Exception(/*errorMessage*/ 'Everyone knows that the magicword is "sesame"', /*errorCode*/ 1234);
+  $status = CRM_Grant_PseudoConstant::grantStatus();
+  $infoTooLate = key(CRM_Core_PseudoConstant::accountOptionValues('grant_info_too_late'));
+  $reasonGranItneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
+
+  $days = ' -' . $infoTooLate . ' days';
+  $endDate = date('Y-m-d', strtotime(date('ymd') . $days));
+  $awatingInfo = array_search('Awaiting Information', $status);
+  $inEligible = array_search('Ineligible', $status);
+  $ineligibleReason = array_search('Information not received in time', $reasonGranItneligible);
+
+  $error = array();
+  if (!$awatingInfo) {
+    $error[] = "'Awaiting Information'";
   }
+  if (!$inEligible) {
+    $error[] = "'Ineligible'";
+  }
+  if (!$ineligibleReason) {
+    $error[] = "'Information not received in time'";
+  }
+  if (!empty($error)) {
+    return civicrm_api3_create_error(implode(',', $error) . ' option(s) not found.');
+  }
+  
+  $sql = "UPDATE civicrm_grant cg
+LEFT JOIN civicrm_value_nei_course_conference_details cd ON cd.entity_id = cg.id
+SET cg.status_id = {$inEligible},
+grant_rejected_reason_id = {$ineligibleReason}
+WHERE cg.status_id = {$awatingInfo} AND end_date <= '{$endDate}'";
+  CRM_Core_DAO::executeQuery($sql);
 }
 
