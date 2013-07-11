@@ -99,6 +99,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       'assessment'     => 'NOT NULL',
     );
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
+    $totalAmount = $_POST['remainder_amount'];
     if (!empty($result)) {
       if (trim($_POST['algorithm']) == 'Best To Worst, Fully Funded') {
         foreach ($result as $key => $row) {
@@ -107,8 +108,6 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $sort_order = SORT_DESC;
         array_multisort($order, $sort_order, $result);
       } 
-      
-      $totalAmount = $_POST['remainder_amount'];
       
       $contact = array(); 
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
@@ -201,7 +200,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     }
     $page = new CRM_Core_Page();
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-    $message = "Trial Allocation Completed. $".$grantedAmount.".00 allocated to {$grantedCount} eligible applications. ".$eligibleCount." eligible applications were not allocated $".$eligibleAmount.".00 in funds they would have received were funds available. $".$totalAmount." remains unallocated.";
+    $message = "Trial Allocation Completed. $".$grantedAmount.".00 allocated to {$grantedCount} eligible applications. $".$eligibleCount.".00 eligible applications were not allocated $".$eligibleAmount.".00 in funds they would have received were funds available. $".$totalAmount." remains unallocated.";
    
     $page->assign('message', $message);
       
