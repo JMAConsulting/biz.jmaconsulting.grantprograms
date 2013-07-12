@@ -507,7 +507,7 @@ function grantprograms_civicrm_pageRun( &$page ) {
   if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
     $params['id'] = $page->getVar('_fid');
     $params['custom_group_id'] = $page->getVar('_gid');
-    CRM_Core_BAO_CustomField::retrieve(&$params, &$defaults);
+    CRM_Core_BAO_CustomField::retrieve($params, $defaults);
     $optionValues = CRM_Core_BAO_OptionValue::getOptionValuesArray($defaults['option_group_id']);
     $smarty = CRM_Core_Smarty::singleton();
     foreach ($optionValues as $key => $value) {
