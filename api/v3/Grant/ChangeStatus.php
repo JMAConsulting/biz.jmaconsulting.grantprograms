@@ -24,19 +24,19 @@ function civicrm_api3_grant_changestatus($params) {
 
   $status = CRM_Grant_PseudoConstant::grantStatus();
   $infoTooLate = key(CRM_Core_PseudoConstant::accountOptionValues('grant_info_too_late'));
-  $reasonGranItneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
+  $reasonGrantIneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
 
   $days = ' -' . $infoTooLate . ' days';
   $endDate = date('Y-m-d', strtotime(date('ymd') . $days));
-  $awatingInfo = array_search('Awaiting Information', $status);
-  $inEligible = array_search('Ineligible', $status);
-  $ineligibleReason = array_search('Information not received in time', $reasonGranItneligible);
+  $awaitingInfo = array_search('Awaiting Information', $status);
+  $ineligible = array_search('Ineligible', $status);
+  $ineligibleReason = array_search('Information not received in time', $reasonGrantIneligible);
 
   $error = array();
-  if (!$awatingInfo) {
+  if (!$awaitingInfo) {
     $error[] = "'Awaiting Information'";
   }
-  if (!$inEligible) {
+  if (!$ineligible) {
     $error[] = "'Ineligible'";
   }
   if (!$ineligibleReason) {
@@ -48,9 +48,9 @@ function civicrm_api3_grant_changestatus($params) {
   
   $sql = "UPDATE civicrm_grant cg
 LEFT JOIN civicrm_value_nei_course_conference_details cd ON cd.entity_id = cg.id
-SET cg.status_id = {$inEligible},
+SET cg.status_id = {$ineligible},
 grant_rejected_reason_id = {$ineligibleReason}
-WHERE cg.status_id = {$awatingInfo} AND end_date <= '{$endDate}'";
+WHERE cg.status_id = {$awaitingInfo} AND end_date <= '{$endDate}'";
   CRM_Core_DAO::executeQuery($sql);
 }
 
