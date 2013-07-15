@@ -259,32 +259,6 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         ) 
       );
     }
-    $empId = $genId = $ccId = '-1';
-    if ($form->getVar('_id')) {
-      $tableName1 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_EMPLOYMENT, 'table_name', 'name');
-      $query1 = "SELECT id FROM {$tableName1} WHERE entity_id = {$form->getVar('_id')}";
-      $empId = CRM_Core_DAO::singleValueQuery($query1);
-      $tableName2 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_GENERAL, 'table_name', 'name');
-      $query2 = "SELECT id FROM {$tableName2} WHERE entity_id = {$form->getVar('_id')}";
-      $genId = CRM_Core_DAO::singleValueQuery($query2);
-      $tableName3 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_CONFERENCE, 'table_name', 'name');
-      $query3 = "SELECT id FROM {$tableName3} WHERE entity_id = {$form->getVar('_id')}";
-      $ccId = CRM_Core_DAO::singleValueQuery($query3);
-    }
-    
-      $form->assign('employment', 'custom_'.EMPLOYED_INDICATE.'_'.$empId);
-      $form->assign('employment_other', 'custom_'.EMPLOYMENT_OTHER.'_'.$empId);
-      $form->assign('position', 'custom_'.POSITION.'_'.$empId);
-      $form->assign('position_other', 'custom_'.POSITION_OTHER.'_'.$empId);
-      $form->assign('employment_setting', 'custom_'.EMPLOYMENT_SETTING.'_'.$empId);
-      $form->assign('employment_setting_other', 'custom_'.EMPLOYMENT_SETTING_OTHER.'_'.$empId);
-      $form->assign('init', 'custom_'.NEI_HEAR_ABOUT.'_'.$genId);
-      $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_'.$genId);
-      $form->assign('course', 'custom_'.COURSE_CONFERENCE_TYPE.'_'.$ccId);
-      $form->assign('course_other', 'custom_'.COURSE_CONFERENCE_TYPE_OTHER.'_'.$ccId);
-      CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/Grant/Form/GrantExtra.tpl',
-      ));
     $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
     $form->add('select', 
       'grant_rejected_reason_id', 

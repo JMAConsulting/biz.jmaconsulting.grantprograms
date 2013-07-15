@@ -281,7 +281,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     foreach ($sort->_vars as $key => $value) {
       if ($value['name'] == "status_weight" && 1 == $key) {
         $sort = trim($sort->orderBy());
-        $sort .= ', grant_application_received_date DESC';
+        $sort .= ', application_received_date DESC';
         break;
       }
     }
