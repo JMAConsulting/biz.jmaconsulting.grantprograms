@@ -10,19 +10,18 @@
     {capture assign=valueStyle }style="padding: 4px; border-bottom: 1px solid #999;"{/capture}
 
     <p>Dear {contact.display_name},</p>
-    <p>This is being sent to you as a receipt of {$grant_status} grant.</p>
+    <p>Processing of your grant application has been put on hold while we await further information from you.</p>
 Grant Program Name: {$grant_programs} <br>
-Grant  Type             : {$grant_type}<br>
-Total Amount            : {$grant.amount_total}<br>
+Grant Type: {$grant_type}<br>
+Total Amount: {$grant.amount_total|crmMoney:$currency}<br>
 {if $grant.grant_incomplete_reason}
-Grant Incomplete Reason:
-{$grant.grant_incomplete_reason}<br>
+Grant Incomplete Reason: {$grant.grant_incomplete_reason}<br>
 {/if}
 {if customField}
 {foreach from=$customField key=key item=data}
 <b>{$customGroup.$key}</b><br>
 {foreach from=$data key=dkey item=ddata}
-{$ddata.label} : {$ddata.value}<br>
+{$ddata.label}: {$ddata.value}<br>
 {/foreach}
 {/foreach}
 {/if}
