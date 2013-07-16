@@ -13,14 +13,14 @@
       </tr>
       <tr>
         <td width="85%">total_in_words</td><td width="15%" style="float:right; text-align:right;">check_total</td>
-      </tr> 
+      </tr>
       </table>
       </div>
       <div style="height:60px" >
       <table width="100%" cellpadding=0 cellspacing=0 ;">
       <tr>
          <td width="100%">payable_to_name</td>
-      </tr> 
+      </tr>
       <tr>
          <td width="100%">payable_to_address</td>
       </tr>
@@ -34,14 +34,14 @@
     </table>
     </div>
     <div style="height:300px" >
-    <div style="float:right; text-align:right;"> payment_id </div>    
+    <div style="float:right; text-align:right;"> payment_id </div>
      <table width="100%"  cellpadding=0 cellspacing=0 >
        <tr><td width="100%" colspan="4">RE: payment_reason</td></tr>
        <tr><td width="15%">Payment Date</td><td width="15%">Grant ID</td><td width="50%">Payee</td><td width="20%">Amount</td></tr>
-       <tr><td width="15%">payment_details</td> </tr> 
+       <tr><td width="15%">payment_details</td> </tr>
       <tr>
-      <td width="15%"></td><td width="15%%"></td><td width="50%" style="text-align:right;" >Total Amount&nbsp;&nbsp;&nbsp;&nbsp;</td><td width="15%"  >CAD :amount</td>
-      </tr> 
+      <td width="15%"></td><td width="15%%"></td><td width="50%" style="text-align:right;" >Total Amount&nbsp;&nbsp;&nbsp;&nbsp;</td><td width="15%"  >currency amount</td>
+      </tr>
      </table>
    </div>
     <div style="height:265px" >
@@ -50,10 +50,10 @@
       <tr><td width="100%" colspan="4">RE: payment_reason</td></tr>
       <tr><td width="15%">Payment Date</td><td width="15%">Grant ID</td><td width="50%">Payee</td><td width="20%">Amount</td></tr>
       <tr><td width="15%">payment_details</td>
-      </tr> 
+      </tr>
       <tr>
-      <td width="15%"></td><td width="15%%"></td><td width="50%" style="text-align:right; ">Total Amount&nbsp;&nbsp;&nbsp;&nbsp;</td><td width="20%"  >CAD :amount</td>
-      </tr> 
+      <td width="15%"></td><td width="15%%"></td><td width="50%" style="text-align:right; ">Total Amount&nbsp;&nbsp;&nbsp;&nbsp;</td><td width="20%"  >currency amount</td>
+      </tr>
     </table>
     </div>
   </body>
