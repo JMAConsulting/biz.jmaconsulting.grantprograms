@@ -177,6 +177,12 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
    */
   public $grant_rejected_reason_id;
   /**
+   * Id of Grant Incomplete Reason.
+   *
+   * @var int unsigned
+   */
+  public $grant_incomplete_reason_id;
+  /**
    *
    * @var string
    */
@@ -379,6 +385,16 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
           'required' => true,
           'import' => true,
           'where' => 'civicrm_grant.grant_rejected_reason_id',
+          'headerPattern' => '',
+          'dataPattern' => '',
+          'export' => false,
+        ) ,
+        'grant_incomplete_reason_id' => array(
+          'name' => 'grant_incomplete_reason_id',
+          'type' => CRM_Utils_Type::T_INT,
+          'required' => true,
+          'import' => true,
+          'where' => 'civicrm_grant.grant_incomplete_reason_id',
           'headerPattern' => '',
           'dataPattern' => '',
           'export' => false,
