@@ -13,11 +13,11 @@
     <p>This is being sent to you as a receipt of {$grant_status} grant.</p>
 Grant Program Name: {$grant_programs} <br>
 Grant  Type             : {$grant_type}<br>
-Total Amount            : {$params.amount_total}<br>
-{if $grant_decision_reason}
-Grant Decision Reason:
-{$grant_decision_reason}
-{/if}<br>
+Total Amount            : {$grant.amount_total}<br>
+{if $grant.grant_rejected_reason}
+Grant Ineligible Reason:
+{$grant.$grant.grant_rejected_reason}<br>
+{/if}
 {if customField}
 {foreach from=$customField key=key item=data}
 <b>{$customGroup.$key}</b><br>

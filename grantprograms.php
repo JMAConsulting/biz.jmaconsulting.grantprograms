@@ -1,4 +1,4 @@
-<?php
+ <?php
 require_once 'grantprograms.civix.php';
 require_once 'grantprograms_data_define.php';
 
@@ -727,11 +727,15 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $grantProgram = $grantPrograms[$params['grant_program_id']];
       $grantType = $grantTypes[$params['grant_type_id']];
       $grantStatus = $grantStatus[$params['status_id']];
+      $grantIneligibleReasons = CRM_Core_OptionGroup::values('reason_grant_ineligible');
       
       $page->assign('grant_type', $grantType);
       $page->assign('grant_programs', $grantProgram);
       $page->assign('grant_status', $grantStatus);
-      $page->assign('params', $params);
+      if (CRM_Utils_Array::value('grant_rejected_reason_id', $params)) {
+        $params['grant_rejected_reason'] = $grantIneligibleReasons[$params['grant_rejected_reason_id']];
+      }
+      $page->assign('grant', $params);
       CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
     }
 
