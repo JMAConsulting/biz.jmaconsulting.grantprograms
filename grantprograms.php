@@ -267,6 +267,14 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       FALSE
     );
 
+    $form->_reasonGrantIncomplete = CRM_Core_OptionGroup::values('reason_grant_incomplete');
+    $form->add('select', 
+      'grant_incomplete_reason_id', 
+      ts('Reason Grant Incomplete'),
+      array('' => ts('- select -')) + $form->_reasonGrantIncomplete, 
+      FALSE
+    );
+
     $form->_grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $form->add('select', 
       'grant_program_id', 
@@ -701,6 +709,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $grantType = $grantTypes[$params['grant_type_id']];
       $grantStatus = $grantStatus[$params['status_id']];
       $grantIneligibleReasons = CRM_Core_OptionGroup::values('reason_grant_ineligible');
+      $grantIncompleteReasons = CRM_Core_OptionGroup::values('reason_grant_incomplete');
       
       $page->assign('grant_type', $grantType);
       $page->assign('grant_programs', $grantProgram);
@@ -708,10 +717,17 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       if (CRM_Utils_Array::value('grant_rejected_reason_id', $params)) {
         $params['grant_rejected_reason'] = $grantIneligibleReasons[$params['grant_rejected_reason_id']];
       }
+      
+      if (CRM_Utils_Array::value('grant_rejected_reason_id', $params)) {
+        $params['grant_rejected_reason'] = $grantIneligibleReasons[$params['grant_rejected_reason_id']];
+      }
+      if (CRM_Utils_Array::value('grant_incomplete_reason_id', $params)) {
+        $params['grant_incomplete_reason'] = $grantIncompleteReasons[$params['grant_incomplete_reason_id']];
+      }
       $page->assign('grant', $params);
       CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
     }
-
+    
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     if (isset($endDate)) {
       $infoTooLate = key(CRM_Core_PseudoConstant::accountOptionValues('grant_info_too_late'));

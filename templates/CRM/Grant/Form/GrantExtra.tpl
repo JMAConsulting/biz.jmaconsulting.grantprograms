@@ -28,6 +28,10 @@
   <tr class="crm-grant-form-block-grant_rejected_reason_id grant_rejected_reason_id">
     <td class="label">{$form.grant_rejected_reason_id.label}</td>
     <td>{$form.grant_rejected_reason_id.html}</td>
+  </tr> 
+  <tr class="crm-grant-form-block-grant_incomplete_reason_id grant_incomplete_reason_id">
+    <td class="label">{$form.grant_incomplete_reason_id.label}</td>
+    <td>{$form.grant_incomplete_reason_id.html}</td>
   </tr>   
   <tr class="crm-grant-form-block-grant_program_id">
     <td class="label">{$form.grant_program_id.label}</td>
@@ -67,6 +71,7 @@
 {literal}
 cj(document).ready(function(){
   cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
+  cj('.crm-grant-form-block-grant_incomplete_reason_id').insertAfter('.crm-grant-form-block-status_id');
   cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
   cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
   cj('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
@@ -83,11 +88,23 @@ if ( cj("#status_id option:selected").text() == 'Ineligible') {
 } else {
   cj('.grant_rejected_reason_id').hide();
 }
+
+if (cj("#status_id option:selected").text() == 'Awaiting Information') {
+  cj('.grant_incomplete_reason_id').show();
+} else {
+  cj('.grant_incomplete_reason_id').hide();
+}
+
 cj('#status_id').change(function(){
-if ( this.options[this.selectedIndex].text == 'Ineligible' ) {
+if (this.options[this.selectedIndex].text == 'Ineligible') {
   cj('.grant_rejected_reason_id').show();
 } else {
   cj('.grant_rejected_reason_id').hide();
+}
+if (this.options[this.selectedIndex].text == 'Awaiting Information') {
+  cj('.grant_incomplete_reason_id').show();
+} else {
+  cj('.grant_incomplete_reason_id').hide();
 }
 });
 var grantId = {/literal}{if $grant_id}{$grant_id}{else}{literal}0{/literal}{/if}{literal};
