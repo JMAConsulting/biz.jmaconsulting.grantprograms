@@ -659,7 +659,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     if (!empty($id)) {
       $params['id'] = $id;
     }
-    CRM_Utils_Hook::grantAssessment($params);
+    CRM_Grantprograms_Hook::grantAssessment($params);
     if ($op == 'edit') {
       $smarty = CRM_Core_Smarty::singleton();
       $smarty->assign('previousGrant', $previousGrant);
