@@ -1,7 +1,7 @@
  <?php
 require_once 'grantprograms.civix.php';
-require_once 'grantprograms_data_define.php';
-
+define('PAY_GRANTS', 5);
+define('DELETE_GRANTS', 1);
 /**
  * Implementation of hook_civicrm_config
  */
@@ -25,7 +25,6 @@ function grantprograms_civicrm_install() {
   _grantprograms_civix_civicrm_install();
   $smarty = CRM_Core_Smarty::singleton();
   $config = CRM_Core_Config::singleton();
-  grantprograms_define($config->extensionsDir);
   $data = $smarty->fetch($config->extensionsDir . DIRECTORY_SEPARATOR . 'biz.jmaconsulting.grantprograms/sql/civicrm_msg_template.tpl');
   file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
@@ -260,32 +259,6 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
         ) 
       );
     }
-    $empId = $genId = $ccId = '-1';
-    if ($form->getVar('_id')) {
-      $tableName1 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_EMPLOYMENT, 'table_name', 'name');
-      $query1 = "SELECT id FROM {$tableName1} WHERE entity_id = {$form->getVar('_id')}";
-      $empId = CRM_Core_DAO::singleValueQuery($query1);
-      $tableName2 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_GENERAL, 'table_name', 'name');
-      $query2 = "SELECT id FROM {$tableName2} WHERE entity_id = {$form->getVar('_id')}";
-      $genId = CRM_Core_DAO::singleValueQuery($query2);
-      $tableName3 = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomGroup', NEI_CONFERENCE, 'table_name', 'name');
-      $query3 = "SELECT id FROM {$tableName3} WHERE entity_id = {$form->getVar('_id')}";
-      $ccId = CRM_Core_DAO::singleValueQuery($query3);
-    }
-    
-      $form->assign('employment', 'custom_'.EMPLOYED_INDICATE.'_'.$empId);
-      $form->assign('employment_other', 'custom_'.EMPLOYMENT_OTHER.'_'.$empId);
-      $form->assign('position', 'custom_'.POSITION.'_'.$empId);
-      $form->assign('position_other', 'custom_'.POSITION_OTHER.'_'.$empId);
-      $form->assign('employment_setting', 'custom_'.EMPLOYMENT_SETTING.'_'.$empId);
-      $form->assign('employment_setting_other', 'custom_'.EMPLOYMENT_SETTING_OTHER.'_'.$empId);
-      $form->assign('init', 'custom_'.NEI_HEAR_ABOUT.'_'.$genId);
-      $form->assign('init_other', 'custom_'.INITIATIVE_OTHER.'_'.$genId);
-      $form->assign('course', 'custom_'.COURSE_CONFERENCE_TYPE.'_'.$ccId);
-      $form->assign('course_other', 'custom_'.COURSE_CONFERENCE_TYPE_OTHER.'_'.$ccId);
-      CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/Grant/Form/GrantExtra.tpl',
-      ));
     $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
     $form->add('select', 
       'grant_rejected_reason_id', 
@@ -952,63 +925,6 @@ function grantprograms_getCustomFieldData($id) {
     $customFieldData['option_group_id'] = $DAO->option_group_id;
   }
   return $customFieldData;
-}
-
-function grantprograms_define($extensionsDir) {
-  $file  = fopen($extensionsDir .'biz.jmaconsulting.grantprograms/grantprograms_data_define.php', 'w'); 
-  fwrite($file, "<?php\n\n//define custom table Names.\ndefine('COURSE_CONFERENCE_DETAILS', 'civicrm_value_nei_course_conference_details');\ndefine('EMPLOYMENT_INFORMATION', 'civicrm_value_nei_employment_information');\ndefine('GENERAL_INFORMATION', 'civicrm_value_nei_general_information');\ndefine('NEI_ID_TABLE', 'civicrm_value_nei_id');\n\n");
-
-  fwrite($file, "//define custom group Names.\ndefine('NEI_EMPLOYMENT', 'NEI_Employment_Information');\ndefine('NEI_GENERAL', 'NEI_General_information');\ndefine('NEI_CONFERENCE', 'NEI_Course_conference_details');\n\n");
-
-  fwrite($file, "//define custom groups Ids.\n");
-  $tables = array(
-    'civicrm_value_nei_employment_information' => 'COURSE_CONFERENCE_DETAILS_ID',
-    'civicrm_value_nei_general_information' => 'EMPLOYMENT_INFORMATION_ID',
-    'civicrm_value_nei_course_conference_details' => 'GENERAL_INFORMATION_ID',
-    'civicrm_value_nei_id' => 'NEI_ID',
-  );
-  foreach ($tables as $tableKey => $tableValue) {
-    fwrite($file, "define('".$tableValue."', '".CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $tableKey, 'id' ,'table_name')."');\n");
-  }
-  
-  fwrite($file, "\n//define custom field Ids and Columns.\n");
-  $customFields = array(
-    'predominant_clinical_area_of_pra' => 'NEI_PRACTICE_AREA',
-    'nei_employment_status' => 'NEI_EMPLOYMENT_STATUS',
-    'if_you_are_not_employed_indicate' => 'EMPLOYED_INDICATE',
-    'other' => 'EMPLOYMENT_OTHER',
-    'employer_name' => 'EMPLOYER_NAME',
-    'province_of_employment' => 'PROVINCES_OF_EMPLOYMENT',
-    'position' => 'POSITION',
-    'select_or_other' => 'POSITION_OTHER',
-    'employment_setting' => 'EMPLOYMENT_SETTING',
-    'employment_setting_other' => 'EMPLOYMENT_SETTING_OTHER',
-    'work_phone' => 'WORK_PHONE',
-    'work_phone_extension' => 'WORK_PHONE_EXTENSION',
-    'how_did_you_hear_about_this_init' => 'NEI_HEAR_ABOUT',
-    'other_initiative' => 'INITIATIVE_OTHER',
-    'course_conference_type' => 'COURSE_CONFERENCE_TYPE',
-    'course_conference_type_other' => 'COURSE_CONFERENCE_TYPE_OTHER',
-    'course_conference_code' => 'COURSE_CONFERENCE_CODE',
-    'course_conference_name' => 'COURSE_CONFERENCE_NAME',
-    'course_conference_provider' => 'COURSE_CONFERENCE_PROVDER',
-    'how_will_this_course_enhance_the' => 'NEI_COURSE_ENHANCEMENT',
-    'proof_of_completion' => 'PROOF_OF_COMPELTION',
-    'proof_of_payment' => 'PROOF_OF_PAYMENT',
-    'type_of_course_provider' => 'COURSE_PROVIDER_TYPE',
-    'start_date' => 'START_DATE',
-    'end_date' => 'END_DATE',
-    'college_of_nurses_of_ontario_reg' => 'NEI_CNO_REGISTRATION_ID',
-    'social_insurance_number' => 'NEI_CIN',
-  );
-  
-  foreach ($customFields as $tableKey => $tableValue) {
-    fwrite($file, "define('".$tableValue."', '".CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $tableKey, 'id' ,'column_name')."');\n");
-    fwrite($file, "define('".$tableValue."_COLUMN', '".$tableKey."');\n");
-  } 
-  fwrite($file, "\ndefine('PAY_GRANTS', 5);\ndefine('DELETE_GRANTS', 1);\n\n?>");
-  fclose($file);
-  return;
 }
 
 function grantprograms_addRemoveMenu($enable) {
