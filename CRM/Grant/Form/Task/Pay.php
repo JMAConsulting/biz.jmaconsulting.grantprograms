@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.1                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -34,114 +34,115 @@
  *
  */
 
+require_once 'CRM/Grant/Form/Task.php';
+
 /**
  * This class provides the functionality to delete a group of
  * participations. This class provides functionality for the actual
  * deletion.
  */
-class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task {
-  /**
-   * Are we operating in "single mode", i.e. deleting one
-   * specific participation?
-   *
-   * @var boolean
-   */
-  protected $_single = FALSE;
-  
-  /**
-   * build all the data structures needed to build the form
-   *
-   * @return void
-   * @access public
-   */
-  function preProcess() {
-    parent::preProcess();
-    
-    //check permission for delete.
-    if (!CRM_Core_Permission::checkActionPermission('CiviGrant', CRM_Core_Action::PAY)) {
-      CRM_Core_Error::fatal(ts('You do not have permission to access this page'));  
-    }
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
-    
-    $paidGrants = $approvedGrants = array();
-    CRM_Core_PseudoConstant::populate(&$paidGrants, 'CRM_Grant_DAO_Grant', TRUE, 'status_id', FALSE, " id in (".implode (', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}");
-    CRM_Core_PseudoConstant::populate(&$approvedGrants, 'CRM_Grant_DAO_Grant', TRUE, 'status_id', FALSE, " id in (".implode (', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Approved for Payment']}");
-    
-    $this->_paidGrants = $paidGrants;
-    $this->_notApproved = count($this->_grantIds) - count($this->_paidGrants) - count($approvedGrants);
-    
-    foreach ($approvedGrants as $key => $value) {
-      $grantProgram = new CRM_Grant_DAO_Grant();
-      $grantArray = array('id' => $key);
-      $grantProgram->copyValues($grantArray);
-      $grantProgram->find(TRUE);
-      $currencyDetails[$grantProgram->contact_id][$grantProgram->currency] = $key;
-    }
-    //$this->_currency = $currencyDetails;
-    $curency = 0;
-    if (!empty($currencyDetails)) {
-      foreach ($currencyDetails as $key => $value) {
-        if (count($value) > 1) {
-          foreach ($value as $unsetKey => $unsetVal) {
-            unset($approvedGrants[$unsetVal]);
-            $curency++;
-          }
+class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task 
+{
+    /**
+     * Are we operating in "single mode", i.e. deleting one
+     * specific participation?
+     *
+     * @var boolean
+     */
+    protected $_single = false;
+
+    /**
+     * build all the data structures needed to build the form
+     *
+     * @return void
+     * @access public
+     */
+    function preProcess( ) 
+    {
+        parent::preProcess( );
+
+        //check permission for delete.
+        if ( !CRM_Core_Permission::checkActionPermission( 'CiviGrant', CRM_Core_Action::PAY ) ) {
+            CRM_Core_Error::fatal( ts( 'You do not have permission to access this page' ) );  
         }
-      }
-      $this->_curency = $curency;
+        require_once "CRM/Core/PseudoConstant.php";
+        require_once 'CRM/Core/OptionGroup.php';
+        $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
+        
+        $paidGrants = $approvedGrants = array();
+        CRM_Core_PseudoConstant::populate( &$paidGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}" );
+        CRM_Core_PseudoConstant::populate( &$approvedGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Approved for Payment']}" );
+        
+        $this->_paidGrants = $paidGrants;
+        $this->_notApproved = count($this->_grantIds) - count( $this->_paidGrants ) - count( $approvedGrants );
+
+        foreach ( $approvedGrants as $key => $value ) {
+            $grantProgram = new CRM_Grant_DAO_Grant( );
+            $grantArray =  array( 'id' => $key );
+            $grantProgram->copyValues( $grantArray );
+            $grantProgram->find( true );
+            $currencyDetails[$grantProgram->contact_id][$grantProgram->currency] = $key;
+        }
+        //$this->_currency = $currencyDetails;
+        $curency = 0;
+        if ( !empty( $currencyDetails ) ) {
+            foreach ( $currencyDetails as $key => $value ) {
+                if ( count($value) > 1 ) {
+                    foreach ( $value as $unsetKey => $unsetVal ) {
+                        unset( $approvedGrants[$unsetVal] );
+                        $curency++;
+                    }
+                }
+            }
+            $this->_curency = $curency;
+        }
+        $this->_approvedGrants = $approvedGrants;
     }
-    $this->_approvedGrants = $approvedGrants;
-  }
-  
-  /**
-   * Build the form
-   *
-   * @access public
-   * @return void
-   */
-  function buildQuickForm() 
-  {
-    if (count($this->_approvedGrants)) {
-      $this->assign('paid', count( $this->_paidGrants));
-      $this->assign('approved', count( $this->_approvedGrants));
-      $this->assign('total', count( $this->_grantIds));
-      $this->assign('notApproved', $this->_notApproved);
-      $this->assign('multipleCurrency', $this->_curency);
-      
-      $this->addButtons( 
-        array(
-          array( 
-            'type' => 'next',
-            'name' => ts('Continue >>'),
-            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'isDefault' => true),
-          array (
-            'type' => 'cancel',
-            'name' => ts('Cancel')),
-          )
-        );
-    } 
-    else {
-      $this->addButtons(
-        array( 
-          array(
-            'type' => 'cancel', 
-            'name' => ts('Cancel')), 
-          ) 
-        );
+
+    /**
+     * Build the form
+     *
+     * @access public
+     * @return void
+     */
+    function buildQuickForm( ) 
+    {
+        if ( count($this->_approvedGrants) ) {
+            $this->assign( 'paid', count( $this->_paidGrants ) );
+            $this->assign( 'approved', count( $this->_approvedGrants ) );
+            $this->assign( 'total', count( $this->_grantIds ) );
+            $this->assign( 'notApproved', $this->_notApproved );
+            $this->assign( 'multipleCurrency', $this->_curency );
+            
+            $this->addButtons( array(
+                                 array ( 'type'      => 'next',
+                                         'name'      => ts('Continue >>'),
+                                         'spacing'   => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+                                         'isDefault' => true   ),
+                                 array ( 'type'      => 'cancel',
+                                         'name'      => ts('Cancel') ),
+                                 )
+                           );
+        } else {
+             $this->addButtons(array( 
+                                    array ( 'type'      => 'cancel', 
+                                            'name'      => ts('Cancel') ), 
+                                    ) 
+                              );
+        }
     }
-  }
-  
-  /**
-   * process the form after the input has been submitted and validated
-   *
-   * @access public
-   * @return None
-   */
-  public function postProcess() {
-    $this->set('approvedGrants', $this->_approvedGrants);
-    $this->controller->resetPage('GrantPayment');
-  }
+
+    /**
+     * process the form after the input has been submitted and validated
+     *
+     * @access public
+     * @return None
+     */
+    public function postProcess( ) 
+    {
+        $this->set( 'approvedGrants', $this->_approvedGrants );
+        $this->controller->resetPage( 'GrantPayment' );
+    }
 }
 
 
