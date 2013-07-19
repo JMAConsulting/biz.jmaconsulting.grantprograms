@@ -310,13 +310,6 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     fputs($fp, $line);
     fclose($fp);
   }
- 
-  static function replaceVariables($html, $values) {
-    foreach ($values as $key => $value) {
-      $html = str_replace($key, $value, $html);
-    }
-    return $html;
-  }
   
   static function makePDF($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
@@ -334,20 +327,20 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     }
     $subject = $grantDao->subject;
     $html = $grantDao->html;
-
-    $final_html = NULL;
-    foreach ($rows as $values) {
-      $words = new CRM_Grant_Words();
-      $amount = $values['amount'];
-      $values['check_total'] = ltrim($amount, '$');
-      $amount = str_replace (',', '', $amount);
-      $values['total_in_words'] = ucwords($words->convert_number_to_words(ltrim($amount, '$')));
-      $final_html .= self::replaceVariables($html, $values) . "<br>";
+    $text = $grantDao->text;
+    $format = $grantDao->format;
+    $grantDao->free();
+    
+    civicrm_smarty_register_string_resource();
+    $smarty = CRM_Core_Smarty::singleton();
+    foreach(array('text', 'html') as $elem) {
+      $$elem = $smarty->fetch("string:{$$elem}");
     }
+    
     $output = file_put_contents( 
       $pdf_filename, 
       CRM_Utils_PDF_Utils::html2pdf( 
-        $final_html,
+        $html,
         $fileName,
         TRUE,
         'Letter'

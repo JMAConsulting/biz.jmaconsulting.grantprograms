@@ -744,10 +744,6 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       if (CRM_Utils_Array::value('grant_rejected_reason_id', $params)) {
         $params['grant_rejected_reason'] = $grantIneligibleReasons[$params['grant_rejected_reason_id']];
       }
-      
-      if (CRM_Utils_Array::value('grant_rejected_reason_id', $params)) {
-        $params['grant_rejected_reason'] = $grantIneligibleReasons[$params['grant_rejected_reason_id']];
-      }
       if (CRM_Utils_Array::value('grant_incomplete_reason_id', $params)) {
         $params['grant_incomplete_reason'] = $grantIncompleteReasons[$params['grant_incomplete_reason_id']];
       }
