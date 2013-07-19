@@ -214,8 +214,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       }
     }
     $totalAmount = 0;
-    $words = new CRM_Grant_Words();
-    foreach ($details as $id => $value) {
+    foreach ( $details as $id => $value ) {
+      
       $grantPayment[$id]['contact_id'] = $id;
       $grantPayment[$id]['financial_type_id'] = $values['financial_type_id'];
       $grantPayment[$id]['payment_batch_number'] = $values['payment_batch_number'];
@@ -254,10 +254,10 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       } 
       require_once 'CRM/Grant/Words.php';
       $words = new CRM_Grant_Words();
-      $amountInWords = ucwords($words->convert_number_to_words($values['amount']));
-      $grantPayment[$grantKey]['total_in_words'] = $values['total_in_words'] = $grantValues['total_in_words'] = $amountInWords;
-      $result = CRM_Grant_BAO_GrantPayment::add( &$values, $ids = array());
-      $grantPayment[$grantKey]['amount'] = $values['amount'];
+      $amountInWords = ucwords($words->convert_number_to_words( $values['amount'] ) );
+      $values['total_in_words'] = $grantValues['total_in_words'] = $amountInWords;
+      $result = CRM_Grant_BAO_GrantPayment::add( &$values, $ids = array() );
+      $grantPayment[$grantKey]['amount'] = CRM_Utils_Money::format( $values['amount'], null, null,false );
       $contactPayments[$grantKey] = $result->id;
       unset($grantPayment[$grantKey]['payment_status_id']);
       if ( $makePdf ) {
@@ -267,8 +267,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         
     $downloadName  = check_plain('grantPayment');
     $downloadName .= '_'.date('Ymdhis');
-    $this->assign('grantPayment', $grantPayment);
-    if (!$makePdf)  {
+    if ( !$makePdf )  {
       $downloadName .= '.csv';
       $fileName = CRM_Utils_File::makeFileName( $downloadName );
       $config = CRM_Core_Config::singleton();
@@ -279,14 +278,15 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $fileName = CRM_Utils_File::makeFileName( $downloadName );
       $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
     }
-    $this->assign('date', date('Y-m-d'));
-    $this->assign('time', date('H:i:s'));
-    $this->assign('account_name',CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_FinancialType', $values['financial_type_id'], 'name'));
-    $this->assign('batch_number', $values['payment_batch_number']);
-    $this->assign('contact',CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $_SESSION[ 'CiviCRM' ][ 'userID' ], 'display_name'));
-    $this->assign('total_payments', count($grantPayment));
-    $this->assign('total_amount' , CRM_Utils_Money::format($totalAmount, NULL, NULL,FALSE));
-    $this->assign('domain_name', CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Domain', CRM_Core_Config::domainID(), 'name'));
+    $this->assign( 'date', date('Y-m-d'));
+    $this->assign( 'time', date('H:i:s'));
+    $this->assign( 'account_name',CRM_Core_DAO::getFieldValue( 'CRM_Financial_DAO_FinancialType', $values['financial_type_id'], 'name' ) );
+    $this->assign( 'batch_number', $values['payment_batch_number']);
+    $this->assign( 'contact',CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $_SESSION[ 'CiviCRM' ][ 'userID' ], 'display_name' ) );
+    $this->assign( 'grantPayment', $grantPayment );
+    $this->assign( 'total_payments', count($grantPayment) );
+    $this->assign( 'total_amount' , CRM_Utils_Money::format( $totalAmount, null, null,false ) );
+    $this->assign( 'domain_name', CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_Domain', CRM_Core_Config::domainID( ) , 'name' ) );
     
     $checkRegisterFile = check_plain('CheckRegister');
     $checkRegisterFile .= '.pdf';
