@@ -243,6 +243,8 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_key = CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next = CRM_Utils_Request::retrieve('next', 'Positive', $form);
     $form->_prev = CRM_Utils_Request::retrieve('prev', 'Positive', $form);
+    $form->_searchGrants = CRM_Utils_Request::retrieve('searchGrants', 'String', $form);
+    $form->_ncid = CRM_Utils_Request::retrieve('ncid', 'String', $form);
     if (CRM_Utils_Request::retrieve('context', 'String', $form) == 'search' && isset($form->_next)) {
       $form->addButtons(array( 
         array ('type' => 'upload',
@@ -871,10 +873,9 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
    
     // FIXME: cookies error
     if ($form->getVar('_context') == 'search') {
-      $array['contact_id'] = $form->getVar('_contactID');
-      $grants = CRM_Grant_BAO_GrantProgram::getGrants($array);
-      $grants = array_flip(array_keys($grants));
-        
+      $array['contact_id'] = $form->_ncid;
+      $searchGrants = explode(',', $form->_searchGrants);
+      $grants = array_flip($searchGrants);
       $foundit = FALSE;
       foreach ($grants as $gKey => $gVal) {
         if ($foundit) {
@@ -890,11 +891,12 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
           $foundit = TRUE;
         }
       }
-
+      $grantParams['id'] = $next;
+      $result = CRM_Grant_BAO_GrantProgram::getGrants($grantParams);
       if (CRM_Utils_Array::value($form->getButtonName('submit', 'savenext'), $_POST)) {
         if ($form->getVar('_id') != $form->_prev) {
           CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
-            "reset=1&action=update&id={$form->_next}&cid={$array['contact_id']}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}"));
+            "reset=1&action=update&id={$form->_next}&cid={$array['contact_id']}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}&ncid={$result[$next]['contact_id']}&searchGrants={$form->_searchGrants}"));
         } 
         else {
           CRM_Core_Session::setStatus( ts('The next record in the Search no longer exists. Select another record to edit if desired.'));
