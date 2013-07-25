@@ -432,34 +432,6 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   }
   
   if ($formName == 'CRM_Grant_Form_Search' && $form->get('context') == 'dashboard') {
-    $query = "SELECT
-      approved.amount_granted AS approved,
-      paid.amount_granted AS paid, 
-      prev.amount_granted AS prev, 
-      every.amount_granted AS every, 
-      cov.label 
-      FROM `civicrm_option_value` cov
-      LEFT JOIN civicrm_option_group cog ON cog.id = cov.option_group_id
-      LEFT JOIN civicrm_grant approved ON approved.status_id = cov.value AND (cov.value = 7 OR cov.value = 2) AND (YEAR(approved.application_received_date) = YEAR(now()))
-      LEFT JOIN civicrm_grant paid ON paid.status_id = cov.value AND cov.value = 4 AND (YEAR(paid.application_received_date) = YEAR(now()))
-      LEFT JOIN civicrm_grant prev ON prev.status_id = cov.value AND cov.value = 4 AND (YEAR(prev.application_received_date) < YEAR(now()))
-      LEFT JOIN civicrm_grant every ON every.status_id = cov.value AND cov.value = 4
-      WHERE cog.name = 'grant_status'";
-
-    $dao = CRM_Core_DAO::executeQuery($query);
-    $rows = array();
-
-    while ($dao->fetch()) {
-      $rows[$dao->approved]['approved'] = CRM_Utils_Money::format($dao->approved);
-      $rows[$dao->paid]['paid'] = CRM_Utils_Money::format($dao->paid);
-      $rows[$dao->prev]['prev'] = CRM_Utils_Money::format($dao->prev);
-      $rows[$dao->every]['every'] = CRM_Utils_Money::format($dao->every);
-    }
-    $rows = array_intersect_key($rows, array_flip(array_filter(array_keys($rows))));
-    $smarty =  CRM_Core_Smarty::singleton( );
-    if (isset($rows)) {
-      $smarty->assign('values', $rows);
-    }
     //Version of grant program listings
     $grantProgram = array();
     require_once 'CRM/Grant/DAO/GrantProgram.php';
