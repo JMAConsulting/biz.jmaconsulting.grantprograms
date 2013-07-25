@@ -265,7 +265,7 @@ class CRM_Grant_BAO_Query {
       case 'grant_amount_low':
       case 'grant_amount_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount', 'amount_total', 'Total Amount'
+          'civicrm_grant', 'grant_amount', 'amount_granted', 'Amount Granted'
         ); 
       case 'grant_amount_total':
       case 'grant_amount_total_low':
