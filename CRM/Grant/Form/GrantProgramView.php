@@ -256,8 +256,10 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     
   public function processFinalization() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
+    $grantRej = CRM_Core_OptionGroup::values('reason_grant_ineligible', TRUE);
     $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
     $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
+    $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
     if ($algoName == "immediate") {
       $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
     }
@@ -271,6 +273,20 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
     if (!empty($result)) {
       foreach ($result as $key => $row) {
+        $userparams['contact_id'] = $row['contact_id'];
+        $userparams['grant_program_id'] = $_POST['pid'];
+        $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $row['grant_id']);
+        $requestedAmount = (($row['assessment']/100) * $row['amount_total'] * ($grantThresholds['Funding factor'] / 100));
+        $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
+        if ($requestedAmount > $amountEligible) {
+          if ($amountEligible == 0) {
+            $ids['grant'] = $key;
+            $row['status_id'] = $grantStatus['Ineligible'];
+            $row['grant_rejected_reason_id'] = $grantRej['Applicant has received their annual maximum already'];       
+            $result = CRM_Grant_BAO_Grant::add(&$row, &$ids);
+          }
+        }
+        
         if ( $row['amount_granted'] > 0 ) {
           $ids['grant'] = $key;
           $row['status_id'] = $grantStatus['Approved for Payment'];
