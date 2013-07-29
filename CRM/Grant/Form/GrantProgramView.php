@@ -202,13 +202,16 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $page = new CRM_Core_Page();
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $eligibleCountMessage = $remainingAmount = NULL;
+     if ($nonEligibleCount) {
+      $nonEligibleCountMessage = $nonEligibleCount." eligible applications were not allocated since they have already received their annual maximum.";
+    }
     if ($eligibleCount) {
       $eligibleCountMessage = $eligibleCount." eligible applications were not allocated ".CRM_Utils_Money::format($eligibleAmount,NULL, NULL,FALSE)." in funds they would have received were funds available. ";
     }
     if ($totalAmount > 0) {
       $remainingAmount = CRM_Utils_Money::format($totalAmount,NULL, NULL,FALSE)." remains unallocated.";
     }
-    $message = "Trial Allocation Completed. ".CRM_Utils_Money::format($grantedAmount,NULL, NULL,FALSE)." allocated to {$grantedCount} eligible applications. ".$eligibleCountMessage.$remainingAmount;
+    $message = "Trial Allocation Completed. ".CRM_Utils_Money::format($grantedAmount,NULL, NULL,FALSE)." allocated to {$grantedCount} eligible applications. ".$eligibleCountMessage.$nonEligibleCountMessage.$remainingAmount;
    
     $page->assign('message', $message);
       
