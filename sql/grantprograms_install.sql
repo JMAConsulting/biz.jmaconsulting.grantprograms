@@ -258,7 +258,7 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 (@opv1, @opGId, 'Outside dates', '1', 'Outside dates', NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv2, @opGId, 'Ineligible', '2', 'Ineligible', NULL, 0, 2, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv3, @opGId, 'Information not received in time', '3', 'Information not received in time', NULL, 0, 3, 1, NULL, 0, 0, 1, NULL, 1, NULL),
-(@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL);
+(@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv5, @opGId, 'Applicant has received their annual maximum already', '5', 'Applicant has received their annual maximum already', NULL, 0, 5, 1, NULL, 0, 0, 1, NULL, 1, NULL);
 
 -- Reason Grant Incomplete
