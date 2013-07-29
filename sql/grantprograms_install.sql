@@ -246,10 +246,12 @@ SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
+SET @opv5 := '';
 SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Outside dates' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Information not received in time' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Insufficient funds in program' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Applicant has received their annual maximum already' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
@@ -257,6 +259,7 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 (@opv2, @opGId, 'Ineligible', '2', 'Ineligible', NULL, 0, 2, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv3, @opGId, 'Information not received in time', '3', 'Information not received in time', NULL, 0, 3, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL);
+(@opv5, @opGId, 'Applicant has received their annual maximum already', '5', 'Applicant has received their annual maximum already', NULL, 0, 5, 1, NULL, 0, 0, 1, NULL, 1, NULL);
 
 -- Reason Grant Incomplete
 SET @opGId := '';
