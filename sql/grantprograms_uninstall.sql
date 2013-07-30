@@ -128,7 +128,9 @@ DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Report';
 SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
 
 DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_financial_type' AND entity_id = @financialType;
-
 DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
-
 DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
+
+ALTER table civicrm_grant DROP column grant_incomplete_reason_id;
+
+DELETE FROM civicrm_extension WHERE full_name = 'biz.jmaconsulting.grantprograms';
