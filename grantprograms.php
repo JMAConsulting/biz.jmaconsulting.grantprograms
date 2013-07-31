@@ -332,9 +332,15 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       if (CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')) {
         if (CRM_Utils_Array::value('amount_granted', $form->_elementIndex)) {
           $form->_elements[$form->_elementIndex['amount_granted']]->freeze();
-          if (array_key_exists('assessment', $form->_elementIndex)) {
-            $form->_elements[$form->_elementIndex['assessment']]->freeze();
-          }
+        }
+        if (CRM_Utils_Array::value('assessment', $form->_elementIndex)) {
+          $form->_elements[$form->_elementIndex['assessment']]->freeze();
+        }
+        if (CRM_Utils_Array::value('amount_total', $form->_elementIndex)) {
+          $form->_elements[$form->_elementIndex['amount_total']]->freeze();
+        }
+        if (CRM_Utils_Array::value('amount_requested', $form->_elementIndex)) {
+          $form->_elements[$form->_elementIndex['amount_requested']]->freeze();
         }
         CRM_Core_Region::instance('page-body')->add(array(
           'template' => 'CRM/Grant/Form/Freeze.tpl',
