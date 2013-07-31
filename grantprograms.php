@@ -826,8 +826,13 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
     $customGroupID = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_OptionGroup', $form->_submitValues['label'], 'id', 'title');
     foreach ($form->_submitValues['option_label'] as $key => $value) {
       if (!empty($value)) {
-        $sql = "UPDATE civicrm_option_value SET description = ".$form->_submitValues['option_description'][$key]." WHERE option_group_id = {$customGroupID} AND label = '{$value}'";
-        CRM_Core_DAO::executeQuery($sql);
+        $sql = "UPDATE civicrm_option_value SET description = %1 WHERE option_group_id = %2 AND label = %3";
+        $params = array(
+          1 => array($form->_submitValues['option_description'][$key], 'String'),
+          2 => array($customGroupID, 'Integer'),
+          3 => array($value, 'String'),
+        );
+        CRM_Core_DAO::executeQuery($sql, $params);
       }
     }
   }
