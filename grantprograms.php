@@ -583,13 +583,19 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     $calculateAssessment = FALSE;
     $params['adjustment_value'] = TRUE;
     $previousGrant = NULL;
+    $smarty = CRM_Core_Smarty::singleton();
+    $sendMail = TRUE;
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
+      if ($params['status_id'] == $previousGrant->status_id) {
+        $sendMail = FALSE;
+      }
       if ((CRM_Utils_Array::value('assessment', $params) == $previousGrant->assessment)) {
         $calculateAssessment = TRUE;
       }
     }
+    $smarty->assign('sendMail', $sendMail);
     $grantStatusApproved = array_search('Approved for Payment', $grantStatus);
     if ($grantStatusApproved == $params['status_id']  && empty($params['decision_date']) && 
       ($op == 'create') || ($previousGrant && !$previousGrant->decision_date && 
@@ -728,7 +734,11 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $params['grant_incomplete_reason'] = $grantIncompleteReasons[$params['grant_incomplete_reason_id']];
       }
       $page->assign('grant', $params);
-      CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
+      $smarty = CRM_Core_Smarty::singleton();
+      $sendMail = $smarty->get_template_vars('sendMail');
+      if ($sendMail) {
+        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
+      }
     }
     
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
