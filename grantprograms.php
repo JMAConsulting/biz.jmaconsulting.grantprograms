@@ -677,6 +677,8 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $customData = array();
       if (!CRM_Utils_Array::value('custom', $params)) {
         $params['custom'] = array();
+        $entityValues = CRM_Core_BAO_CustomValueTable::getEntityValues($objectId, 'Grant');
+        getCustomFields(array_filter($entityValues), $customData);
       }
       foreach ($params['custom'] as $key => $value) {
         foreach ($value as $index => $field) {
@@ -691,6 +693,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           }
         }
       }
+      $customGroup = $customField = array();
       if (!empty( $customData)) {
         foreach ($customData as $dataKey => $dataValue) {
           $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',$dataKey,'title');
@@ -711,9 +714,9 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
             $count++;
           }
         }
-        $page->assign('customGroup', $customGroup);
-        $page->assign('customField', $customField);
       }
+      $page->assign('customGroup', $customGroup);
+      $page->assign('customField', $customField);
       
       $grantStatus = CRM_Core_OptionGroup::values('grant_status');
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
@@ -1020,4 +1023,20 @@ function grantprograms_addRemoveMenu($enable) {
   }
   CRM_Core_BAO_ConfigSetting::create($params);
   return;
+}
+ 
+function getCustomFields($params, &$values) {
+  static $_customGroup = array();
+  if (empty($_customGroup)) {
+    $query = "SELECT ccf.id, ccg.id custom_group FROM civicrm_custom_group ccg
+LEFT JOIN civicrm_custom_field ccf ON ccf.custom_group_id = ccg.id
+WHERE ccg.name LIKE 'NEI_%' ORDER BY ccg.id";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $_customGroup[$dao->custom_group][$dao->id] = $dao->id;
+    }
+  }
+  foreach ($_customGroup as $key => $val) {
+    $values[$key] = array_intersect_key($params, $val);
+  }
 }
