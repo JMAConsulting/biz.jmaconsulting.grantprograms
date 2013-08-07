@@ -72,12 +72,24 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
    * @return None
    */
   public function postProcess() {
-    $deletedGrantPayments = 0;
-    $status = array(
-      ts('Cancel Grant Payments(s): %1', array(1 => $deletedGrantPayments)),
-      ts('Total Selected Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))),
+    if (empty($this->_grantPaymentIds)) {
+      return FALSE;
+    }    
+    // change status of payment(s) to Cancelled And grant status to Eligible
+    $query = "UPDATE civicrm_grant cg
+LEFT JOIN civicrm_entity_payment cep ON cep.entity_id = cg.id
+LEFT JOIN civicrm_payment cp ON cp.id = cep.payment_id
+SET cg.status_id = %1,
+cp.payment_status_id = %2
+WHERE  cp.id IN (" . implode(',', $this->_grantPaymentIds) . ") AND cep.entity_table = 'civicrm_grant'";
+    $params = array(
+      1 => array(CRM_Core_OptionGroup::getValue('grant_status', 'Eligible', 'name'), 'Integer'),
+      2 => array(CRM_Core_OptionGroup::getValue('grant_payment_status', 'Cancelled', 'name'), 'Integer'),
     );
-    CRM_Core_Session::setStatus($status);
+    CRM_Core_DAO::executeQuery($query, $params);
+
+    CRM_Core_Session::setStatus(ts('Cancel Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
+    CRM_Core_Session::setStatus(ts('Total Selected Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
   }
 }
 
