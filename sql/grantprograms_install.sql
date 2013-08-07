@@ -123,13 +123,15 @@ SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Printed' AND option_
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Reprinted' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Stopped' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Cancelled' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
 (@opv1, @opGId, 'Printed', '1', 'Printed', NULL, 0, 0, 1, 'Payment that has had cheque or other payment created via PDF or csv download. The default status.', 0, 1, 1, NULL, 1, NULL),
-(@opv3, @opGId, 'Stopped', '2', 'Stopped', NULL, 0, 0, 1, 'The bank has been told to put a Stop Payment on the cheque or payment. Usually caused by a lost cheque that is being replaced by a newly printed one.', 0, 1, 1, NULL, 1, NULL),
-(@opv2, @opGId, 'Reprinted', '3', 'Reprinted', NULL, 0, 1, 1, 'This payment is no longer valid, and a new one has been printed to replace it. For example, a cheque jammed in the printer has been reprinted on cheque with a different number.', 0, 1, 1, NULL, 1, NULL),
-(@opv4, @opGId, 'Withdrawn', '4', 'Withdrawn', NULL, 0, 0, 2, 'Payment has been returned. For example, a grant winner gets a different better grant that makes them no longer eligible for this grant.', 0, 1, 1, NULL, NULL, NULL);
+(@opv3, @opGId, 'Stopped', '2', 'Stopped', NULL, 0, 0, 2, 'The bank has been told to put a Stop Payment on the cheque or payment. Usually caused by a lost cheque that is being replaced by a newly printed one.', 0, 1, 1, NULL, 1, NULL),
+(@opv2, @opGId, 'Reprinted', '3', 'Reprinted', NULL, 0, 1, 3, 'This payment is no longer valid, and a new one has been printed to replace it. For example, a cheque jammed in the printer has been reprinted on cheque with a different number.', 0, 1, 1, NULL, 1, NULL),
+(@opv4, @opGId, 'Withdrawn', '4', 'Withdrawn', NULL, 0, 0, 4, 'Payment has been returned. For example, a grant winner gets a different better grant that makes them no longer eligible for this grant.', 0, 1, 1, NULL, NULL, NULL),
+(@opv5, @opGId, 'Cancelled', '5', 'Cancelled', NULL, 0, 0, 5, 'Payment has been cancelled.', 0, 1, 1, NULL, 1, NULL);
 
 -- Grant Program Status
 SET @opGId := '';
