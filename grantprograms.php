@@ -1,4 +1,4 @@
- <?php
+<?php
 require_once 'grantprograms.civix.php';
 require_once 'grantprograms_data_define.php';
 
