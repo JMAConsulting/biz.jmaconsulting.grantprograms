@@ -627,7 +627,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     }
     
     if ($objectName == 'Grant' && $op == "edit") {
-      if (!empty($previousGrant->amount_granted) && CRM_Utils_Array::value('amount_granted', $params) && CRM_Utils_Money::format($previousGrant->amount_granted) != CRM_Utils_Money::format($params['amount_granted']) && !CRM_Utils_Array::value('allocation', $params)) {
+      if (!empty($previousGrant->amount_granted) && array_key_exists('amount_granted', $params) && CRM_Utils_Money::format($previousGrant->amount_granted) != CRM_Utils_Money::format($params['amount_granted']) && !CRM_Utils_Array::value('allocation', $params)) {
         $programParams = array('id' => $previousGrant->grant_program_id);
         $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, CRM_Core_DAO::$_nullArray);
         $remainderDifference = CRM_Utils_Rule::cleanMoney($params['amount_granted']) - $previousGrant->amount_granted;
