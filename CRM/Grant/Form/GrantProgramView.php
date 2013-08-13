@@ -176,7 +176,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         } 
         $value['allocation'] = TRUE;
         $value['grant_program_id'] = $_POST['pid'];
-        $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
+        $result = CRM_Grant_BAO_Grant::add($value, $ids);
       } 
     }
 
@@ -286,7 +286,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
             $ids['grant'] = $key;
             $row['status_id'] = $grantStatus['Ineligible'];
             $row['grant_rejected_reason_id'] = $grantRej['Applicant has received their annual maximum already'];       
-            $result = CRM_Grant_BAO_Grant::add(&$row, &$ids);
+            $result = CRM_Grant_BAO_Grant::add($row, $ids);
           }
         }
         
@@ -294,7 +294,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           $ids['grant'] = $key;
           $row['status_id'] = $grantStatus['Approved for Payment'];
                     
-          $result = CRM_Grant_BAO_Grant::add(&$row, &$ids);
+          $result = CRM_Grant_BAO_Grant::add($row, $ids);
         } 
       }
       CRM_Core_Session::setStatus('Approved allocations finalized successfully.');
@@ -325,7 +325,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $value['status_id'] = $grantStatus['Ineligible'];
         $value['amount_granted'] = 0.00;
         $ids['grant'] = $key;
-        $result = CRM_Grant_BAO_Grant::add(&$value, &$ids);
+        $result = CRM_Grant_BAO_Grant::add($value, $ids);
       }
       $grantProgramParams['remainder_amount'] = $remainderAmount;
       $grantProgramParams['id'] = $_POST['pid'];
