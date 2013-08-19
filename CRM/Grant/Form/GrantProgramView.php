@@ -216,7 +216,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $page->assign('message', $message);
       
     $page->assign('grant_program_name', $grantPrograms[$_POST['pid']]);
-    CRM_Core_Session::setStatus($message);
+    CRM_Core_Session::setStatus($message, '', 'no-popup');
     $params['is_auto_email'] = 1;
     CRM_Grant_BAO_GrantProgram::sendMail($_SESSION['CiviCRM']['userID'], $params, 'allocation');
   }
@@ -297,7 +297,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           $result = CRM_Grant_BAO_Grant::add($row, $ids);
         } 
       }
-      CRM_Core_Session::setStatus('Approved allocations finalized successfully.');
+      CRM_Core_Session::setStatus('Approved allocations finalized successfully.', '', 'no-popup');
     }
   }
     
@@ -331,7 +331,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       $grantProgramParams['id'] = $_POST['pid'];
       $ids['grant_program'] = $_POST['pid'];
       CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
-      CRM_Core_Session::setStatus('Marked remaining unapproved Grants as Ineligible successfully.');
+      CRM_Core_Session::setStatus('Marked remaining unapproved Grants as Ineligible successfully.', '', 'no-popup');
     }
   }
 }
