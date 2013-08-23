@@ -146,6 +146,10 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         }
         else {
           $requestedAmount = CRM_Utils_Money::format((($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
+       		// Don't grant more money than originally requested
+          if ($requestedAmount > $value['amount_total']) {
+          	$requestedAmount = $value['amount_total'];
+          }
           $amountEligible = CRM_Utils_Money::format(($grantThresholds['Maximum Grant'] - $amountGranted), NULL, NULL, TRUE);
           if ($requestedAmount > $amountEligible) {
             if ($amountEligible > $totalAmount) {
@@ -280,6 +284,10 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $userparams['grant_program_id'] = $_POST['pid'];
         $amountGranted = CRM_Grant_BAO_GrantProgram::getUserAllocatedAmount($userparams, $row['grant_id']);
         $requestedAmount = (($row['assessment']/100) * $row['amount_total'] * ($grantThresholds['Funding factor'] / 100));
+        // Don't grant more money than originally requested
+        if ($requestedAmount > $row['amount_total']) {
+        	$requestedAmount = $row['amount_total'];
+        }
         $amountEligible = $grantThresholds['Maximum Grant'] - $amountGranted;
         if ($requestedAmount > $amountEligible) {
           if ($amountEligible == 0) {

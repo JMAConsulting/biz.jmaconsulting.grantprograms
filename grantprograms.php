@@ -152,6 +152,10 @@ function quickAllocate($grantProgram, $value) {
     }
     $value['amount_total'] = str_replace(',', '', $value['amount_total']);
     $requestedAmount = CRM_Utils_Money::format((($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
+    // Don't grant more money than originally requested
+    if ($requestedAmount > $value['amount_total']) {
+    	$requestedAmount = $value['amount_total'];
+    }
     if ($requestedAmount > $amountEligible) {
       $requestedAmount = $amountEligible;
     }
