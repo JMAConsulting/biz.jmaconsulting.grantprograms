@@ -473,6 +473,8 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->add('text', 'prev_assessment', ts('Prior Year\'s Assessment'));
     $priority = CRM_Grant_BAO_GrantProgram::getPriorities($form->_defaultValues['grant_program_id'], $form->getVar('_contactID'));
     $form->setDefaults(array('prev_assessment' => $priority));
+    //Freeze Prior Year's Assessment field
+    $form->_elements[$form->_elementIndex['prev_assessment']]->freeze();
     // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
  }
