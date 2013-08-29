@@ -641,8 +641,10 @@ class CRM_Batch_BAO_Batch extends CRM_Batch_DAO_Batch {
 LEFT JOIN civicrm_entity_financial_trxn ON civicrm_entity_financial_trxn.financial_trxn_id = civicrm_financial_trxn.id
 LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = civicrm_financial_trxn.id
 LEFT JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_entity_financial_trxn.entity_id
+LEFT JOIN civicrm_grant ON civicrm_grant.id = civicrm_entity_financial_trxn.entity_id
 LEFT JOIN civicrm_financial_type ON civicrm_financial_type.id = civicrm_contribution.financial_type_id
 LEFT JOIN civicrm_contact contact_a ON contact_a.id = civicrm_contribution.contact_id
+LEFT JOIN civicrm_contact contact_id_grant ON contact_id_grant.id = civicrm_grant.contact_id
 LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id = civicrm_contribution.id
 ";
 
@@ -710,7 +712,8 @@ LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id
     }
     if (!empty($query->_where[0])) {
       $where = implode(' AND ', $query->_where[0]) .
-        " AND civicrm_entity_batch.batch_id IS NULL ";
+        " AND civicrm_entity_batch.batch_id IS NULL 
+          AND (civicrm_entity_financial_trxn.entity_table = 'civicrm_contribution' OR civicrm_entity_financial_trxn.entity_table = 'civicrm_grant')";
       $searchValue = TRUE;
     }
     else {
@@ -720,10 +723,12 @@ LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id
     if (!$searchValue) {
       if (!$notPresent) {
         $where =  " ( civicrm_entity_batch.batch_id = {$entityID}
-        AND civicrm_entity_batch.entity_table = 'civicrm_financial_trxn' )";
+        AND civicrm_entity_batch.entity_table = 'civicrm_financial_trxn' 
+        AND (civicrm_entity_financial_trxn.entity_table = 'civicrm_contribution' OR civicrm_entity_financial_trxn.entity_table = 'civicrm_grant') )";
       }
       else {
-        $where = " ( civicrm_entity_batch.batch_id IS NULL )";
+        $where = " ( civicrm_entity_batch.batch_id IS NULL
+        AND (civicrm_entity_financial_trxn.entity_table = 'civicrm_contribution' OR civicrm_entity_financial_trxn.entity_table = 'civicrm_grant') )";
       }
     }
 
