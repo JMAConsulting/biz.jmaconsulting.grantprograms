@@ -179,11 +179,11 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     
     while( $dao->fetch() ) {  
       if ( !empty( $payment_details[$dao->id] ) ) {
-        $payment_details[$dao->id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >CAD :'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
+        $payment_details[$dao->id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
 
 
       } else {
-        $payment_details[$dao->id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >CAD :'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
+        $payment_details[$dao->id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
       }
 
       if ( !empty( $details[$dao->id]['total_amount'] ) ) {
@@ -223,7 +223,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $grantPayment[$id]['payment_date'        ] = date("Y-m-d", strtotime($values['payment_date']));
       $grantPayment[$id]['payment_created_date'] = date('Y-m-d');
       $grantPayment[$id]['payable_to_name'     ] = CRM_Grant_BAO_GrantProgram::getDisplayName( $id );
-      $grantPayment[$id]['payable_to_address'  ] = CRM_Utils_Array::value( 'address', CRM_Grant_BAO_GrantProgram::getAddress( $id ) );
+      $grantPayment[$id]['payable_to_address'  ] =
+      		CRM_Utils_Array::value('address', CRM_Grant_BAO_GrantProgram::getAddress($id, NULL, true));
       $grantPayment[$id]['amount'              ] = $details[$id]['total_amount'];
       $grantPayment[$id]['currency'            ] = $details[$id]['currency'];
       $grantPayment[$id]['payment_status_id'   ] = 1;
