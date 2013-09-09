@@ -175,7 +175,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
   }
      
      
-  public function getAddress($id, $locationTypeID = NULL) {
+  public function getAddress($id, $locationTypeID = NULL, $twoLines = false) {
     $sql = "
    SELECT civicrm_contact.id as contact_id,
           civicrm_address.street_address as street_address,
@@ -207,18 +207,33 @@ WHERE civicrm_contact.id = $id ";
     $config = CRM_Core_Config::singleton();
     while ($dao->fetch()) {
       $address = '';
-      CRM_Utils_String::append( 
-        $address, ', ',
-        array( 
-          $dao->street_address,
-          $dao->supplemental_address_1,
-          $dao->supplemental_address_2,
-          $dao->city,
-          $dao->state,
-          $dao->postal_code,
-          $dao->country
-        ) 
-      );
+      if ($twoLines) {
+      	CRM_Utils_String::append(
+      	$address, ' ',
+      	array(
+	      	$dao->street_address,
+	      	$dao->supplemental_address_1,
+	      	$dao->supplemental_address_2,
+	      	'<br />',
+	      	$dao->city,
+	      	$dao->state,
+	      	$dao->postal_code
+	      	)
+      	);
+      } else {
+	      CRM_Utils_String::append( 
+	        $address, ', ',
+	        array( 
+	          $dao->street_address,
+	          $dao->supplemental_address_1,
+	          $dao->supplemental_address_2,
+	          $dao->city,
+	          $dao->state,
+	          $dao->postal_code,
+	          $dao->country
+	        ) 
+	      );
+      }
       $location['address'] = addslashes($address);
     } 
     return $location;
