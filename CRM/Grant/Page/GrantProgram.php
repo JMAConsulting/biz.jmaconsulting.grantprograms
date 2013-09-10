@@ -123,6 +123,9 @@ class CRM_Grant_Page_GrantProgram extends CRM_Core_Page {
       $this->browse(); 
     }
     $this->assign('action', $action);
+    if ($action & CRM_Core_Action::DELETE) {
+      CRM_Core_Session::setStatus(ts('Deleting a grant program cannot be undone. Do you want to continue?'), NULL, 'no-popup');
+    }
     return parent::run();
   }
 

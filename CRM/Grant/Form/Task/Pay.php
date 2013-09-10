@@ -107,28 +107,44 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
      */
     function buildQuickForm( ) 
     {
-        if ( count($this->_approvedGrants) ) {
-            $this->assign( 'paid', count( $this->_paidGrants ) );
-            $this->assign( 'approved', count( $this->_approvedGrants ) );
-            $this->assign( 'total', count( $this->_grantIds ) );
-            $this->assign( 'notApproved', $this->_notApproved );
-            $this->assign( 'multipleCurrency', $this->_curency );
+      $message = "";
+      if (count($this->_approvedGrants)) {
+        if (count($this->_paidGrants)) {
+          $message = count( $this->_paidGrants ).' of the '.count($this->_grantIds).' selected grants have already been paid. ';
+        }
+        if ($this->_notApproved) {
+          $message .= $this->_notApproved.' of the '.count($this->_grantIds).' selected grants are not eligible. ';
+        }
+        if ($this->_curency) {
+          $message .=  $this->_curency.' of '.count($this->_grantIds).' grants have different currency of same user. ';
+        }
+        if (count( $this->_approvedGrants )) {
+          $message .= 'Would you like to proceed to paying the '.count( $this->_approvedGrants ).' eligible or approved for payment but unpaid grants?';
+          CRM_Core_Session::setStatus(ts($message), NULL, 'no-popup');
+        }
             
-            $this->addButtons( array(
-                                 array ( 'type'      => 'next',
-                                         'name'      => ts('Continue >>'),
-                                         'spacing'   => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-                                         'isDefault' => true   ),
-                                 array ( 'type'      => 'cancel',
-                                         'name'      => ts('Cancel') ),
-                                 )
-                           );
-        } else {
-             $this->addButtons(array( 
-                                    array ( 'type'      => 'cancel', 
-                                            'name'      => ts('Cancel') ), 
-                                    ) 
-                              );
+        $this->addButtons( array(
+          array ( 
+            'type' => 'next',
+            'name' => ts('Continue >>'),
+            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+            'isDefault' => true,   
+          ),
+          array ( 
+            'type' => 'cancel',
+            'name' => ts('Cancel'), 
+          ),
+          )
+        );
+      } 
+      else {
+          CRM_Core_Session::setStatus(ts('Please select at least one grant that has been approved for payment or eligible and not been paid.'), NULL, 'no-popup');
+          $this->addButtons(array( 
+            array (
+              'type' => 'cancel', 
+              'name' => ts('Cancel') ), 
+            ) 
+          );
         }
     }
 
