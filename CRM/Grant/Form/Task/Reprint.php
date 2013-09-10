@@ -91,7 +91,6 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       }
     }
     $selectedPayments = count($this->_grantPaymentIds);
-    $this->assign( 'total', $selectedPayments );
     foreach ( $this->_grantPaymentIds as $key => $paymentId ) {
       $paymentDAO =& new CRM_Grant_DAO_GrantPayment();
       $paymentDAO->id = $paymentId; 
@@ -101,11 +100,9 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       }
     }
     $reprinted = count($this->_grantPaymentIds);
-    $this->assign( 'stopped', $selectedPayments - $reprinted );
-    $this->assign( 'reprinted', $reprinted );
-    
+    $stopped = $selectedPayments - $reprinted;
     if ( count($this->_grantPaymentIds ) ) {
-      $this->assign( 'payments', 1 );
+    CRM_Core_Session::setStatus(ts( $stopped.' of the '.$selectedPayments.' selected grant payments have already been stopped. '.count($this->_grantPaymentIds).' of the '.count($this->_grantPaymentIds).' selected grant payments are printed or reprinted.'), NULL, 'no-popup');
       $this->applyFilter('__ALL__','trim');
       $attributes = CRM_Core_DAO::getAttribute( 'CRM_Grant_DAO_GrantProgram' );
     
@@ -132,6 +129,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
                                ) 
                         );
     } else {
+      CRM_Core_Session::setStatus(ts('Please select at least one grant payment that has been printed.'), NULL, 'no-popup');
       $this->addButtons(array( 
                               array ( 'type'      => 'cancel', 
                                       'name'      => ts('Cancel') ), 

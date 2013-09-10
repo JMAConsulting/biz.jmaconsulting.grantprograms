@@ -63,6 +63,9 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
    */
   function buildQuickForm() {
     $this->addDefaultButtons(ts('Cancel Grants'), 'done');
+    $smarty = CRM_Core_Smarty::singleton();
+    $vars = $smarty->get_template_vars();
+    CRM_Core_Session::setStatus(ts('Are you sure you want to cancel the selected Grant Payments? This cancel operation cannot be undone and will delete all transactions associated with these grant payments. Number of selected grant payments: '. $vars['totalSelectedGrants']), NULL, 'no-popup');
   }
 
   /**
