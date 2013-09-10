@@ -102,6 +102,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
     $reprinted = count($this->_grantPaymentIds);
     $stopped = $selectedPayments - $reprinted;
     if ( count($this->_grantPaymentIds ) ) {
+    	$this->assign( 'payments', 1 );
     CRM_Core_Session::setStatus(ts( $stopped.' of the '.$selectedPayments.' selected grant payments have already been stopped. '.count($this->_grantPaymentIds).' of the '.count($this->_grantPaymentIds).' selected grant payments are printed or reprinted.'), NULL, 'no-popup');
       $this->applyFilter('__ALL__','trim');
       $attributes = CRM_Core_DAO::getAttribute( 'CRM_Grant_DAO_GrantProgram' );
@@ -198,9 +199,9 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
         $grantDAO->find(true);
         
         if ( !empty( $payment_details[$newEntityDAO->payment_id] ) ) {
-          $payment_details[$newEntityDAO->payment_id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$entityDAO->entity_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id ).'</td><td width="20%" >CAD :'.CRM_Utils_Money::format( $grantDAO->amount_granted,null, null,false );
+          $payment_details[$newEntityDAO->payment_id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$entityDAO->entity_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $grantDAO->amount_granted,null, null,false );
         } else {
-          $payment_details[$newEntityDAO->payment_id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$entityDAO->entity_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id ).'</td><td width="20%" >CAD :'.CRM_Utils_Money::format( $grantDAO->amount_granted,null, null,false );
+          $payment_details[$newEntityDAO->payment_id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$entityDAO->entity_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $grantDAO->amount_granted,null, null,false );
         }
       }
       
@@ -212,11 +213,21 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $grantPayment[$newEntityDAO->payment_id]['payment_created_date'] = date('Y-m-d');
       $grantPayment[$newEntityDAO->payment_id]['payable_to_name'     ] = CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id );
       $grantPayment[$newEntityDAO->payment_id]['payable_to_address'  ] = CRM_Utils_Array::value( 'address', CRM_Grant_BAO_GrantProgram::getAddress( $result->contact_id ) );
-      $grantPayment[$newEntityDAO->payment_id]['amount'              ] = CRM_Utils_Money::format( $result->amount,null, null,false ) ;
+      $grantPayment[$newEntityDAO->payment_id]['amount'              ] = $result->amount;
       $grantPayment[$newEntityDAO->payment_id]['currency'            ] = $result->currency;
       $grantPayment[$newEntityDAO->payment_id]['payment_status_id'   ] = 3;
       $grantPayment[$newEntityDAO->payment_id]['payment_reason'     ]  = $result->payment_reason;
       $grantPayment[$newEntityDAO->payment_id]['replaces_payment_id']  = $result->replaces_payment_id;
+      
+      foreach ( $grantPayment as $grantKey => $values ) {
+      	$row = array();
+      	$grantValues = $values;
+      	require_once 'CRM/Grant/Words.php';
+      	$words = new CRM_Grant_Words();
+      	$amountInWords = ucwords($words->convert_number_to_words($values['amount']));
+      	$grantPayment[$grantKey]['total_in_words'] = $values['total_in_words'] = $grantValues['total_in_words'] = $amountInWords;
+      	$grantPayment[$grantKey]['amount'] = $values['amount'];
+      }
       
       if ( $makePdf ) {
         $grantPayment[$newEntityDAO->payment_id]['payment_details'] = $payment_details[$newEntityDAO->payment_id];
