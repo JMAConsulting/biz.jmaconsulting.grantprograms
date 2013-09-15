@@ -304,7 +304,7 @@ WHERE civicrm_contact.id = $id ";
     return $grants;
   }
     
-  static function sendMail($contactID, &$values, $grantStatus) {
+  static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE) {
     $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
@@ -331,6 +331,23 @@ WHERE civicrm_contact.id = $id ";
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
         CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
+        if ($grantId) {
+          $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
+          $activityType = CRM_Core_PseudoConstant::activityType();
+          $session = CRM_Core_Session::singleton();
+          $params = array( 
+            'source_contact_id'=> $session->get('userID'),
+            'source_record_id' => $grantId,
+            'activity_type_id'=> array_search('Grant Status Change', $activityType),
+            'assignee_contact_id'=> array($contactID),
+            'subject'=> "Grant Status Change",
+            'activity_date_time'=> date('Ymdhis'),
+            'status_id'=> array_search('Completed', $activityStatus),
+            'priority_id'=> 2,
+            'details'=> '',
+          );
+          CRM_Activity_BAO_Activity::create($params);
+        }
       }
     }
   }

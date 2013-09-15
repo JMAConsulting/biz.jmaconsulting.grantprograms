@@ -40,3 +40,8 @@ UPDATE civicrm_option_value SET is_active = 0 WHERE name = 'NEI Grant' AND optio
 
 UPDATE civicrm_financial_account SET is_active = 0 WHERE  name = 'NEI Grant';
 UPDATE civicrm_financial_type SET is_active = 0 WHERE  name = 'NEI Grant';
+
+-- RG-212
+UPDATE  civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id 
+SET cov.is_active = 0
+WHERE  cog.name = 'activity_type' AND cov.name IN ('grant_status_change', 'grant_payment');
