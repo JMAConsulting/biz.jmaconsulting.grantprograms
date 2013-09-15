@@ -321,18 +321,20 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $entityFileDAO->entity_id    = $_SESSION[ 'CiviCRM' ][ 'userID' ];
     $entityFileDAO->file_id      = $grantPaymentCheckFile;
     $entityFileDAO->save(); 
-
+    
+    $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
+    $activityType = CRM_Core_PseudoConstant::activityType();
     $params = array( 
-                    'source_contact_id'    => $_SESSION[ 'CiviCRM' ][ 'userID' ],
-                    'activity_type_id'     => key(CRM_Core_OptionGroup::values( 'activity_type', false, false, false, 'AND v.label = "Grant Payment"' , 'value' )),
-                    'assignee_contact_id'  => $_SESSION[ 'CiviCRM' ][ 'userID' ],
-                    'subject'              => "Grant Payment",
-                    'activity_date_time'   => date('Ymdhis'),
-                    'status_id'            => CRM_Core_OptionGroup::getValue( 'activity_status', 'Completed', 'name' ),
-                    'priority_id'          => 2,
-                    'details'              => "<a href=".CRM_Utils_System::url( 'civicrm/file', 'reset=1&id='.$grantPaymentFile.'&eid='.$_SESSION[ 'CiviCRM' ][ 'userID' ].'').">".$downloadName."</a></br><a href=".CRM_Utils_System::url( 'civicrm/file', 'reset=1&id='.$grantPaymentCheckFile.'&eid='.$_SESSION[ 'CiviCRM' ][ 'userID' ].'').">".$checkRegisterFile."</a>",
-                     );
-    CRM_Activity_BAO_Activity::create( $params );
+      'source_contact_id' => $_SESSION['CiviCRM']['userID'],
+      'activity_type_id' => array_search('Grant Payment', $activityType),
+      'assignee_contact_id' => $_SESSION['CiviCRM']['userID'],
+      'subject' => "Grant Payment",
+      'activity_date_time' => date('Ymdhis'),
+      'status_id' => array_search('Completed', $activityStatus),
+      'priority_id' => 2,
+      'details' => "<a href=" . CRM_Utils_System::url('civicrm/file', 'reset=1&id=' . $grantPaymentFile . '&eid=' . $_SESSION['CiviCRM']['userID'] . '') . ">" . $downloadName . "</a></br><a href=" . CRM_Utils_System::url('civicrm/file', 'reset=1&id=' . $grantPaymentCheckFile . '&eid=' . $_SESSION['CiviCRM']['userID'] . '') . ">" . $checkRegisterFile . "</a>",
+    );
+    CRM_Activity_BAO_Activity::create($params);
     
     require_once 'CRM/Grant/DAO/EntityPayment.php';
     if ( $this->_prid ) {
