@@ -746,7 +746,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $smarty = CRM_Core_Smarty::singleton();
       $sendMail = $smarty->get_template_vars('sendMail');
       if ($sendMail) {
-        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus);
+        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus, $objectId);
       }
     }
     
