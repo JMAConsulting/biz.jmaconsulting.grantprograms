@@ -350,5 +350,6 @@ VALUES
 SELECT @activityType := cog.id, @value := max(cast(value as unsigned)) + 1 FROM civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id WHERE  cog.name = 'activity_type';
 
 INSERT INTO civicrm_option_value(option_group_id, label, value, name, grouping, filter, is_default, weight, description, is_optgroup, is_reserved, is_active, component_id, visibility_id) 
-VALUES (@activityType, 'Grant Status Change', @value, 'grant_status_change', NULL, 0, 0, @value, 'Grant status change', 0, 1, 1, 5, NULL);
+VALUES (@activityType, 'Grant Status Change', @value, 'grant_status_change', NULL, 0, 0, @value, 'Grant status change', 0, 1, 1, 5, NULL),
+       (@activityType, 'Grant Payment', @value + 1, 'grant_payment', NULL, 0, 0, @value + 1, 'Grant payment', 0, 1, 1, 5, NULL);
 
