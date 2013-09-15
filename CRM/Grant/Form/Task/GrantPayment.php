@@ -362,7 +362,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $this->assign( 'grant_programs', $grantPrograms[$mailParams[$grantId]['grant_program_id']] );
         $this->assign( 'grant_status', 'Paid' );
         $this->assign( 'params', $mailParams[$grantId] );
-        CRM_Grant_BAO_GrantProgram::sendMail( $grantContctId[$grantId], $mailParams[$grantId], 'Paid' );
+        CRM_Grant_BAO_GrantProgram::sendMail($grantContctId[$grantId], $mailParams[$grantId], 'Paid', $grantId);
       }
       CRM_Core_Session::setStatus( "Created ".count($details)." payments to pay for ".count($this->_approvedGrants)." grants to ".count($details)." applicants." );
     }
