@@ -155,6 +155,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
   public function postProcess() 
   {
     $details = $allGrants = $grantPayments = array();
+    $grandTotal = 0;
     CRM_Utils_System::flushCache( 'CRM_Grant_DAO_GrantPayment' );
     $values  = $this->controller->exportValues( $this->_name );
     $batchNumber = $values['payment_batch_number'];
@@ -172,9 +173,14 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $daoCount = CRM_Grant_DAO_Grant::singleValueQuery($countQuery);
     for ($i=0; $i<$daoCount; $i=$i+$maxLimit) {
       $dao = CRM_Grant_DAO_Grant::executeQuery($query." LIMIT $i, $maxLimit");
-      $grantPayment = $payment_details = $details = array();
+      $grantPayment = $payment_details = $amountsTotal = $details = array();
       while( $dao->fetch() ) { 
-        $amountstotal[$dao->id] += $dao->total_amount;
+        if (isset($amountsTotal[$dao->id])) {
+          $amountsTotal[$dao->id] += $dao->total_amount;
+        }
+        else {
+          $amountsTotal[$dao->id] = $dao->total_amount;
+        }
         if ( !empty( $payment_details[$dao->id] ) ) {
           $payment_details[$dao->id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
         } else {
@@ -249,7 +255,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
           $grantPayment[$grantKey]['amount'] = $values['amount'];
           if ($curr_id == $grantKey) {
             $grantTotalPayment[$grantKey] = $grantPayment[$grantKey];
-            $grantTotalPayment[$grantKey]['amount'] = $amountstotal[$grantKey];
+            $grantTotalPayment[$grantKey]['amount'] = $amountsTotal[$grantKey];
           }
           $contactPayments[$grantKey] = $result->id;
           unset($grantPayment[$grantKey]['payment_status_id']);
@@ -262,7 +268,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $this->assign('grantPayment', $grantPayment);
       $downloadNamePDF .= '.pdf';
       $fileName = CRM_Utils_File::makeFileName( $downloadNamePDF );
-      $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
+      $files[] = $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
     }
     $downloadNameCSV = check_plain('grantPayment');
     $downloadNameCSV .= '_'.date('Ymdhis');
@@ -272,7 +278,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $config = CRM_Core_Config::singleton();
     $file_name = $config->customFileUploadDir . $fileName;
     CRM_Grant_BAO_GrantPayment::createCSV($file_name, $grantTotalPayment);
-       
+    $files[] = $fileName;
+
     $this->assign('date', date('Y-m-d'));
     $this->assign('time', date('H:i:s'));
     $this->assign('account_name',CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_FinancialType', $values['financial_type_id'], 'name'));
@@ -285,14 +292,12 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $checkRegisterFile .= '.pdf';
     $checkFile = CRM_Utils_File::makeFileName( $checkRegisterFile );
     $checkRegister = CRM_Grant_BAO_GrantPayment::makeReport( $checkFile, $grantTotalPayment );
+    $files[] = $checkRegister;
     
+
     $fileDAO =& new CRM_Core_DAO_File();
     $fileDAO->uri           = $fileName;
-    if ( $makePdf ) {
-      $fileDAO->mime_type = 'application/pdf';
-    } else {
-      $fileDAO->mime_type = 'text/x-csv';
-    }
+    $fileDAO->mime_type = 'application/zip';
     $fileDAO->upload_date   = date('Ymdhis');
     $fileDAO->save();
     $grantPaymentFile = $fileDAO->id;
@@ -314,6 +319,17 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $entityFileDAO->file_id      = $grantPaymentCheckFile;
     $entityFileDAO->save(); 
     
+    //make Zip
+    $zipFile  =  check_plain('GrantPayment').'_'.date('Ymdhis').'.zip';
+    foreach($files as $file) {
+      $source[] = $config->customFileUploadDir.$file;
+    }
+    $zip = CRM_Financial_BAO_ExportFormat::createZip($source, $config->customFileUploadDir.$zipFile);
+    rename($config->customFileUploadDir.$zipFile, $config->uploadDir.$zipFile);
+    foreach($source as $sourceFile) {
+      unlink($sourceFile);
+    }
+
     $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
     $activityType = CRM_Core_PseudoConstant::activityType();
     $params = array( 
@@ -324,7 +340,12 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       'activity_date_time' => date('Ymdhis'),
       'status_id' => array_search('Completed', $activityStatus),
       'priority_id' => 2,
-      'details' => "<a href=" . CRM_Utils_System::url('civicrm/file', 'reset=1&id=' . $grantPaymentFile . '&eid=' . $_SESSION['CiviCRM']['userID'] . '') . ">" . $downloadName . "</a></br><a href=" . CRM_Utils_System::url('civicrm/file', 'reset=1&id=' . $grantPaymentCheckFile . '&eid=' . $_SESSION['CiviCRM']['userID'] . '') . ">" . $checkRegisterFile . "</a>",
+      'attachFile_1' => array (
+        'uri' => $config->uploadDir.$zipFile,
+        'type' => 'text/csv',
+        'location' => $config->uploadDir.$zipFile,
+        'upload_date' => date('YmdHis'),
+      ),
     );
     CRM_Activity_BAO_Activity::create($params);
     
@@ -360,6 +381,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       }
       CRM_Core_Session::setStatus( "Created ".count($details)." payments to pay for ".count($this->_approvedGrants)." grants to ".count($details)." applicants." );
     }
-    CRM_Utils_System::redirect(CRM_Utils_System::url( 'civicrm/grant/payment/search', 'reset=1&bid='.$batchNumber.'&download='.$fileName.'&force=1'));
+    CRM_Utils_System::redirect(CRM_Utils_System::url( 'civicrm/grant/payment/search', 'reset=1&bid='.$batchNumber.'&download='.$zipFile.'&force=1'));
   }
 }
