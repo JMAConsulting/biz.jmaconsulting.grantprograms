@@ -196,7 +196,7 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Maximum Grant', '1500', 'Maximum Grant', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL);
-(@opv1, @opGId, 'Maximum number of checks per pdf file', '1000', 'Maximum number of checks per pdf file', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv5, @opGId, 'Maximum number of checks per pdf file', '1000', 'Maximum number of checks per pdf file', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL);
 
 -- grant_status
 SET @opv1 := '';
