@@ -304,7 +304,7 @@ WHERE civicrm_contact.id = $id ";
     return $grants;
   }
     
-  static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE) {
+  static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE, $status = '') {
     $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
@@ -340,11 +340,11 @@ WHERE civicrm_contact.id = $id ";
             'source_record_id' => $grantId,
             'activity_type_id'=> array_search('Grant Status Change', $activityType),
             'assignee_contact_id'=> array($contactID),
-            'subject'=> "Grant Status Change",
+            'subject'=> "Grant Status Change : " . $grantStatus,
             'activity_date_time'=> date('Ymdhis'),
             'status_id'=> array_search('Completed', $activityStatus),
             'priority_id'=> 2,
-            'details'=> '',
+            'details'=> "Grant status changed from {$status} to {$grantStatus}",
           );
           CRM_Activity_BAO_Activity::create($params);
         }
