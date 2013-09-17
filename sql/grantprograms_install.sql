@@ -26,89 +26,6 @@
  *          Canada   M5T 2C7
  */
 
--- create civicrm_payment table. 
-CREATE TABLE IF NOT EXISTS `civicrm_payment` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Id',
-  `payment_batch_number` int(10) unsigned NOT NULL COMMENT 'Payment Batch Nnumber',
-  `payment_number` int(10) unsigned NOT NULL COMMENT 'Payment Number',
-  `financial_type_id` int(10) unsigned NOT NULL COMMENT 'Financial Type ID',
-  `contact_id` int(10) unsigned NOT NULL COMMENT 'Contact ID',
-  `payment_created_date` date DEFAULT NULL COMMENT 'Payment Created Date.',
-  `payment_date` date DEFAULT NULL COMMENT 'Payment Date.',
-  `payable_to_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Payable To Name.',
-  `payable_to_address` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Payable To Address.',
-  `amount` decimal(20,2) NOT NULL COMMENT 'Requested grant amount, in default currency.',
-  `currency` varchar(3) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '3 character string, value from config setting or input via user.',
-  `payment_reason` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Payment Reason.',
-  `payment_status_id` int(10) unsigned DEFAULT NULL COMMENT 'Payment Status ID',
-  `replaces_payment_id` varchar(8) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Replaces Payment Id.',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
-
--- create civicrm_entity_payment
-CREATE TABLE IF NOT EXISTS `civicrm_entity_payment` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `payment_id` int(10) unsigned NOT NULL COMMENT 'Type of grant. Implicit FK to civicrm_payment.',
-  `entity_table` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Entity Table.',
-  `entity_id` int(10) unsigned NOT NULL COMMENT 'Entity ID',
-  PRIMARY KEY (`id`),
-  KEY `FK_civicrm_entity_payment_payment_id` (`payment_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `civicrm_entity_payment`
-
-ALTER TABLE `civicrm_entity_payment`
-  ADD CONSTRAINT `FK_civicrm_entity_payment_payment_id` FOREIGN KEY (`payment_id`) REFERENCES `civicrm_payment` (`id`);
-
--- create civicrm_grant_program
-CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Grant Program ID',
-  `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Label displayed to users',
-  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Stores a fixed (non-translated) name for the grant program.',
-  `grant_type_id` int(10) unsigned NOT NULL COMMENT 'Type of grant. Implicit FK to civicrm_option_value in grant_type option_group.',
-  `total_amount` decimal(20,2) NOT NULL COMMENT 'Requested grant program amount, in default currency.',
-  `remainder_amount` decimal(20,2) NOT NULL COMMENT 'Requested grant program remainder amount, in default currency.',
-  `financial_type_id` int(10) unsigned NOT NULL COMMENT 'Financial Type ID',
-  `status_id` int(10) unsigned NOT NULL COMMENT 'Id of Grant status.',
-  `applications_start_date` datetime DEFAULT NULL COMMENT 'Application Start Date',
-  `applications_end_date` datetime DEFAULT NULL COMMENT 'Application End Date.',
-  `allocation_date` date DEFAULT NULL COMMENT 'Allocation date.',
-  `is_active` tinyint(4) DEFAULT '1' COMMENT 'Is this grant program active?',
-  `is_auto_email` tinyint(4) DEFAULT '1' COMMENT 'Is auto email active?',
-  `allocation_algorithm` int(10) unsigned DEFAULT NULL COMMENT 'Allocation Algorithm.',
-  `grant_program_id` int(11) DEFAULT NULL COMMENT 'FK reference to this civicrm_grant_program table, used to determine grants given to contact in previous year during assessment.',
-  PRIMARY KEY (`id`),
-  KEY `FK_civicrm_grant_program_grant_type_id` (`grant_type_id`),
-  KEY `FK_civicrm_grant_program_status_id` (`status_id`),
-  KEY `FK_civicrm_grant_program_grant_program_id` (`grant_program_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `civicrm_grant_program`
-ALTER TABLE `civicrm_grant_program`
-  ADD CONSTRAINT `FK_civicrm_grant_program_grant_type_id` FOREIGN KEY (`grant_type_id`) REFERENCES `civicrm_option_value` (`id`),
-  ADD CONSTRAINT `FK_civicrm_grant_program_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_option_value` (`id`);
-
--- add columns to civicrm_grant
-ALTER TABLE `civicrm_grant` 
-  ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
-  ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
-  ADD `grant_incomplete_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Incomplete Reason.' AFTER `grant_rejected_reason_id` ,
-  ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL AFTER `grant_incomplete_reason_id`;
-
---
--- Constraints for table `civicrm_grant`
-ALTER TABLE `civicrm_grant`
-  ADD CONSTRAINT `FK_civicrm_grant_grant_program_id` FOREIGN KEY (`grant_program_id`) REFERENCES `civicrm_grant_program` (`id`) ON DELETE CASCADE;
 
 -- add option groups and option values
 
@@ -195,7 +112,7 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 (@opv1, @opGId, 'Funding factor', '85', NULL, NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Maximum Grant', '1500', 'Maximum Grant', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
-(@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv5, @opGId, 'Maximum number of checks per pdf file', '1000', 'Maximum number of checks per pdf file', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL);
 
 -- grant_status

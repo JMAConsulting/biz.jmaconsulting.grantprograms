@@ -331,7 +331,7 @@ WHERE civicrm_contact.id = $id ";
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
         CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
-        if ($grantId) {
+        if ($grantId && $status) {
           $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
           $activityType = CRM_Core_PseudoConstant::activityType();
           $session = CRM_Core_Session::singleton();
@@ -340,11 +340,11 @@ WHERE civicrm_contact.id = $id ";
             'source_record_id' => $grantId,
             'activity_type_id'=> array_search('Grant Status Change', $activityType),
             'assignee_contact_id'=> array($contactID),
-            'subject'=> "Grant Status Change : " . $grantStatus,
+            'subject'=> "Grant status changed from {$status} to {$grantStatus}",
             'activity_date_time'=> date('Ymdhis'),
             'status_id'=> array_search('Completed', $activityStatus),
             'priority_id'=> 2,
-            'details'=> "Grant status changed from {$status} to {$grantStatus}",
+            'details'=> CRM_Core_Smarty::singleton()->get_template_vars('messageBody'),
           );
           CRM_Activity_BAO_Activity::create($params);
         }
