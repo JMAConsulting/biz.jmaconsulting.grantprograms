@@ -748,7 +748,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       if ($sendMail) {
         $previousGrant = $smarty->get_template_vars('previousGrant');
         $previousStatus = '';
-        if (property_exists($previousGrant, 'status_id')) {
+        if ($previousGrant && property_exists($previousGrant, 'status_id')) {
           $previousStatus = $grantStatuses[$previousGrant->status_id];
         }
         CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus, $objectId, $previousStatus);
@@ -1049,5 +1049,15 @@ WHERE ccg.name LIKE 'NEI_%' ORDER BY ccg.id";
   }
   foreach ($_customGroup as $key => $val) {
     $values[$key] = array_intersect_key($params, $val);
+  }
+}
+
+/**
+ * Hook implementation when an email is about to be sent by CiviCRM.
+ *
+ */
+function grantprograms_civicrm_alterMailParams(&$params) {
+  if (substr($params['valueName'], 0, 6) == 'grant_') {
+    CRM_Core_Smarty::singleton()->assign('messageBody', $params['html']);
   }
 }
