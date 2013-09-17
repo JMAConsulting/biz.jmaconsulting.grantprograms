@@ -724,7 +724,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $page->assign('customGroup', $customGroup);
       $page->assign('customField', $customField);
       
-      $grantStatus = CRM_Core_OptionGroup::values('grant_status');
+      $grantStatuses = $grantStatus = CRM_Core_OptionGroup::values('grant_status');
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $grantTypes = CRM_Core_OptionGroup::values('grant_type');
       $grantProgram = $grantPrograms[$params['grant_program_id']];
@@ -746,7 +746,12 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $smarty = CRM_Core_Smarty::singleton();
       $sendMail = $smarty->get_template_vars('sendMail');
       if ($sendMail) {
-        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus, $objectId);
+        $previousGrant = $smarty->get_template_vars('previousGrant');
+        $previousStatus = '';
+        if (property_exists($previousGrant, 'status_id')) {
+          $previousStatus = $grantStatuses[$previousGrant->status_id];
+        }
+        CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus, $objectId, $previousStatus);
       }
     }
     
