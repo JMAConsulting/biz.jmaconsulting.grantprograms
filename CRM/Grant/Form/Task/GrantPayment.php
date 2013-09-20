@@ -174,18 +174,26 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     for ($i=0; $i<$daoCount; $i=$i+$maxLimit) {
       $dao = CRM_Grant_DAO_Grant::executeQuery($query." LIMIT $i, $maxLimit");
       $grantPayment = $payment_details = $amountsTotal = $details = array();
-      while( $dao->fetch() ) { 
-        if (isset($amountsTotal[$dao->id])) {
+      while( $dao->fetch() ) {
+	      if (isset($amountsTotal[$dao->id])) {
           $amountsTotal[$dao->id] += $dao->total_amount;
         }
         else {
           $amountsTotal[$dao->id] = $dao->total_amount;
         }
         if ( !empty( $payment_details[$dao->id] ) ) {
-          $payment_details[$dao->id] .= '</td></tr><tr><td width="15%" >'.date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
+        	// List all payments on this cheque (if contact has multiple applications being paid)
+          $payment_details[$dao->id] .= '</td></tr><tr><td width="15%" >'.
+          	date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.
+          	$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).
+          	'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
         } else {
-          $payment_details[$dao->id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
+          $payment_details[$dao->id] = date("Y-m-d", strtotime($values['payment_date'])).'</td><td width="15%" >'.
+          	$dao->grant_id.'</td><td width="50%" >'.CRM_Grant_BAO_GrantProgram::getDisplayName( $dao->id ).
+          	'</td><td width="20%" >'.CRM_Utils_Money::format( $dao->total_amount,null, null,false );
         }
+        
+        // Aggregate payments per contact id
         if ( !empty( $details[$dao->id]['total_amount'] ) ) {
           $details[$dao->id]['total_amount'] += $dao->total_amount;
         } else {
@@ -210,57 +218,63 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         } else {
           $details[$dao->id]['payment_reason'][$dao->payment_reason]   = $dao->payment_reason;
         }
-        $totalAmount = 0;
+      }
+      $totalAmount = 0;
+      $words = new CRM_Grant_Words();
+      foreach ($details as $id => $value) {
+        $grantPayment[$id]['contact_id'] = $id;
+        $grantPayment[$id]['financial_type_id'] = $values['financial_type_id'];
+        $grantPayment[$id]['payment_batch_number'] = $values['payment_batch_number'];
+        $grantPayment[$id]['payment_number'] = $values['payment_number'];
+        $grantPayment[$id]['payment_date'] = date("Y-m-d", strtotime($values['payment_date']));
+        $grantPayment[$id]['payment_created_date'] = date('Y-m-d');
+        $grantPayment[$id]['payable_to_name'] = CRM_Grant_BAO_GrantProgram::getDisplayName( $id );
+        $grantPayment[$id]['payable_to_address'] =
+          CRM_Utils_Array::value('address', CRM_Grant_BAO_GrantProgram::getAddress($id, NULL, true));
+        $grantPayment[$id]['amount']  = $details[$id]['total_amount'];
+        $grantPayment[$id]['currency'] = $details[$id]['currency'];
+        $grantPayment[$id]['payment_status_id'   ] = 1;
+        if ( $this->_prid ) {
+          $grantPayment[$id]['payment_reason'     ]  = implode(', ',  $details[$id]['payment_reason']);
+          $grantPayment[$id]['replaces_payment_id']  = $this->_prid;
+          $grantPayment[$id]['payment_status_id'   ] = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Reprinted', 'name' );
+        } else {
+          $grantPayment[$id]['payment_reason'     ] = implode(', ',  $details[$id]['grant_program_id']);
+          $grantPayment[$id]['replaces_payment_id'] = 'NULL';
+        }
+        $grantPayment[$id]['payment_details'] = $payment_details[$id];
+        $values['payment_number']++;
+        $totalAmount += $details[$id]['total_amount'];
+      }
+
+      foreach ( $grantPayment as $grantKey => $grantInfo ) {
+        $row = array();
+        $grantValues = $grantInfo;
+        if ( $this->_prid ) {
+          require_once 'CRM/Grant/DAO/GrantPayment.php';
+          $dao = new CRM_Grant_DAO_GrantPayment( );
+          $dao->id                    = $this->_prid;
+          $dao->payment_status_id     = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Stopped', 'name' );
+          $dao->save();
+        }
+        require_once 'CRM/Grant/Words.php';
         $words = new CRM_Grant_Words();
-        foreach ($details as $id => $value) {
-          $grantPayment[$id]['contact_id'] = $id;
-          $grantPayment[$id]['financial_type_id'] = $values['financial_type_id'];
-          $grantPayment[$id]['payment_batch_number'] = $values['payment_batch_number'];
-          $grantPayment[$id]['payment_number'] = $values['payment_number'];
-          $grantPayment[$id]['payment_date'] = date("Y-m-d", strtotime($values['payment_date']));
-          $grantPayment[$id]['payment_created_date'] = date('Y-m-d');
-          $grantPayment[$id]['payable_to_name'] = CRM_Grant_BAO_GrantProgram::getDisplayName( $id );
-          $grantPayment[$id]['payable_to_address'] =
-            CRM_Utils_Array::value('address', CRM_Grant_BAO_GrantProgram::getAddress($id, NULL, true));
-          $grantPayment[$id]['amount']  = $details[$id]['total_amount'];
-          $grantPayment[$id]['currency'] = $details[$id]['currency'];
-          $grantPayment[$id]['payment_status_id'   ] = 1;
-          if ( $this->_prid ) {
-            $grantPayment[$id]['payment_reason'     ]  = implode(', ',  $details[$id]['payment_reason']);
-            $grantPayment[$id]['replaces_payment_id']  = $this->_prid;
-            $grantPayment[$id]['payment_status_id'   ] = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Reprinted', 'name' );
-          } else {
-            $grantPayment[$id]['payment_reason'     ] = implode(', ',  $details[$id]['grant_program_id']);
-            $grantPayment[$id]['replaces_payment_id'] = 'NULL';
-          }
-          $grantPayment[$id]['payment_details'] = $payment_details[$id];
-          $values['payment_number']++;
-          $totalAmount += $details[$id]['total_amount'];
+        $amountInWords = ucwords($words->convert_number_to_words($grantInfo['amount']));
+        $grantPayment[$grantKey]['total_in_words'] = $grantInfo['total_in_words'] =
+        	$grantValues['total_in_words'] = $amountInWords;
+        $grantPayment[$grantKey]['amount'] = $grantInfo['amount'];
+        if ($curr_id == $grantKey) {
+          $grantTotalPayment[$grantKey] = $grantPayment[$grantKey];
+          $grantTotalPayment[$grantKey]['amount'] = $amountsTotal[$grantKey];
         }
-        foreach ( $grantPayment as $grantKey => $values ) {
-          $row = array();
-          $grantValues = $values;
-          if ( $this->_prid ) {
-            require_once 'CRM/Grant/DAO/GrantPayment.php';
-            $dao = new CRM_Grant_DAO_GrantPayment( );
-            $dao->id                    = $this->_prid;
-            $dao->payment_status_id     = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Stopped', 'name' );
-            $dao->save();
-          }
-          require_once 'CRM/Grant/Words.php';
-          $words = new CRM_Grant_Words();
-          $amountInWords = ucwords($words->convert_number_to_words($values['amount']));
-          $grantPayment[$grantKey]['total_in_words'] = $values['total_in_words'] = $grantValues['total_in_words'] = $amountInWords;
-          $result = CRM_Grant_BAO_GrantPayment::add( &$values, $ids = array());
-          $grantPayment[$grantKey]['amount'] = $values['amount'];
-          if ($curr_id == $grantKey) {
-            $grantTotalPayment[$grantKey] = $grantPayment[$grantKey];
-            $grantTotalPayment[$grantKey]['amount'] = $amountsTotal[$grantKey];
-          }
-          $contactPayments[$grantKey] = $result->id;
-          unset($grantPayment[$grantKey]['payment_status_id']);
-          $grantPayment[$grantKey]['payment_id'] = $grantValues['payment_id'] = $result->payment_number;
-        }
+        // Save payment
+        $savePayment = $grantPayment[$grantKey];
+        $savePayment['payable_to_address'] = str_replace('<br /> ', '', $savePayment['payable_to_address']);
+        $result = CRM_Grant_BAO_GrantPayment::add(&$savePayment, $ids = array());
+        
+        $grantPayment[$grantKey]['payment_id'] = $result->payment_number;
+        $contactPayments[$grantKey] = $result->id;
+        unset($grantPayment[$grantKey]['payment_status_id']);
       }
       $grandTotal += $totalAmount;
       $downloadNamePDF  =  check_plain('grantPayment');
