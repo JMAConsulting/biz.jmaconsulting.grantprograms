@@ -326,7 +326,12 @@ WHERE civicrm_contact.id = $id ";
            ),
           'PDFFilename' => '',
         );
-        $sendTemplateParams['from'] = $email;
+        
+        $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
+        foreach ($defaultAddress as $id => $value) {
+          $sendTemplateParams['from'] = $value;
+        }
+
         $sendTemplateParams['toName'] = $displayName;
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
