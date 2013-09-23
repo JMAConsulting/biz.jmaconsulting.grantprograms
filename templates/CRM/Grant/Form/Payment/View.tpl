@@ -48,11 +48,7 @@
 </div>
 {elseif $action eq 2097152}
 <h3>{ts}Stop Payment{/ts}</h3>
-<div class="crm-block crm-content-block crm-grant-view-block">  
-     <div class="messages status">
-          <div class="icon inform-icon"></div>    
-           {ts}Do you want to record that a Stop payment request has been made with bank on this payment?{/ts}
-      </div>
+<div class="crm-block crm-content-block crm-grant-view-block">
    <div class="crm-submit-buttons">
         {include file="CRM/common/formButtons.tpl" location="bottom"}
     </div>
@@ -85,10 +81,6 @@
 <h3>{ts}Withdraw Payment{/ts}</h3>
 
 <div class="crm-block crm-content-block crm-grant-view-block">  
-     <div class="messages status">
-          <div class="icon inform-icon"></div>    
-           {ts}Do you want to record that this cheque will not be cashed, e.g. it has been destroyed or is stale dated?{/ts}
-      </div>
    <div class="crm-submit-buttons">
         {include file="CRM/common/formButtons.tpl" location="bottom"}
     </div>

@@ -157,7 +157,7 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
         $values['grant_program_id'] = $grant->grant_program_id;
         $values['grant_type_id'] = $grant->grant_type_id;
         $values['id'] = $grantId;
-        $values['status_id'] = $grant->status_id;
+        $values['status_id'] = $params['status_id'];
         $values['amount_total'] = $grant->amount_total;
         if ($params['radio_ts'] == 'amount_total') {
           unset($params['amount_granted']);
