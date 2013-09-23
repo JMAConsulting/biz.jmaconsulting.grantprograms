@@ -1,1 +1,1 @@
-Receipt for {$grant_status} Grant
+Grant application approved

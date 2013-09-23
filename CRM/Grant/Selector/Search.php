@@ -76,6 +76,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'grant_amount_granted',
     'grant_application_received_date', 
     'grant_payment_created',
+    'course_type',
+    'course_name',
     'program_name',
     'program_id',
     'grant_report_received',
@@ -205,7 +207,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
         CRM_Core_Action::UPDATE => array(
           'name' => ts('Edit'),
           'url' => 'civicrm/contact/view/grant',
-          'qs' => 'reset=1&action=update&id=%%id%%&cid=%%cid%%&context=%%cxt%%&next=%%next%%&prev=%%prev%%' . $extraParams,
+          'qs' => 'reset=1&action=update&id=%%id%%&cid=%%cid%%&context=%%cxt%%&next=%%next%%&prev=%%prev%%' . $extraParams.'&ncid=%%ncid%%&searchGrants=%%searchGrants%%',
           'title' => ts('Edit Grant'),
         ),
       );
@@ -312,7 +314,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
        false, 
        $this->_grantClause );
      while ($grant->fetch()) {
-       $grants[$grant->contact_id][$grant->id] = $grant->id;
+       $grants[$grant->id] = $grant->id;
+       $grantContacts[$grant->id] = $grant->contact_id;
      }
      while ($result->fetch()) {
       $row = array();
@@ -321,7 +324,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       }
       $prev = $next = null;
       $foundit = false;
-      $contactGrants = $grants[$result->contact_id];
+      $contactGrants = $grants;
+      $searchGrants = implode(',', $grants);
       foreach( $contactGrants as $gKey => $gVal) {
         if ($foundit) {
           $next = $gKey; 
@@ -340,6 +344,16 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       }
       if(empty($prev)) {
         $prev = end($contactGrants);
+      }
+      if (isset($result->course_type)) {
+        if (!empty($result->course_type)) {
+          if ($result->course_type != 'select_or_other') {
+            $result->course_type = CRM_Core_DAO::singleValueQuery("SELECT civicrm_option_value.label as course_type FROM civicrm_option_value LEFT JOIN civicrm_option_group ON civicrm_option_group.id = civicrm_option_value.option_group_id  WHERE civicrm_option_value.value = {$result->course_type} AND  civicrm_option_group.name = 'course_conference_type_20120720143907'");
+          } 
+          else {
+            $result->course_type = 'Other';
+          }
+        }
       }
 
       // the columns we are interested in
@@ -361,6 +375,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           'cxt' => $this->_context,
           'prev' => $prev,
           'next' => $next,
+          'searchGrants' => $searchGrants,
+          'ncid' => $grantContacts[$next],
         )
       );
 
@@ -429,7 +445,17 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           'name' => ts('Payment Created'),
           'sort' => 'grant_payment_created',
           'direction' => CRM_Utils_Sort::DONTCARE,
- 	    ),
+ 	      ),
+        array(
+          'name' => ts('Course Name'),
+          'sort' => 'course_conference_name_77',                                                
+          'direction' => CRM_Utils_Sort::DONTCARE,
+        ),
+        array(
+          'name' => ts('Course Type'),
+          'sort' => 'course_conference_type_74',                                                
+          'direction' => CRM_Utils_Sort::DONTCARE,
+        ),
         array('desc' => ts('Actions')),
       );
 

@@ -121,7 +121,7 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
       $form->_componentClause =
         ' civicrm_payment.id IN ( ' .
         implode(',', $ids) . ' ) ';
-      $form->assign('totalSelectedGrants', count($ids));             
+      $form->assign('totalSelectedGrants', count($ids));
     }
         
     $form->_grantPaymentIds = $form->_componentIds = $ids;

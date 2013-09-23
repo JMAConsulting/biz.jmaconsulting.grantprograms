@@ -25,10 +25,6 @@
 *}
 {* Confirmation of Grant pay  *}
 {if $payments}
-<div class="messages status">
-        <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}'{$stopped} of the {$total} selected grant payments have already been stopped. {$reprinted} of the {$total} selected grant payments are printed or reprinted.{/ts}</p>
-</div>
 <h3>{ts}Reprint Payments{/ts}</h3>
 <div class="crm-block crm-form-block crm-contribution_type-form-block">
      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
@@ -61,13 +57,6 @@
        </tr>
       </table> 
  
-   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="botttom"}</div>
 </div>
-
-{else if}
-<div class="messages status">
-        <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}Please select at least one grant payment that has been printed.{/ts}</p>
-</div>
-<div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl"}</div>
 {/if}
+   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="botttom"}</div>
