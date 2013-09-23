@@ -26,12 +26,22 @@
  *          Canada   M5T 2C7
  */
 
-UPDATE civicrm_option_group SET is_active = 0 WHERE name IN ('grant_payment_status','grant_program_status', 'allocation_algorithm', 'grant_thresholds', 'reason_grant_ineligible', 'reason_grant_incomplete', 'grant_info_too_late', 'msg_tpl_workflow_grant');
+UPDATE civicrm_option_group SET is_active = 0 WHERE name IN ('grant_payment_status','grant_program_status', 'allocation_algorithm', 'grant_thresholds', 'reason_grant_ineligible', 'reason_grant_incomplete', 'grant_info_too_late', 'msg_tpl_workflow_grant', 'predominant_clinical_area_of_pra_nei', 'nei_employment_status_nei', 'if_you_are_not_employed_indicate_nei', 'province_of_employment_nei', 'position_nei', 'employment_setting_nei', 'how_did_you_hear_about_this_init_nei', 'course_conference_type_nei', 'how_will_this_course_enhance_the_nei', 'type_of_course_provider_nei');
 
-UPDATE civicrm_option_value SET is_active = 0 WHERE option_group_id IN (SELECT id FROM civicrm_option_group WHERE name IN ('grant_payment_status','grant_program_status', 'allocation_algorithm', 'grant_thresholds', 'reason_grant_ineligible', 'reason_grant_incomplete', 'grant_info_too_late', 'msg_tpl_workflow_grant'));
+UPDATE civicrm_option_value SET is_active = 0 WHERE option_group_id IN (SELECT id FROM civicrm_option_group WHERE name IN ('grant_payment_status','grant_program_status', 'allocation_algorithm', 'grant_thresholds', 'reason_grant_ineligible', 'reason_grant_incomplete', 'grant_info_too_late', 'msg_tpl_workflow_grant', 'predominant_clinical_area_of_pra_nei', 'nei_employment_status_nei', 'if_you_are_not_employed_indicate_nei', 'province_of_employment_nei', 'position_nei', 'employment_setting_nei', 'how_did_you_hear_about_this_init_nei', 'course_conference_type_nei', 'how_will_this_course_enhance_the_nei', 'type_of_course_provider_nei'));
+
+
+UPDATE civicrm_custom_group SET is_active = 0 WHERE name IN ('NEI_Employment_Information','NEI_General_information', 'NEI_Course_conference_details', 'NEI_ID');
+
+UPDATE civicrm_custom_field SET is_active = 0 WHERE custom_group_id IN (SELECT id FROM civicrm_custom_group WHERE name IN ('NEI_General_information', 'NEI_Course_conference_details', 'NEI_ID', 'NEI_Employment_Information'));
 
 SELECT @gtype := id FROM civicrm_option_group WHERE name = 'grant_type';
 UPDATE civicrm_option_value SET is_active = 0 WHERE name = 'NEI Grant' AND option_group_id = @gtype;
 
 UPDATE civicrm_financial_account SET is_active = 0 WHERE  name = 'NEI Grant';
 UPDATE civicrm_financial_type SET is_active = 0 WHERE  name = 'NEI Grant';
+
+-- RG-212
+UPDATE  civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id 
+SET cov.is_active = 0
+WHERE  cog.name = 'activity_type' AND cov.name IN ('grant_status_change', 'grant_payment');

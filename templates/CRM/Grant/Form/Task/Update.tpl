@@ -34,7 +34,7 @@
        <td>{$form.status_id.html}</td>
     </tr>
     <tr class="crm-contact-custom-search-form-row-radio_ts">
-       <td class="label">{$form.radio_ts.no_update.label}</td>
+    	 <td class="label">{$form.amount_granted.label}</td>
        <td>{$form.radio_ts.no_update.html}</td>
     </tr>
     <tr class="crm-contact-custom-search-form-row-radio_ts">
@@ -43,7 +43,7 @@
        <span class="description">{ts}Set to the amount specified here.{/ts}</span></td>
     </tr>
     <tr class="crm-contact-custom-search-form-row-radio_ts">
-       <td class="label" style="vertical-align:top;padding:0">{$form.amount_granted.label}</td>
+       <td class="label"></td>
        <td>{$form.amount_granted.html}</td>
     </tr>
     <tr class="crm-contact-custom-search-form-row-radio_ts">

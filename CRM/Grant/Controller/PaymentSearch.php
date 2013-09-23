@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.1                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -45,11 +45,11 @@
  * The second form is used to process search results with the asscociated actions
  *
  */
-class CRM_Grant_Controller_PaymentSearch extends CRM_Core_Controller {
+class CRM_Grant_Controller_PaymentSearch extends CRM_Core_Controller{
   /**
    * class constructor
    */
-  function __construct($title = NULL, $action = CRM_Core_Action::NONE, $modal = TRUE) {
+  function __construct( $title = NULL, $action = CRM_Core_Action::NONE, $modal = TRUE ) {
             
     parent::__construct($title, $modal);
         
