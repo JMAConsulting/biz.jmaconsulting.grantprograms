@@ -23,9 +23,6 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{if $totalSelectedGrants}
-    {ts 1=$totalSelectedGrants}Number of selected grant paments: %1{/ts}
-{/if}
 {if $rows } 
 <div class="form-item">
 <table width="30%">

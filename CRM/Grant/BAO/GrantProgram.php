@@ -175,7 +175,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
   }
      
      
-  public function getAddress($id, $locationTypeID = NULL) {
+  public function getAddress($id, $locationTypeID = NULL, $twoLines = false) {
     $sql = "
    SELECT civicrm_contact.id as contact_id,
           civicrm_address.street_address as street_address,
@@ -207,18 +207,33 @@ WHERE civicrm_contact.id = $id ";
     $config = CRM_Core_Config::singleton();
     while ($dao->fetch()) {
       $address = '';
-      CRM_Utils_String::append( 
-        $address, ', ',
-        array( 
-          $dao->street_address,
-          $dao->supplemental_address_1,
-          $dao->supplemental_address_2,
-          $dao->city,
-          $dao->state,
-          $dao->postal_code,
-          $dao->country
-        ) 
-      );
+      if ($twoLines) {
+      	CRM_Utils_String::append(
+      	$address, ' ',
+      	array(
+	      	$dao->street_address,
+	      	$dao->supplemental_address_1,
+	      	$dao->supplemental_address_2,
+	      	'<br />',
+	      	$dao->city,
+	      	$dao->state,
+	      	$dao->postal_code
+	      	)
+      	);
+      } else {
+	      CRM_Utils_String::append( 
+	        $address, ', ',
+	        array( 
+	          $dao->street_address,
+	          $dao->supplemental_address_1,
+	          $dao->supplemental_address_2,
+	          $dao->city,
+	          $dao->state,
+	          $dao->postal_code,
+	          $dao->country
+	        ) 
+	      );
+      }
       $location['address'] = addslashes($address);
     } 
     return $location;
@@ -289,7 +304,7 @@ WHERE civicrm_contact.id = $id ";
     return $grants;
   }
     
-  static function sendMail($contactID, &$values, $grantStatus) {
+  static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE, $status = '') {
     $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
@@ -311,11 +326,33 @@ WHERE civicrm_contact.id = $id ";
            ),
           'PDFFilename' => '',
         );
-        $sendTemplateParams['from'] = $email;
+        
+        $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
+        foreach ($defaultAddress as $id => $value) {
+          $sendTemplateParams['from'] = $value;
+        }
+
         $sendTemplateParams['toName'] = $displayName;
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
         CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
+        if ($grantId && $status) {
+          $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
+          $activityType = CRM_Core_PseudoConstant::activityType();
+          $session = CRM_Core_Session::singleton();
+          $params = array( 
+            'source_contact_id'=> $session->get('userID'),
+            'source_record_id' => $grantId,
+            'activity_type_id'=> array_search('Grant Status Change', $activityType),
+            'assignee_contact_id'=> array($contactID),
+            'subject'=> "Grant status changed from {$status} to {$grantStatus}",
+            'activity_date_time'=> date('Ymdhis'),
+            'status_id'=> array_search('Completed', $activityStatus),
+            'priority_id'=> 2,
+            'details'=> CRM_Core_Smarty::singleton()->get_template_vars('messageBody'),
+          );
+          CRM_Activity_BAO_Activity::create($params);
+        }
       }
     }
   }

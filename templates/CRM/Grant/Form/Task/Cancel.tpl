@@ -24,9 +24,5 @@
  +--------------------------------------------------------------------+
 *}
 {* Confirmation of Grant Payment Cancel  *}
-<div class="messages status">
-        <p><div class="icon inform-icon"></div>&nbsp;
-        {ts}Are you sure you want to cancel the selected Grant Payments? This cancel operation cannot be undone and will delete all transactions associated with these grant payments.{/ts}</p>
-        <p>{include file="CRM/Grant/Form/PaymentTask.tpl"}</p>
-</div>
+{include file="CRM/Grant/Form/PaymentTask.tpl"}
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl"}</div>

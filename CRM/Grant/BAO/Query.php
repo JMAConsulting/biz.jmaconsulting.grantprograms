@@ -99,7 +99,7 @@ class CRM_Grant_BAO_Query {
         $query->_element['grant_note'] = 1;
         $query->_tables['grant_note'] = 1;
       }
-
+      
       $query->_select['grant_amount_requested'] = 'civicrm_grant.amount_requested as grant_amount_requested';
       $query->_select['grant_amount_granted'] = 'civicrm_grant.amount_granted as grant_amount_granted';
       $query->_select['grant_amount_total'] = 'civicrm_grant.amount_total as grant_amount_total';
@@ -253,13 +253,13 @@ class CRM_Grant_BAO_Query {
       case 'grant_amount_low':
       case 'grant_amount_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount', 'amount_total', 'Total Amount'
+          'civicrm_grant', 'grant_amount', 'amount_granted', 'Amount Granted'
         ); 
       case 'grant_amount_total':
       case 'grant_amount_total_low':
       case 'grant_amount_total_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Allocated' 
+          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Requested' 
         );
       case 'grant_assessment':
       case 'grant_assessment_low':

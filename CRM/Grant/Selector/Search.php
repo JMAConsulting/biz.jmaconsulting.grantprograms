@@ -205,7 +205,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
         CRM_Core_Action::UPDATE => array(
           'name' => ts('Edit'),
           'url' => 'civicrm/contact/view/grant',
-          'qs' => 'reset=1&action=update&id=%%id%%&cid=%%cid%%&context=%%cxt%%&next=%%next%%&prev=%%prev%%' . $extraParams,
+          'qs' => 'reset=1&action=update&id=%%id%%&cid=%%cid%%&context=%%cxt%%&next=%%next%%&prev=%%prev%%' . $extraParams.'&ncid=%%ncid%%&searchGrants=%%searchGrants%%',
           'title' => ts('Edit Grant'),
         ),
       );
@@ -312,7 +312,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
        false, 
        $this->_grantClause );
      while ($grant->fetch()) {
-       $grants[$grant->contact_id][$grant->id] = $grant->id;
+       $grants[$grant->id] = $grant->id;
+       $grantContacts[$grant->id] = $grant->contact_id;
      }
      while ($result->fetch()) {
       $row = array();
@@ -321,7 +322,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       }
       $prev = $next = null;
       $foundit = false;
-      $contactGrants = $grants[$result->contact_id];
+      $contactGrants = $grants;
+      $searchGrants = implode(',', $grants);
       foreach( $contactGrants as $gKey => $gVal) {
         if ($foundit) {
           $next = $gKey; 
@@ -361,6 +363,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           'cxt' => $this->_context,
           'prev' => $prev,
           'next' => $next,
+          'searchGrants' => $searchGrants,
+          'ncid' => $grantContacts[$next],
         )
       );
 
@@ -429,7 +433,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           'name' => ts('Payment Created'),
           'sort' => 'grant_payment_created',
           'direction' => CRM_Utils_Sort::DONTCARE,
- 	    ),
+ 	      ),
         array('desc' => ts('Actions')),
       );
 
