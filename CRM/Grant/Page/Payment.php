@@ -53,6 +53,12 @@ class CRM_Grant_Page_Payment extends CRM_Core_Page {
     $controller->process();
     $controller->run();
     $this->assign('action', $action);
+    if ($action == 2097152) {
+      CRM_Core_Session::setStatus(ts('Do you want to record that a Stop payment request has been made with bank on this payment?'), NULL, 'no-popup');
+    }
+    elseif ($action == 8388608) {
+      CRM_Core_Session::setStatus(ts('Do you want to record that this cheque will not be cashed, e.g. it has been destroyed or is stale dated?'), NULL, 'no-popup');
+    }
     return parent::run();
   }
 }

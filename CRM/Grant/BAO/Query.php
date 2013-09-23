@@ -99,6 +99,18 @@ class CRM_Grant_BAO_Query {
         $query->_element['grant_note'] = 1;
         $query->_tables['grant_note'] = 1;
       }
+      
+        if (CRM_Utils_Array::value(COURSE_CONFERENCE_TYPE_COLUMN, $query->_returnProperties)) { 
+        $query->_select['course_type']  = COURSE_CONFERENCE_DETAILS.'.'.COURSE_CONFERENCE_TYPE_COLUMN.' as course_type';
+        $query->_element['course_type'] = 1;
+        $query->_tables['course_type']  = 1;
+      }
+            
+      if (CRM_Utils_Array::value(COURSE_CONFERENCE_NAME_COLUMN, $query->_returnProperties)) {
+        $query->_select['course_name']  = COURSE_CONFERENCE_DETAILS.'.'.COURSE_CONFERENCE_NAME_COLUMN.' as course_name';
+        $query->_element['course_name'] = 1;
+        $query->_tables['course_name']  = 1;
+      }
 
       $query->_select['grant_amount_requested'] = 'civicrm_grant.amount_requested as grant_amount_requested';
       $query->_select['grant_amount_granted'] = 'civicrm_grant.amount_granted as grant_amount_granted';
@@ -253,13 +265,13 @@ class CRM_Grant_BAO_Query {
       case 'grant_amount_low':
       case 'grant_amount_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount', 'amount_total', 'Total Amount'
+          'civicrm_grant', 'grant_amount', 'amount_granted', 'Amount Granted'
         ); 
       case 'grant_amount_total':
       case 'grant_amount_total_low':
       case 'grant_amount_total_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Allocated' 
+          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Requested' 
         );
       case 'grant_assessment':
       case 'grant_assessment_low':
@@ -304,6 +316,10 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         $from .= " $side JOIN civicrm_option_value v ON (civicrm_grant.status_id = v.value AND v.option_group_id=21)";
         break;
 
+      case 'course_name':
+        $from .= ' '.$side.' JOIN '.COURSE_CONFERENCE_DETAILS.' ON ( civicrm_grant.id = '.COURSE_CONFERENCE_DETAILS.'.entity_id )';
+        break;
+
       case 'grant_program':
         $from .= " $side JOIN civicrm_grant_program gp ON (civicrm_grant.grant_program_id = gp.id)";
         break;
@@ -337,6 +353,8 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
         'grant_amount_requested' => 1,
         'grant_application_received_date' => 1,
         'grant_payment_created' => 1,
+        COURSE_CONFERENCE_TYPE_COLUMN => 1,
+        COURSE_CONFERENCE_NAME_COLUMN => 1,
         'grant_report_received' => 1,
         'grant_money_transfer_date' => 1,
         'grant_note' => 1,

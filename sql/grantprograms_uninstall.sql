@@ -92,7 +92,27 @@ DELETE FROM civicrm_navigation WHERE parent_id = @parentId2 AND label = 'Find Gr
 DELETE FROM civicrm_navigation WHERE parent_id = @parentId2 AND label = 'New Grant Program' AND name = 'New Grant Program' AND url = 'civicrm/grant_program?action=add&reset=1';
 DELETE FROM civicrm_navigation WHERE parent_id = @parentId1 AND label = 'Grant Programs' AND name = 'Grant Programs' AND url = 'civicrm/grant_program&reset=1';
 
--- message templates
+-- custom data
+DELETE FROM civicrm_custom_group WHERE name = 'NEI_Employment_Information';
+DELETE FROM civicrm_custom_group WHERE name = 'NEI_General_information';
+DELETE FROM civicrm_custom_group WHERE name = 'NEI_Course_conference_details';
+DELETE FROM civicrm_custom_group WHERE name = 'NEI_ID';
+
+DELETE FROM civicrm_option_group WHERE name = 'predominant_clinical_area_of_pra_nei';
+DELETE FROM civicrm_option_group WHERE name = 'nei_employment_status_nei';
+DELETE FROM civicrm_option_group WHERE name = 'if_you_are_not_employed_indicate_nei';
+DELETE FROM civicrm_option_group WHERE name = 'province_of_employment_nei';
+DELETE FROM civicrm_option_group WHERE name = 'position_nei';
+DELETE FROM civicrm_option_group WHERE name = 'employment_setting_nei';
+DELETE FROM civicrm_option_group WHERE name = 'how_did_you_hear_about_this_init_nei';
+DELETE FROM civicrm_option_group WHERE name = 'course_conference_type_nei';
+DELETE FROM civicrm_option_group WHERE name = 'how_will_this_course_enhance_the_nei';
+DELETE FROM civicrm_option_group WHERE name = 'type_of_course_provider_nei';
+
+DROP TABLE IF EXISTS civicrm_value_nei_employment_information;
+DROP TABLE IF EXISTS civicrm_value_nei_general_information;
+DROP TABLE IF EXISTS civicrm_value_nei_course_conference_details;
+DROP TABLE IF EXISTS civicrm_value_nei_id;
 
 DELETE FROM civicrm_msg_template WHERE msg_title = 'Trial Allocation of Funds';
 DELETE FROM civicrm_msg_template WHERE msg_title = 'Grants Eligible Receipt';
@@ -108,7 +128,10 @@ DELETE FROM civicrm_msg_template WHERE msg_title = 'Grant Payment Report';
 SELECT @financialType := id FROM civicrm_financial_type WHERE name = 'NEI Grant';
 
 DELETE FROM civicrm_entity_financial_account WHERE entity_table = 'civicrm_financial_type' AND entity_id = @financialType;
-
 DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
-
 DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
+
+ALTER table civicrm_grant DROP column grant_incomplete_reason_id;
+      
+-- RG-212
+DELETE cov FROM civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id WHERE  cog.name = 'activity_type' AND cov.name IN ('grant_status_change', 'grant_payment');

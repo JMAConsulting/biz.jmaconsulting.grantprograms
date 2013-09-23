@@ -82,9 +82,6 @@ You have {$grantSummary.no_of_grants} grant(s) registered in your database.
 
 {if $pager->_totalItems}   
     <h3>{ts}Recent Grants{/ts}</h3>
-{* <div class="form-item">
-        {include file="CRM/Grant/Page/Status.tpl" context="DashBoard"}
-    </div> *}
     <div class="form-item">
         {include file="CRM/Grant/Form/Selector.tpl" context="DashBoard"}
     </div>
