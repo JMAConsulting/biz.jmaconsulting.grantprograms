@@ -132,8 +132,6 @@ DELETE FROM civicrm_financial_account WHERE name = 'NEI Grant';
 DELETE FROM civicrm_financial_type WHERE name = 'NEI Grant';
 
 ALTER table civicrm_grant DROP column grant_incomplete_reason_id;
-
-DELETE FROM civicrm_extension WHERE full_name = 'biz.jmaconsulting.grantprograms';
-
+      
 -- RG-212
 DELETE cov FROM civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id WHERE  cog.name = 'activity_type' AND cov.name IN ('grant_status_change', 'grant_payment');

@@ -207,15 +207,15 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
     $eligibleCountMessage = $remainingAmount = NULL;
      if ($nonEligibleCount) {
-      $nonEligibleCountMessage = $nonEligibleCount." eligible applications were not allocated since they have already received their annual maximum.";
+       $nonEligibleCountMessage = ts($nonEligibleCount." eligible applications were not allocated since they have already received their annual maximum.";)
     }
     if ($eligibleCount) {
-      $eligibleCountMessage = $eligibleCount." eligible applications were not allocated ".CRM_Utils_Money::format($eligibleAmount,NULL, NULL,FALSE)." in funds they would have received were funds available. ";
+      $eligibleCountMessage = ts($eligibleCount." eligible applications were not allocated ".CRM_Utils_Money::format($eligibleAmount,NULL, NULL,FALSE)." in funds they would have received were funds available.");
     }
     if ($totalAmount > 0) {
       $remainingAmount = CRM_Utils_Money::format($totalAmount,NULL, NULL,FALSE)." remains unallocated.";
     }
-    $message = "Trial Allocation Completed. ".CRM_Utils_Money::format($grantedAmount,NULL, NULL,FALSE)." allocated to {$grantedCount} eligible applications. ".$eligibleCountMessage.$nonEligibleCountMessage.$remainingAmount;
+    $message = ts("Trial Allocation Completed. " . CRM_Utils_Money::format($grantedAmount,NULL, NULL,FALSE) . " allocated to {$grantedCount} eligible applications. " . $eligibleCountMessage . $nonEligibleCountMessage . $remainingAmount);
    
     $page->assign('message', $message);
       
@@ -305,7 +305,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           $result = CRM_Grant_BAO_Grant::add($row, $ids);
         } 
       }
-      CRM_Core_Session::setStatus('Approved allocations finalized successfully.', '', 'no-popup');
+      CRM_Core_Session::setStatus(ts('Approved allocations finalized successfully.'), '', 'no-popup');
     }
   }
     
@@ -339,7 +339,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       $grantProgramParams['id'] = $_POST['pid'];
       $ids['grant_program'] = $_POST['pid'];
       CRM_Grant_BAO_GrantProgram::create($grantProgramParams, $ids);
-      CRM_Core_Session::setStatus('Marked remaining unapproved Grants as Ineligible successfully.', '', 'no-popup');
+      CRM_Core_Session::setStatus(ts('Marked remaining unapproved Grants as Ineligible successfully.'), '', 'no-popup');
     }
   }
 }
