@@ -123,13 +123,15 @@ SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Printed' AND option_
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Reprinted' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Stopped' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Cancelled' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
 (@opv1, @opGId, 'Printed', '1', 'Printed', NULL, 0, 0, 1, 'Payment that has had cheque or other payment created via PDF or csv download. The default status.', 0, 1, 1, NULL, 1, NULL),
-(@opv3, @opGId, 'Stopped', '2', 'Stopped', NULL, 0, 0, 1, 'The bank has been told to put a Stop Payment on the cheque or payment. Usually caused by a lost cheque that is being replaced by a newly printed one.', 0, 1, 1, NULL, 1, NULL),
-(@opv2, @opGId, 'Reprinted', '3', 'Reprinted', NULL, 0, 1, 1, 'This payment is no longer valid, and a new one has been printed to replace it. For example, a cheque jammed in the printer has been reprinted on cheque with a different number.', 0, 1, 1, NULL, 1, NULL),
-(@opv4, @opGId, 'Withdrawn', '4', 'Withdrawn', NULL, 0, 0, 2, 'Payment has been returned. For example, a grant winner gets a different better grant that makes them no longer eligible for this grant.', 0, 1, 1, NULL, NULL, NULL);
+(@opv3, @opGId, 'Stopped', '2', 'Stopped', NULL, 0, 0, 2, 'The bank has been told to put a Stop Payment on the cheque or payment. Usually caused by a lost cheque that is being replaced by a newly printed one.', 0, 1, 1, NULL, 1, NULL),
+(@opv2, @opGId, 'Reprinted', '3', 'Reprinted', NULL, 0, 1, 3, 'This payment is no longer valid, and a new one has been printed to replace it. For example, a cheque jammed in the printer has been reprinted on cheque with a different number.', 0, 1, 1, NULL, 1, NULL),
+(@opv4, @opGId, 'Withdrawn', '4', 'Withdrawn', NULL, 0, 0, 4, 'Payment has been returned. For example, a grant winner gets a different better grant that makes them no longer eligible for this grant.', 0, 1, 1, NULL, NULL, NULL),
+(@opv5, @opGId, 'Cancelled', '5', 'Cancelled', NULL, 0, 0, 5, 'Payment has been cancelled.', 0, 1, 1, NULL, 1, NULL);
 
 -- Grant Program Status
 SET @opGId := '';
@@ -186,13 +188,15 @@ SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Funding factor' AND 
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Fixed Percentage Of Grant' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Maximum Grant' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Minimum Score For Grant Award' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Maximum number of checks per pdf file' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
 (@opv1, @opGId, 'Funding factor', '85', NULL, NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Maximum Grant', '1500', 'Maximum Grant', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
-(@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL);
+(@opv4, @opGId, 'Minimum Score For Grant Award', '73', 'Minimum Score For Grant Award', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL),
+(@opv5, @opGId, 'Maximum number of checks per pdf file', '1000', 'Maximum number of checks per pdf file', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL);
 
 -- grant_status
 SET @opv1 := '';
@@ -246,17 +250,20 @@ SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
+SET @opv5 := '';
 SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Outside dates' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Ineligible' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Information not received in time' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Insufficient funds in program' AND option_group_id = @opGId;
+SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Applicant has received their annual maximum already' AND option_group_id = @opGId;
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
 (@opv1, @opGId, 'Outside dates', '1', 'Outside dates', NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv2, @opGId, 'Ineligible', '2', 'Ineligible', NULL, 0, 2, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv3, @opGId, 'Information not received in time', '3', 'Information not received in time', NULL, 0, 3, 1, NULL, 0, 0, 1, NULL, 1, NULL),
-(@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL);
+(@opv4, @opGId, 'Insufficient funds in program', '4', 'Insufficient funds in program', NULL, 0, 4, 1, NULL, 0, 0, 1, NULL, 1, NULL),
+(@opv5, @opGId, 'Applicant has received their annual maximum already', '5', 'Applicant has received their annual maximum already', NULL, 0, 5, 1, NULL, 0, 0, 1, NULL, 1, NULL);
 
 -- Reason Grant Incomplete
 SET @opGId := '';
@@ -340,3 +347,11 @@ INSERT INTO
    `civicrm_option_value` (`option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `visibility_id`)
 VALUES
     (@ogId, 'Number of Days after Course till Ineligible', 120, 'number_of_days_after_course_till_ineligible', NULL, 0, 0, 1, 'Number of Days after Course till Ineligible', 0, 1, 1, 2, NULL);
+
+-- RG-212
+SELECT @activityType := cog.id, @value := max(cast(value as unsigned)) + 1 FROM civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id WHERE  cog.name = 'activity_type';
+
+INSERT INTO civicrm_option_value(option_group_id, label, value, name, grouping, filter, is_default, weight, description, is_optgroup, is_reserved, is_active, component_id, visibility_id) 
+VALUES (@activityType, 'Grant Status Change', @value, 'grant_status_change', NULL, 0, 0, @value, 'Grant status change', 0, 1, 1, 5, NULL),
+       (@activityType, 'Grant Payment', @value + 1, 'grant_payment', NULL, 0, 0, @value + 1, 'Grant payment', 0, 1, 1, 5, NULL);
+

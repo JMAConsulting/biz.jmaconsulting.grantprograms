@@ -38,7 +38,7 @@ class CRM_Grant_BAO_PaymentSearch {
 
   const
     MODE_GRANT_PAYMENT = 1;
-
+    
   static function &getFields() {
     $fields = array();
     $fields = CRM_Grant_BAO_GrantPayment::exportableFields();

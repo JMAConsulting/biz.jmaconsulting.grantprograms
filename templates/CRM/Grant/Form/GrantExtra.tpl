@@ -120,5 +120,21 @@ var response = cj.ajax({
   }
  }).responseText;	
 });
+cj(document).ready( function(){
+// RG-116 hide attachments
+{/literal}{if $hideAttachments}{literal}
+cj('div.crm-grant-form-block-attachment').hide();
+{/literal}{/if}{literal}
+var total = 0;
+cj(".form-select").change(function(){
+cj(".form-select").each(function(){
+var name = cj(this).attr('id');
+  var customName = name.split('_');
+if (customName[0] == 'custom') {
+  total += parseInt(cj('#'+name).val());
+}
+});
+});
+});
 {/literal}
 </script>

@@ -35,19 +35,11 @@
  */
 
 /**
- * This class provides the functionality to delete a group of
- * participations. This class provides functionality for the actual
- * deletion.
+ * This class provides the functionality to cancel a group of
+ * grant payments.
  */
 class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
-  /**
-   * Are we operating in "single mode", i.e. deleting one
-   * specific participation?
-   *
-   * @var boolean
-   */
-  protected $_single = false;
-  
+
   /**
    * build all the data structures needed to build the form
    *
@@ -56,13 +48,13 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
    */
   function preProcess() {
     parent::preProcess();
-    
+
     //check permission for delete.
     if (!CRM_Core_Permission::checkActionPermission('CiviGrant', CRM_Core_Action::DELETE)) {
       CRM_Core_Error::fatal(ts('You do not have permission to access this page'));  
     }
   }
-  
+
   /**
    * Build the form
    *
@@ -71,8 +63,11 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
    */
   function buildQuickForm() {
     $this->addDefaultButtons(ts('Cancel Grants'), 'done');
+    $smarty = CRM_Core_Smarty::singleton();
+    $vars = $smarty->get_template_vars();
+    CRM_Core_Session::setStatus(ts('Are you sure you want to cancel the selected Grant Payments? This cancel operation cannot be undone and will delete all transactions associated with these grant payments. Number of selected grant payments: '. $vars['totalSelectedGrants']), NULL, 'no-popup');
   }
-  
+
   /**
    * process the form after the input has been submitted and validated
    *
@@ -80,29 +75,24 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
    * @return None
    */
   public function postProcess() {
-    $deletedGrantPayments = 0;
-    foreach ($this->_grantPaymentIds as $paymentId) {
-      $entityDAO =& new CRM_Grant_DAO_EntityPayment();
-      $entityDAO->payment_id = $paymentId;
-      $entityDAO->find();
-      
-      while ($entityDAO->fetch()) {
-        CRM_Grant_BAO_EntityPayment::del($entityDAO->id);
-        $grantDAO =& new CRM_Grant_DAO_Grant();
-        $grantDAO->id = $entityDAO->entity_id;
-        $grantDAO->status_id = CRM_Core_OptionGroup::getValue('grant_status', 'Eligible', 'name');
-        $grantDAO->save();
-      }
-      if (CRM_Grant_BAO_GrantPayment::del($paymentId)) {
-        $deletedGrantPayments++;
-      }
-    }
-    
-    $status = array(
-      ts('Cancel Grant Payments(s): %1', array(1 => $deletedGrantPayments)),
-      ts('Total Selected Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))),
+    if (empty($this->_grantPaymentIds)) {
+      return FALSE;
+    }    
+    // change status of payment(s) to Cancelled And grant status to Eligible
+    $query = "UPDATE civicrm_grant cg
+LEFT JOIN civicrm_entity_payment cep ON cep.entity_id = cg.id
+LEFT JOIN civicrm_payment cp ON cp.id = cep.payment_id
+SET cg.status_id = %1,
+cp.payment_status_id = %2
+WHERE  cp.id IN (" . implode(',', $this->_grantPaymentIds) . ") AND cep.entity_table = 'civicrm_grant'";
+    $params = array(
+      1 => array(CRM_Core_OptionGroup::getValue('grant_status', 'Eligible', 'name'), 'Integer'),
+      2 => array(CRM_Core_OptionGroup::getValue('grant_payment_status', 'Cancelled', 'name'), 'Integer'),
     );
-    CRM_Core_Session::setStatus($status);
+    CRM_Core_DAO::executeQuery($query, $params);
+
+    CRM_Core_Session::setStatus(ts('Cancel Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
+    CRM_Core_Session::setStatus(ts('Total Selected Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
   }
 }
 

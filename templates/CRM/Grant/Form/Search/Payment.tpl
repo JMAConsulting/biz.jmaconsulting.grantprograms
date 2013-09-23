@@ -50,7 +50,7 @@
     </td>
 </tr>
 <tr>
-    <td colspan = "2"><label>{ts}Amount Allocated{/ts}</label> <br />
+    <td colspan = "2"><label>{ts}Amount Requested{/ts}</label> <br />
         {$form.grant_amount_total_low.label}
         {$form.grant_amount_total_low.html}
 	 {$form.grant_amount_total_high.label}
