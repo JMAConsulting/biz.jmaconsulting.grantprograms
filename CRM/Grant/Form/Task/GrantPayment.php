@@ -203,7 +203,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       
         $contactGrants[$dao->grant_id] = $dao->id;
 
-        $curr_id = $dao->id;
+        $grantAmount[$dao->id] += $dao->total_amount;
         if ( !$this->_prid ) {
           $grantProgramSql = "SELECT is_auto_email FROM civicrm_grant_program WHERE id  = ".$dao->grant_program_id;
           $mailParams[$dao->grant_id]['is_auto_email'] = CRM_Grant_DAO_GrantProgram::singleValueQuery( $grantProgramSql );
@@ -263,10 +263,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $grantPayment[$grantKey]['total_in_words'] = $grantInfo['total_in_words'] =
         	$grantValues['total_in_words'] = $amountInWords;
         $grantPayment[$grantKey]['amount'] = $grantInfo['amount'];
-        if ($curr_id == $grantKey) {
-          $grantTotalPayment[$grantKey] = $grantPayment[$grantKey];
-          $grantTotalPayment[$grantKey]['amount'] = $amountsTotal[$grantKey];
-        }
         // Save payment
         $savePayment = $grantPayment[$grantKey];
         $savePayment['payable_to_address'] = str_replace('<br /> ', '', $savePayment['payable_to_address']);
@@ -286,12 +282,15 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     }
     $downloadNameCSV = check_plain('grantPayment');
     $downloadNameCSV .= '_'.date('Ymdhis');
-    $this->assign('grantPayment', $grantTotalPayment);
+    $this->assign('grantPayment', $grantPayment);
     $downloadNameCSV .= '.csv';
     $fileName = CRM_Utils_File::makeFileName( $downloadNameCSV );
     $config = CRM_Core_Config::singleton();
     $file_name = $config->customFileUploadDir . $fileName;
-    CRM_Grant_BAO_GrantPayment::createCSV($file_name, $grantTotalPayment);
+    foreach($grantAmount as $id => $value) {
+      $grantPayment[$id]['amount'] = $value;
+    }
+    CRM_Grant_BAO_GrantPayment::createCSV($file_name, $grantPayment);
     $files[] = $fileName;
 
     $this->assign('date', date('Y-m-d'));
@@ -305,7 +304,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $checkRegisterFile = check_plain('CheckRegister');
     $checkRegisterFile .= '.pdf';
     $checkFile = CRM_Utils_File::makeFileName( $checkRegisterFile );
-    $checkRegister = CRM_Grant_BAO_GrantPayment::makeReport( $checkFile, $grantTotalPayment );
+    $checkRegister = CRM_Grant_BAO_GrantPayment::makeReport( $checkFile, $grantPayment );
     $files[] = $checkRegister;
     
 
