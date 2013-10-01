@@ -238,7 +238,7 @@ class CRM_Grant_Form_PaymentSearch extends CRM_Core_Form {
         
     $this->addElement('text', 'payment_batch_number', ts('Batch Number'), array('size' => 8, 'maxlength' => 8));
        
-    $this->addElement('text', 'payment_number', ts('Payment Number'), array('size' => 8, 'maxlength' => 8));
+    $this->addElement('text', 'payment_number', ts('Payment Number'), array('size' => 10, 'maxlength' => 10));
        
     $this->addDate('payment_created_date_low', ts('From'), FALSE, array('formatType' => 'searchDate'));
     $this->addDate('payment_created_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
