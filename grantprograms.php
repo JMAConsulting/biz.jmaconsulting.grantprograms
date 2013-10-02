@@ -944,6 +944,7 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
 }
 
 function grantprograms_getOptionValueLabel($optioGroupID, $value) {
+  $value = CRM_Core_DAO::escapeString($value);
   $query = "SELECT label FROM civicrm_option_value WHERE  option_group_id = {$optioGroupID} AND value = '{$value}' ";
   return CRM_Core_DAO::singleValueQuery($query);
 }
