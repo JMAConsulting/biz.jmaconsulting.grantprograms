@@ -162,7 +162,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $this->_approvedGrants = $this->get( 'approvedGrants' );
     $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
     $maxLimit = $grantThresholds['Maximum number of checks per pdf file'];
-
     if ( $this->_prid ) {
       $query = "SELECT cp.id as pid, cg.amount_granted as total_amount, cp.currency, cp.payment_reason, cp.contact_id as id, cep.entity_id as grant_id FROM civicrm_payment as cp LEFT JOIN civicrm_entity_payment as cep ON cep.payment_id = cp.id LEFT JOIN civicrm_grant as cg ON cg.id = cep.entity_id WHERE cp.id IN (".$this->_prid.")";
       $countQuery = "SELECT COUNT(cp.id) as ids FROM civicrm_payment as cp LEFT JOIN civicrm_entity_payment as cep ON cep.payment_id = cp.id LEFT JOIN civicrm_grant as cg ON cg.id = cep.entity_id WHERE cp.id IN (".$this->_prid.")";
@@ -202,7 +201,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $details[$dao->id]['currency']        = $dao->currency;
       
         $contactGrants[$dao->grant_id] = $dao->id;
-
         $grantAmount[$dao->id] += $dao->total_amount;
         if ( !$this->_prid ) {
           $grantProgramSql = "SELECT is_auto_email FROM civicrm_grant_program WHERE id  = ".$dao->grant_program_id;
@@ -246,7 +244,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $values['payment_number']++;
         $totalAmount += $details[$id]['total_amount'];
       }
-
       foreach ( $grantPayment as $grantKey => $grantInfo ) {
         $row = array();
         $grantValues = $grantInfo;
@@ -279,6 +276,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $downloadNamePDF .= '.pdf';
       $fileName = CRM_Utils_File::makeFileName( $downloadNamePDF );
       $files[] = $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
+      $counter++;
     }
     $downloadNameCSV = check_plain('grantPayment');
     $downloadNameCSV .= '_'.date('Ymdhis');
