@@ -242,6 +242,18 @@ function grantprograms_civicrm_permission(&$permissions) {
  *
 */
 function grantprograms_civicrm_buildForm($formName, &$form) {
+
+  if ($formName == 'CRM_Activity_Form_Activity'
+    && ($form->getVar('_action') == CRM_Core_Action::UPDATE || $form->getVar('_action') == CRM_Core_Action::VIEW)) {
+    $activityType = CRM_Core_PseudoConstant::activityType();
+    $activityValues = $form->getVar('_values');
+    if (array_search('Grant Status Change', $activityType) != $activityValues['activity_type_id']) {
+      return FALSE;
+    }
+    $grantUrl = CRM_Utils_System::url('civicrm/contact/view/grant', 
+      'reset=1&action=view&id=' . $activityValues['source_record_id'] . '&cid=' . current($activityValues['assignee_contact']));
+    $form->assign('grantUrl', $grantUrl);
+  }
   
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $form->_key = CRM_Utils_Request::retrieve('key', 'String', $form);
