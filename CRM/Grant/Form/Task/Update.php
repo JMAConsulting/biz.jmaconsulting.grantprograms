@@ -63,7 +63,7 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
    * @return void
    */
   function buildQuickForm() {
-    $grantStatus = CRM_Grant_PseudoConstant::grantStatus();
+    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
     CRM_Utils_System::setTitle(ts('Update Grants'));
     $this->addElement('select', 'status_id', ts('Grant Status'), array('' => '') + $grantStatus);
     $this->addElement('radio', 'radio_ts', NULL, ts('&nbsp;Do not update'), 'no_update' );  
