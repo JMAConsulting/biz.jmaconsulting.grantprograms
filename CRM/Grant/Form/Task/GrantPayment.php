@@ -154,7 +154,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
    */
   public function postProcess() 
   {
-    $details = $allGrants = $grantPayments = array();
+    $details = $allGrants = $grantPayments = $grantAmount = array();
     $grandTotal = 0;
     CRM_Utils_System::flushCache( 'CRM_Grant_DAO_GrantPayment' );
     $values  = $this->controller->exportValues( $this->_name );

@@ -226,6 +226,7 @@ function &links() {
 function grantprograms_civicrm_permission(&$permissions) {
   $prefix = ts('CiviCRM Grant Program') . ': '; // name of extension or module
   $permissions['edit grant finance'] = $prefix . ts('edit grant finance');
+  $permissions['edit grant program'] = $prefix . ts('edit grant programs in CiviGrant');
   $permissions['cancel payments in CiviGrant'] = $prefix . ts('cancel payments in CiviGrant');
   $permissions['edit payments in CiviGrant'] = $prefix . ts('edit payments in CiviGrant');
   $permissions['create payments in CiviGrant'] = $prefix . ts('create payments in CiviGrant');
@@ -442,7 +443,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       $grantProgram[$dao->id]['action'] = CRM_Core_Action::formLink(links(), $action, 
                                           array('id' => $dao->id));
     }
-    $grantType   = CRM_Grant_PseudoConstant::grantType( );
+    $grantType   = CRM_Core_OptionGroup::values('grant_type');
     $grantStatus = CRM_Grant_BAO_GrantProgram::grantProgramStatus( );
     foreach ( $grantProgram as $key => $value ) {
       $grantProgram[$key]['grant_type_id'] = $grantType[$grantProgram[$key]['grant_type_id']];
@@ -762,7 +763,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     if ($previousGrant && $previousGrant->status_id == $objectRef->status_id) {
       return FALSE;
     }
-    $status = CRM_Grant_PseudoConstant::grantStatus();
+    $status = CRM_Core_OptionGroup::values('grant_status');
     $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
     $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
     $amount = $objectRef->amount_granted;
@@ -988,4 +989,14 @@ function grantprograms_civicrm_alterMailParams(&$params) {
   if (substr($params['valueName'], 0, 6) == 'grant_') {
     CRM_Core_Smarty::singleton()->assign('messageBody', $params['html']);
   }
+}
+
+function grantprograms_civicrm_links( $op, $objectName, $objectId, &$links ) {
+      if ($op == 'create.new.shorcuts' && (CRM_Core_Permission::check('access CiviGrant') &&
+      CRM_Core_Permission::check('edit grant program')) ) {
+      // add link to create new profile
+      $links[] = array( 'url'   => CRM_Utils_System::url('civicrm/grant_program', 'reset=1&action=browse', FALSE),
+                 'title' => ts('Grant Program'),
+                 'ref'   => 'new-grant program');
+    }
 }
