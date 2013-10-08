@@ -22,7 +22,7 @@ function _civicrm_api3_grant_changestatus_spec(&$spec) {
  */
 function civicrm_api3_grant_changestatus($params) {
 
-  $status = CRM_Grant_PseudoConstant::grantStatus();
+  $status = CRM_Core_OptionGroup::values('grant_status');
   $infoTooLate = key(CRM_Core_PseudoConstant::accountOptionValues('grant_info_too_late'));
   $reasonGrantIneligible = CRM_Core_OptionGroup::values('reason_grant_ineligible');
 
