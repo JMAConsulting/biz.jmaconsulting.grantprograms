@@ -1080,7 +1080,7 @@ function grantprograms_civicrm_links( $op, $objectName, $objectId, &$links ) {
       if ($op == 'create.new.shorcuts' && (CRM_Core_Permission::check('access CiviGrant') &&
       CRM_Core_Permission::check('edit grant program')) ) {
       // add link to create new profile
-      $links[] = array( 'url'   => 'grant_program?reset=1&action=browse',
+      $links[] = array( 'url'   => CRM_Utils_System::url('civicrm/grant_program', 'reset=1&action=browse', FALSE),
                  'title' => ts('Grant Program'),
                  'ref'   => 'new-grant program');
     }
