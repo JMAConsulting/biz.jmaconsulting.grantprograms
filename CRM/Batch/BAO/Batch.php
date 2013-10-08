@@ -741,7 +741,6 @@ WHERE  {$where}
     if (isset($limit)) {
       $sql .= "{$limit}";
     }
-      CRM_Core_Error::debug_var( '$sql', $sql );
 
     $result = CRM_Core_DAO::executeQuery($sql);
     return $result;
