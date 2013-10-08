@@ -82,7 +82,11 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
       ft.trxn_id AS trxn_id,
       cov.label AS payment_instrument,
       ft.check_number,
-      c.source AS source,
+      CASE 
+        WHEN eftc.entity_table = 'civicrm_contribution'
+        THEN c.source
+        ELSE cgp.label
+      END AS source,
       ft.currency AS currency,
       cov_status.label AS status,
       CASE 
@@ -104,7 +108,10 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
       LEFT JOIN civicrm_option_group cog ON cog.name = 'payment_instrument'
       LEFT JOIN civicrm_option_value cov ON (cov.value = ft.payment_instrument_id AND cov.option_group_id = cog.id)
       LEFT JOIN civicrm_entity_financial_trxn eftc ON (eftc.financial_trxn_id  = ft.id AND (eftc.entity_table = 'civicrm_contribution' OR  eftc.entity_table = 'civicrm_grant'))
-      LEFT JOIN civicrm_contribution c ON c.id = eftc.entity_id
+      LEFT JOIN civicrm_contribution c ON c.id = eftc.entity_id AND eftc.entity_table = 'civicrm_contribution'
+     
+      LEFT JOIN civicrm_grant ccg ON ccg.id = eftc.entity_id AND eftc.entity_table = 'civicrm_grant'
+      LEFT JOIN civicrm_grant_program cgp ON cgp.id = ccg.grant_program_id
       LEFT JOIN civicrm_option_group cog_status ON cog_status.name = 'contribution_status'
       LEFT JOIN civicrm_option_value cov_status ON (cov_status.value = ft.status_id AND cov_status.option_group_id = cog_status.id)
       LEFT JOIN civicrm_entity_financial_trxn efti ON (efti.financial_trxn_id  = ft.id AND efti.entity_table = 'civicrm_financial_item')
@@ -115,7 +122,6 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
 
     $params = array(1 => array($batchId, 'String'));
     $dao = CRM_Core_DAO::executeQuery( $sql, $params );
-    CRM_Core_Error::debug_var( '$sql', $sql );
 
     return $dao;
   }
