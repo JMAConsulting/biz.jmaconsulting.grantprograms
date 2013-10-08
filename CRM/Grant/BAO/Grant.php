@@ -259,7 +259,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
       "action=view&reset=1&id={$grant->id}&cid={$grant->contact_id}&context=home"
     );
 
-    $grantTypes = CRM_Grant_PseudoConstant::grantType();
+    $grantTypes = CRM_Core_OptionGroup::values('grant_type');
     if (!CRM_Utils_Array::value('skipRecentView', $params)) {
       if(!isset($grant->contact_id) || !isset($grant->grant_type_id)){
         $grant->find(TRUE);
