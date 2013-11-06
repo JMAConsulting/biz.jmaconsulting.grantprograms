@@ -45,7 +45,6 @@
   {/foreach}
   </tr>
   </thead>
-
   {counter start=0 skip=1 print=false}
   {foreach from=$rows item=row}  
   <tr id='crm-payment_{$row.id}' class="{cycle values="odd-row,even-row"} crm-grant crm-grant_status-{$row.payment_status_id}">
@@ -57,10 +56,14 @@
      {/if} 
   {/if}
     <td class="crm-grant-grant_status">{$row.payment_status_id}</td>
-    <td class="crm-grant-grant_type">{$row.payment_batch_number}</td> 
+    <td class="crm-grant-grant_type">{$row.payment_batch_number}</td>
     <td class="crm-grant-grant_type">{$row.payment_number}</td>
     <td class="right crm-grant-grant_money_transfer_date">{$row.payment_created_date|truncate:10:''|crmDate}</td>
-    <td class="crm-grant-grant_status">{$row.payable_to_name}</td>
+    <td class="crm-grant-grant_status">
+      <a href="{php}echo CRM_Utils_System::url('civicrm/contact/view');{/php}?reset=1&cid={$row.contact_id}&force=1">
+      {$row.payable_to_name}
+      </a>
+    </td>
     <td class="right crm-grant-grant_amount_total">{$row.amount|crmMoney}</td>
     <td>{$row.action|replace:'xx':$row.grant_id}</td>
    </tr>

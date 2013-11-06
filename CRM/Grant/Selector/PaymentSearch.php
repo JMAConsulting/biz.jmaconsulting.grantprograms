@@ -64,6 +64,7 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
    */
   static $_properties = array( 
     'id',
+    'contact_id',
     'payable_to_name',
     'payment_batch_number',
     'payment_number',
@@ -304,7 +305,6 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
            
     while ($result->fetch()) {
       $row = array();
-             
       // the columns we are interested in
       foreach (self::$_properties as $property) {
         if (isset($result->$property)) {
