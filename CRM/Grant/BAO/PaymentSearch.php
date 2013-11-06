@@ -586,6 +586,7 @@ class CRM_Grant_BAO_PaymentSearch {
    */
   function select() {   
     $this->_select['id'] = 'civicrm_payment.id as id';
+    $this->_select['contact_id'] = 'civicrm_payment.contact_id as contact_id';
     $this->_select['payable_to_name'] = 'civicrm_payment.payable_to_name as payable_to_name';
     $this->_select['payment_batch_number'] = 'civicrm_payment.payment_batch_number as payment_batch_number';
     $this->_select['payment_number'] = 'civicrm_payment.payment_number as payment_number';
@@ -597,6 +598,7 @@ class CRM_Grant_BAO_PaymentSearch {
     
   function element() {    
     $this->_element['id'] = 1;
+    $this->_element['contact_id'] = 1;
     $this->_element['payable_to_name'] = 1;
     $this->_element['payment_batch_number'] = 1;
     $this->_element['payment_number'] = 1;
