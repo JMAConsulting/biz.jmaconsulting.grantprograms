@@ -70,8 +70,9 @@ class CRM_Core_Action {
     PAY = 1048576, 
     STOP = 2097152, 
     REPRINT = 4194304, 
-    WITHDRAW = 8388608, 
-    MAX_ACTION = 16777216;
+    WITHDRAW = 8388608,
+    PRINTT4 = 16777216,
+    MAX_ACTION = 33554431;
 
   //make sure MAX_ACTION = 2^n - 1 ( n = total number of actions )
 
@@ -108,6 +109,7 @@ class CRM_Core_Action {
     'stop' => self::STOP,
     'reprint' => self::REPRINT,
     'withdraw' => self::WITHDRAW,
+    'printT4' => self::PRINTT4,
   );
 
   /**
