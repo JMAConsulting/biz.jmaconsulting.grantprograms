@@ -173,6 +173,16 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     $sql = "SELECT display_name FROM civicrm_contact WHERE civicrm_contact.id = $id ";
     return CRM_Core_DAO::singleValueQuery($sql);
   }
+
+  public function getFirstName($id) {
+    $sql = "SELECT first_name FROM civicrm_contact WHERE civicrm_contact.id = $id ";
+    return CRM_Core_DAO::singleValueQuery($sql);
+  }
+
+  public function getLastName($id) {
+    $sql = "SELECT last_name FROM civicrm_contact WHERE civicrm_contact.id = $id ";
+    return CRM_Core_DAO::singleValueQuery($sql);
+  }
      
      
   public function getAddress($id, $locationTypeID = NULL, $twoLines = false) {
