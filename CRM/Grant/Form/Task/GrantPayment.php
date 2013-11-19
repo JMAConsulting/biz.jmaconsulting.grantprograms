@@ -203,7 +203,11 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       
         $contactGrants[$dao->grant_id] = $dao->id;
 
-        $grantAmount[$dao->id] += $dao->total_amount;
+        if (isset($grantAmount[$dao->id]) {
+          $grantAmount[$dao->id] += $dao->total_amount;
+        } else {
+          $grantAmount[$dao->id] = $dao->total_amount;
+        }
         if ( !$this->_prid ) {
           $grantProgramSql = "SELECT is_auto_email FROM civicrm_grant_program WHERE id  = ".$dao->grant_program_id;
           $mailParams[$dao->grant_id]['is_auto_email'] = CRM_Grant_DAO_GrantProgram::singleValueQuery( $grantProgramSql );
