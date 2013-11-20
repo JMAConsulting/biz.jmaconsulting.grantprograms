@@ -203,7 +203,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       
         $contactGrants[$dao->grant_id] = $dao->id;
 
-        if (isset($grantAmount[$dao->id]) {
+        if (isset($grantAmount[$dao->id])) {
           $grantAmount[$dao->id] += $dao->total_amount;
         } else {
           $grantAmount[$dao->id] = $dao->total_amount;
