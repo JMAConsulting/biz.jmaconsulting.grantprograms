@@ -948,7 +948,7 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
     && CRM_Core_Permission::check('create payments in CiviGrant')) {
     $tasks[PAY_GRANTS] = array( 
       'title' => ts('Pay Grants'),
-      'class' => array('CRM_Grant_Form_Task_Pay', 'CRM_Grant_Form_Task_GrantPayment'),
+      'class' => array('CRM_Grant_Form_Task_Pay'),
       'result' => FALSE,
     );
     $tasks[PRINT_T4] = array(
