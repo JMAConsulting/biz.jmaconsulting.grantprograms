@@ -948,12 +948,9 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
     && CRM_Core_Permission::check('create payments in CiviGrant')) {
     $tasks[PAY_GRANTS] = array( 
       'title' => ts('Pay Grants'),
-      'class' => array('CRM_Grant_Form_Task_Pay'),
-      'result' => FALSE,
-    );
-    $tasks[PRINT_T4] = array(
-      'title' => ts('Print T4'),
-      'class' => array('CRM_Grant_Form_Task_T4'),
+      'class' => array('CRM_Grant_Form_Task_Pay',
+        'CRM_Grant_Form_Task_GrantPayment' 
+      ),
       'result' => FALSE,
     );
   }
@@ -1028,7 +1025,7 @@ function grantprograms_define($extensionsDir) {
     fwrite($file, "define('".$tableValue."', '".CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $tableKey, 'id' ,'column_name')."');\n");
     fwrite($file, "define('".$tableValue."_COLUMN', '".$tableKey."');\n");
   } 
-  fwrite($file, "\ndefine('PAY_GRANTS', 5);\ndefine('DELETE_GRANTS', 1);\ndefine('PRINT_T4', 6);\n\n?>");
+  fwrite($file, "\ndefine('PAY_GRANTS', 5);\ndefine('DELETE_GRANTS', 1);\n\n?>");
   fclose($file);
   return;
 }

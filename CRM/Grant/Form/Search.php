@@ -157,7 +157,6 @@ class CRM_Grant_Form_Search extends CRM_Core_Form {
     $this->_force   = CRM_Utils_Request::retrieve('force', 'Boolean', $this, FALSE);
     $this->_limit   = CRM_Utils_Request::retrieve('limit', 'Positive', $this);
     $this->_context = CRM_Utils_Request::retrieve('context', 'String', $this, FALSE, 'search');
-    $this->_download = CRM_Utils_Request::retrieve('download', 'String');
 
     $this->assign("context", $this->_context);
 
@@ -214,15 +213,6 @@ class CRM_Grant_Form_Search extends CRM_Core_Form {
     );
     $controller->setEmbedded(TRUE);
     $controller->moveFromSessionToTemplate();
-
-    if ($this->_download) {
-      //FIXME : incase of wp and joomla
-      global $base_url;
-      $config = CRM_Core_Config::singleton();
-      $directory = strstr($config->customFileUploadDir, 'sites');
-      $file_name = $base_url . '/' . $directory . $this->_download;
-      $this->assign('download', $file_name);
-    }
 
     $this->assign('summary', $this->get('summary'));
   }
