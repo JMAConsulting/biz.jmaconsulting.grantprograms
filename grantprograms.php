@@ -151,9 +151,7 @@ function quickAllocate($grantProgram, $value) {
       $amountEligible = $grantProgram->remainder_amount;
     }
     $value['amount_total'] = str_replace(',', '', $value['amount_total']);
-    $requestedAmount = CRM_Utils_Money::format(($value['amount_total'] *
-        (($value['assessment']/100 < 0) ? 0 : ($value['assessment']/100)) *
-        ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
+    $requestedAmount = CRM_Utils_Money::format((($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
     // Don't grant more money than originally requested
     if ($requestedAmount > $value['amount_total']) {
     	$requestedAmount = $value['amount_total'];
@@ -950,12 +948,9 @@ function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
     && CRM_Core_Permission::check('create payments in CiviGrant')) {
     $tasks[PAY_GRANTS] = array( 
       'title' => ts('Pay Grants'),
-      'class' => array('CRM_Grant_Form_Task_Pay', 'CRM_Grant_Form_Task_GrantPayment'),
-      'result' => FALSE,
-    );
-    $tasks[PRINT_T4] = array(
-      'title' => ts('Print T4'),
-      'class' => array('CRM_Grant_Form_Task_T4'),
+      'class' => array('CRM_Grant_Form_Task_Pay',
+        'CRM_Grant_Form_Task_GrantPayment' 
+      ),
       'result' => FALSE,
     );
   }
@@ -1030,7 +1025,7 @@ function grantprograms_define($extensionsDir) {
     fwrite($file, "define('".$tableValue."', '".CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $tableKey, 'id' ,'column_name')."');\n");
     fwrite($file, "define('".$tableValue."_COLUMN', '".$tableKey."');\n");
   } 
-  fwrite($file, "\ndefine('PAY_GRANTS', 5);\ndefine('DELETE_GRANTS', 1);\ndefine('PRINT_T4', 6);\n\n?>");
+  fwrite($file, "\ndefine('PAY_GRANTS', 5);\ndefine('DELETE_GRANTS', 1);\n\n?>");
   fclose($file);
   return;
 }

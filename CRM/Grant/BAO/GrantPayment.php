@@ -311,12 +311,12 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     fclose($fp);
   }
   
-  static function makePDF($fileName, $rows, $template = 'Grant Payment Check') {
+  static function makePDF($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
     $query = "SELECT msg_subject subject, msg_html html, msg_text text, pdf_format_id format
               FROM civicrm_msg_template 
-              WHERE msg_title = '" . $template . "' AND is_default = 1;";
+              WHERE msg_title = 'Grant Payment Check' AND is_default = 1;";
     $grantDao = CRM_Core_DAO::executeQuery($query);
     $grantDao->fetch();
                 
@@ -343,7 +343,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
         $html,
         $fileName,
         TRUE,
-        $format
+        'Letter'
       )
     );
     return $fileName;

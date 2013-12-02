@@ -145,9 +145,7 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           $ids['grant_id'] = $value['grant_id'];
         }
         else {
-          $requestedAmount = CRM_Utils_Money::format(($value['amount_total'] *
-              (($value['assessment']/100 < 0) ? 0 : ($value['assessment']/100)) *
-              ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
+          $requestedAmount = CRM_Utils_Money::format((($value['assessment']/100) * $value['amount_total'] * ($grantThresholds['Funding factor'] / 100)), NULL, NULL, TRUE);
        		// Don't grant more money than originally requested
           if ($requestedAmount > $value['amount_total']) {
           	$requestedAmount = $value['amount_total'];
