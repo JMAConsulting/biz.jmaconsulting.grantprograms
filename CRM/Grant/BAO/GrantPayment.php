@@ -343,7 +343,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
         $html,
         $fileName,
         TRUE,
-        'Letter'
+        $format
       )
     );
     return $fileName;
