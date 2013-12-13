@@ -167,7 +167,9 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $query = "SELECT cp.id as pid, cg.amount_granted as total_amount, cp.currency, cp.payment_reason, cp.contact_id as id, cep.entity_id as grant_id FROM civicrm_payment as cp LEFT JOIN civicrm_entity_payment as cep ON cep.payment_id = cp.id LEFT JOIN civicrm_grant as cg ON cg.id = cep.entity_id WHERE cp.id IN (".$this->_prid.")";
       $countQuery = "SELECT COUNT(cp.id) as ids FROM civicrm_payment as cp LEFT JOIN civicrm_entity_payment as cep ON cep.payment_id = cp.id LEFT JOIN civicrm_grant as cg ON cg.id = cep.entity_id WHERE cp.id IN (".$this->_prid.")";
     } else {
-      $query = "SELECT id as grant_id, amount_granted as total_amount, currency, grant_program_id, grant_type_id, contact_id as id FROM civicrm_grant WHERE id IN (".implode(', ', array_keys($this->_approvedGrants) ).")";
+      $query = "SELECT id as grant_id, amount_granted as total_amount, currency, grant_program_id, " .
+          "application_received_date, grant_type_id, contact_id as id FROM civicrm_grant " .
+          "WHERE id IN (".implode(', ', array_keys($this->_approvedGrants) ).")";
       $countQuery = "SELECT COUNT(id) as grant_id FROM civicrm_grant WHERE id IN (".implode(', ', array_keys($this->_approvedGrants) ).")";
     }
     $daoCount = CRM_Grant_DAO_Grant::singleValueQuery($countQuery);
@@ -214,6 +216,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
           $mailParams[$dao->grant_id]['amount_total'] = $dao->total_amount;
           $mailParams[$dao->grant_id]['grant_type_id'] = $dao->grant_type_id;
           $mailParams[$dao->grant_id]['grant_program_id'] = $dao->grant_program_id;
+          $mailParams[$dao->grant_id]['application_received_date'] = $dao->application_received_date;
           $grantContctId[$dao->grant_id] = $dao->id;
           $gProgram = CRM_Grant_BAO_GrantProgram::getGrantPrograms( $dao->grant_program_id );
           if( !empty( $gProgram ) ) {
@@ -394,6 +397,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $this->assign( 'grant_programs', $grantPrograms[$mailParams[$grantId]['grant_program_id']] );
         $this->assign( 'grant_status', 'Paid' );
         $this->assign( 'params', $mailParams[$grantId] );
+        $this->assign('grant', $mailParams[$grantId]);
         CRM_Grant_BAO_GrantProgram::sendMail($grantContctId[$grantId], $mailParams[$grantId], 'Paid', $grantId, 'Approved for Payment');
       }
       CRM_Core_Session::setStatus( "Created ".count($details)." payments to pay for ".count($this->_approvedGrants)." grants to ".count($details)." applicants." );
