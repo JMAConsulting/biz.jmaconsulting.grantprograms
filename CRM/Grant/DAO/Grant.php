@@ -50,6 +50,13 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
    */
   static $_fields = null;
   /**
+   * static instance to hold the keys used in $_fields for each field.
+   *
+   * @var array
+   * @static
+   */
+  static $_fieldKeys = null;
+  /**
    * static instance to hold the FK relationships
    *
    * @var string
@@ -214,9 +221,9 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
   {
     if (!(self::$_links)) {
       self::$_links = array(
-        'contact_id' => 'civicrm_contact:id',
-        'grant_program_id' => 'civicrm_grant_program:id',
-        'financial_type_id' => 'civicrm_financial_type:id',
+        new CRM_Core_EntityReference(self::getTableName() , 'contact_id', 'civicrm_contact', 'id') ,
+        new CRM_Core_EntityReference(self::getTableName() , 'grant_program_id', 'civicrm_grant_program', 'id') ,
+        new CRM_Core_EntityReference(self::getTableName() , 'financial_type_id', 'civicrm_financial_type', 'id') ,
       );
     }
     return self::$_links;
@@ -351,10 +358,16 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
         'currency' => array(
           'name' => 'currency',
           'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Currency') ,
+          'title' => ts('Grant Currency') ,
           'required' => true,
           'maxlength' => 3,
           'size' => CRM_Utils_Type::FOUR,
+          'pseudoconstant' => array(
+            'table' => 'civicrm_currency',
+            'keyColumn' => 'name',
+            'labelColumn' => 'full_name',
+            'nameColumn' => 'numeric_code',
+          )
         ) ,
         'rationale' => array(
           'name' => 'rationale',
@@ -378,6 +391,9 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
           'headerPattern' => '',
           'dataPattern' => '',
           'export' => false,
+          'pseudoconstant' => array(
+            'optionGroupName' => 'grant_status',
+          )
         ) ,
         'grant_rejected_reason_id' => array(
           'name' => 'grant_rejected_reason_id',
@@ -415,12 +431,42 @@ class CRM_Grant_DAO_Grant extends CRM_Core_DAO
           'name' => 'financial_type_id',
           'type' => CRM_Utils_Type::T_INT,
           'title' => ts('Financial Type') ,
-          'default' => 'UL',
+          'default' => 'NULL',
           'FKClassName' => 'CRM_Financial_DAO_FinancialType',
         ) ,
       );
     }
     return self::$_fields;
+  }
+  /**
+   * Returns an array containing, for each field, the arary key used for that
+   * field in self::$_fields.
+   *
+   * @access public
+   * @return array
+   */
+  static function &fieldKeys()
+  {
+    if (!(self::$_fieldKeys)) {
+      self::$_fieldKeys = array(
+        'id' => 'grant_id',
+        'contact_id' => 'grant_contact_id',
+        'application_received_date' => 'application_received_date',
+        'decision_date' => 'decision_date',
+        'money_transfer_date' => 'money_transfer_date',
+        'grant_due_date' => 'grant_due_date',
+        'grant_report_received' => 'grant_report_received',
+        'grant_type_id' => 'grant_type_id',
+        'amount_total' => 'amount_total',
+        'amount_requested' => 'amount_requested',
+        'amount_granted' => 'amount_granted',
+        'currency' => 'currency',
+        'rationale' => 'rationale',
+        'status_id' => 'grant_status_id',
+        'financial_type_id' => 'financial_type_id',
+      );
+    }
+    return self::$_fieldKeys;
   }
   /**
    * returns the names of this table
