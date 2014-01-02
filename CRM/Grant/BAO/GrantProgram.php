@@ -335,7 +335,7 @@ WHERE civicrm_contact.id = $id ";
         $sendTemplateParams['toName'] = $displayName;
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
-        CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
+        CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
         if ($grantId && $status) {
           $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
           $activityType = CRM_Core_PseudoConstant::activityType();
