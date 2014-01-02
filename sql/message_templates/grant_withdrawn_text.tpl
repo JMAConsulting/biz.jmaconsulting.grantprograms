@@ -4,7 +4,7 @@ Thank you for the notification that you want the grant application below and any
 Grant Program Name: {$grant_programs}  <br>
 Grant Type:    {$grant_type}
 Total Amount: {$grant.amount_total|crmMoney:$currency}
-{if customField}
+{if $customField}
   {foreach from=$customField key=key item=data}
     {$customGroup.$key}
     {foreach from=$data key=dkey item=ddata}
