@@ -7,7 +7,7 @@ Total Amount: {$grant.amount_total|crmMoney:$currency}
 {if $grant.grant_rejected_reason}
 Grant Ineligible Reason: {$grant.grant_rejected_reason}<br>
 {/if}
-{if customField}
+{if $customField}
 {foreach from=$customField key=key item=data}
 {$customGroup.$key}
 {foreach from=$data key=dkey item=ddata}
