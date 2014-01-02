@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -63,7 +63,7 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
    * @return void
    */
   function buildQuickForm() {
-    $grantStatus = CRM_Core_OptionGroup::values('grant_status');
+    $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
     CRM_Utils_System::setTitle(ts('Update Grants'));
     $this->addElement('select', 'status_id', ts('Grant Status'), array('' => '') + $grantStatus);
     $this->addElement('radio', 'radio_ts', NULL, ts('&nbsp;Do not update'), 'no_update' );  
@@ -148,7 +148,6 @@ class CRM_Grant_Form_Task_Update extends CRM_Grant_Form_Task {
         }
       }
       
-      //CRM_Core_Error::debug( '$this', $this->sorted );
       foreach ($this->sorted as $grantId) {
         $ids['grant_id'] = $grantId;
         $grantParams = array('id' => $grantId);
