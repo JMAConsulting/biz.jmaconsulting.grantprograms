@@ -276,7 +276,6 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $downloadNamePDF .= '.pdf';
       $fileName = CRM_Utils_File::makeFileName( $downloadNamePDF );
       $files[] = $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
-      $counter++;
     }
     $downloadNameCSV = check_plain('grantPayment');
     $downloadNameCSV .= '_'.date('Ymdhis');
