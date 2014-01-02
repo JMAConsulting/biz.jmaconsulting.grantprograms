@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -153,13 +153,17 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
    * @return array Array of event summary values
    */
   static function getGrantStatusOptGroup() {
+
     $params = array();
     $params['name'] = CRM_Grant_BAO_Grant::$statusGroupName;
+
     $defaults = array();
+
     $og = CRM_Core_BAO_OptionGroup::retrieve($params, $defaults);
     if (!$og) {
       CRM_Core_Error::fatal('No option group for grant statuses - database discrepancy! Make sure you loaded civicrm_data.mysql');
     }
+
     return $og;
   }
 
@@ -259,7 +263,7 @@ class CRM_Grant_BAO_Grant extends CRM_Grant_DAO_Grant {
       "action=view&reset=1&id={$grant->id}&cid={$grant->contact_id}&context=home"
     );
 
-    $grantTypes = CRM_Core_OptionGroup::values('grant_type');
+    $grantTypes = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'grant_type_id');
     if (!CRM_Utils_Array::value('skipRecentView', $params)) {
       if(!isset($grant->contact_id) || !isset($grant->grant_type_id)){
         $grant->find(TRUE);
