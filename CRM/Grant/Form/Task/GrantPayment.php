@@ -204,12 +204,10 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $details[$dao->id]['currency']        = $dao->currency;
       
         $contactGrants[$dao->grant_id] = $dao->id;
-
-        if (isset($grantAmount[$dao->id])) {
-          $grantAmount[$dao->id] += $dao->total_amount;
-        } else {
-          $grantAmount[$dao->id] = $dao->total_amount;
+        if (!array_key_exists($dao->id, $grantAmount)) {
+          $grantAmount[$dao->id] = 0;
         }
+          $grantAmount[$dao->id] += $dao->total_amount;
         if ( !$this->_prid ) {
           $grantProgramSql = "SELECT is_auto_email FROM civicrm_grant_program WHERE id  = ".$dao->grant_program_id;
           $mailParams[$dao->grant_id]['is_auto_email'] = CRM_Grant_DAO_GrantProgram::singleValueQuery( $grantProgramSql );
@@ -273,7 +271,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         // Save payment
         $savePayment = $grantPayment[$grantKey];
         $savePayment['payable_to_address'] = str_replace('<br /> ', '', $savePayment['payable_to_address']);
-        $result = CRM_Grant_BAO_GrantPayment::add(&$savePayment, $ids = array());
+        $result = CRM_Grant_BAO_GrantPayment::add($savePayment, $ids = array());
         
         $grantPayment[$grantKey]['payment_id'] = $result->payment_number;
         $contactPayments[$grantKey] = $result->id;
@@ -286,18 +284,19 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $downloadNamePDF .= '.pdf';
       $fileName = CRM_Utils_File::makeFileName( $downloadNamePDF );
       $files[] = $fileName = CRM_Grant_BAO_GrantPayment::makePDF($fileName, $grantPayment );
+      $grantPayments += $grantPayment;
     }
     $downloadNameCSV = check_plain('grantPayment');
     $downloadNameCSV .= '_'.date('Ymdhis');
-    $this->assign('grantPayment', $grantPayment);
+    $this->assign('grantPayment', $grantPayments);
     $downloadNameCSV .= '.csv';
     $fileName = CRM_Utils_File::makeFileName( $downloadNameCSV );
     $config = CRM_Core_Config::singleton();
     $file_name = $config->customFileUploadDir . $fileName;
     foreach($grantAmount as $id => $value) {
-      $grantPayment[$id]['amount'] = $value;
+      $grantPayments[$id]['amount'] = $value;
     }
-    CRM_Grant_BAO_GrantPayment::createCSV($file_name, $grantPayment);
+    CRM_Grant_BAO_GrantPayment::createCSV($file_name, $grantPayments);
     $files[] = $fileName;
 
     $this->assign('date', date('Y-m-d'));
