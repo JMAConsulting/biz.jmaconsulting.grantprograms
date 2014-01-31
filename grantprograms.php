@@ -90,6 +90,9 @@ function grantprograms_civicrm_managed(&$entities) {
  *
  */
 function grantprograms_civicrm_grantAssessment(&$params) {
+  if (!CRM_Utils_Array::value('grant_program_id', $params)) {
+    return;
+  }
   $grantProgramParams['id'] = $params['grant_program_id'];
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
   if (!empty($grantProgram->grant_program_id)) {
@@ -657,7 +660,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     $params = $config->_params;
     // added by JMA fixme in module
     $grantProgram  = new CRM_Grant_DAO_GrantProgram();
-    $grantProgram->id = $params['grant_program_id'];
+    $grantProgram->id = isset($params['grant_program_id']) ? $params['grant_program_id'] : NULL;
     $page = new CRM_Core_Page();
     if ($grantProgram->find(TRUE)) {
       $params['is_auto_email'] = $grantProgram->is_auto_email;
@@ -712,7 +715,12 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $grantStatuses = $grantStatus = CRM_Core_OptionGroup::values('grant_status');
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $grantTypes = CRM_Core_OptionGroup::values('grant_type');
-      $grantProgram = $grantPrograms[$params['grant_program_id']];
+      if (CRM_Utils_Array::value('grant_program_id', $params)) {
+        $grantProgram = $grantPrograms[$params['grant_program_id']];
+      }
+      else {
+        $grantProgram = '';
+      }
       $grantType = $grantTypes[$params['grant_type_id']];
       $grantStatus = $grantStatus[$params['status_id']];
       $grantIneligibleReasons = CRM_Core_OptionGroup::values('reason_grant_ineligible');
