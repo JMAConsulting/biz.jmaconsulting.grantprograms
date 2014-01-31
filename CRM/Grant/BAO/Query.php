@@ -193,6 +193,11 @@ class CRM_Grant_BAO_Query {
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
         return;
 
+      case 'grant_id':
+        $query->_where[$grouping][] = "civicrm_grant.id = $value";
+        $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
+        return;
+
       case 'grant_type_id':
 
         $value = $strtolower(CRM_Core_DAO::escapeString(trim($value)));
