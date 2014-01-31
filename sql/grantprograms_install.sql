@@ -98,18 +98,6 @@ ALTER TABLE `civicrm_grant_program`
   ADD CONSTRAINT `FK_civicrm_grant_program_grant_type_id` FOREIGN KEY (`grant_type_id`) REFERENCES `civicrm_option_value` (`id`),
   ADD CONSTRAINT `FK_civicrm_grant_program_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_option_value` (`id`);
 
--- add columns to civicrm_grant
-ALTER TABLE `civicrm_grant` 
-  ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
-  ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
-  ADD `grant_incomplete_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Incomplete Reason.' AFTER `grant_rejected_reason_id` ,
-  ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL AFTER `grant_incomplete_reason_id`;
-
---
--- Constraints for table `civicrm_grant`
-ALTER TABLE `civicrm_grant`
-  ADD CONSTRAINT `FK_civicrm_grant_grant_program_id` FOREIGN KEY (`grant_program_id`) REFERENCES `civicrm_grant_program` (`id`) ON DELETE CASCADE;
-
 -- add option groups and option values
 
 -- Grant Payment Status
@@ -150,9 +138,9 @@ SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Allocation Finalized
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
  VALUES
-(@opv1, @opGId, 'Accepting Applications', '1', NULL, NULL, 0, 0, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
-(@opv2, @opGId, 'Trial Allocation', '2', NULL, NULL, 0, 0, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
-(@opv3, @opGId, 'Allocation Finalized', '3', NULL, NULL, 0, 0, 3, NULL, 0, 0, 1, NULL, NULL, NULL);
+(@opv1, @opGId, 'Accepting Applications', '1', 'Accepting Applications', NULL, 0, 0, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
+(@opv2, @opGId, 'Trial Allocation', '2', 'Trial Allocation', NULL, 0, 0, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
+(@opv3, @opGId, 'Allocation Finalized', '3', 'Allocation Finalized', NULL, 0, 0, 3, NULL, 0, 0, 1, NULL, NULL, NULL);
 
 -- Grant Program Allocation Algorithm
 SET @opGId := '';
@@ -354,4 +342,31 @@ SELECT @activityType := cog.id, @value := max(cast(value as unsigned)) + 1 FROM 
 INSERT INTO civicrm_option_value(option_group_id, label, value, name, grouping, filter, is_default, weight, description, is_optgroup, is_reserved, is_active, component_id, visibility_id) 
 VALUES (@activityType, 'Grant Status Change', @value, 'grant_status_change', NULL, 0, 0, @value, 'Grant status change', 0, 1, 1, 5, NULL),
        (@activityType, 'Grant Payment', @value + 1, 'grant_payment', NULL, 0, 0, @value + 1, 'Grant payment', 0, 1, 1, 5, NULL);
+
+
+-- Enter a default grant program
+SET @opGId := '';
+SET @statusId := '';
+SELECT @opGId := id FROM `civicrm_option_group` WHERE `name` = 'grant_program_status';
+SELECT @statusId := id FROM `civicrm_option_value` WHERE  `name` = 'Accepting Applications' AND `option_group_id` = @opGId;
+
+SET @optGId := '';
+SET @algId := '';
+SELECT @optGId := id FROM `civicrm_option_group` WHERE `name` = 'allocation_algorithm';
+SELECT @algId := id FROM `civicrm_option_value` WHERE  `name` = 'Best To Worst, Fully Funded' AND `option_group_id` = @optGId;
+
+INSERT INTO `civicrm_grant_program` (`label`, `name`, `grant_type_id`, `total_amount`, `remainder_amount`, `financial_type_id`, `status_id`, `applications_start_date`, `applications_end_date`, `allocation_date`, `is_active`, `is_auto_email`, `allocation_algorithm`, `grant_program_id`) VALUES
+('Default Grant Program', 'Default Grant Program', 1, 1000000.00, 1000000.00, 1, @statusId, NULL, NULL, NULL, 1, 1, @algId, 0);
+
+-- add columns to civicrm_grant
+ALTER TABLE `civicrm_grant` 
+  ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
+  ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
+  ADD `grant_incomplete_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Incomplete Reason.' AFTER `grant_rejected_reason_id` ,
+  ADD `assessment` VARCHAR( 655 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL AFTER `grant_incomplete_reason_id`;
+
+--
+-- Constraints for table `civicrm_grant`
+ALTER TABLE `civicrm_grant`
+  ADD CONSTRAINT `FK_civicrm_grant_grant_program_id` FOREIGN KEY (`grant_program_id`) REFERENCES `civicrm_grant_program` (`id`) ON DELETE CASCADE;
 
