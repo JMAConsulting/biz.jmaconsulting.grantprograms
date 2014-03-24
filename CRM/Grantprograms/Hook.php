@@ -1,8 +1,9 @@
-{*
+<?php
+/*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,18 +23,27 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*}
-{if $rows } 
-<div class="form-item">
-<table width="30%">
-  <tr class="columnheader">
-    <td>{ts}Name{/ts}</td>
-  </tr>
-{foreach from=$rows item=row}
-<tr class="{cycle values="odd-row,even-row"}">
-<td>{$row.displayName}</td>
-</tr>
-{/foreach}
-</table>
-</div>
-{/if}
+*/
+
+/**
+ *
+ * @package CiviCRM_Hook
+ * @copyright CiviCRM LLC (c) 2004-2013
+ * $Id: $
+ *
+ */
+
+abstract class CRM_Grantprograms_Hook extends CRM_Utils_Hook {
+  
+  /**
+   * This hook to assessment grant
+   *
+   * @param string $param the params
+   *
+   * @access public
+   */
+  static function grantAssessment(&$params) {
+    return self::singleton( )->invoke(1, $params, self::$_nullObject, 
+      self::$_nullObject, self::$_nullObject, self::$_nullObject, 'civicrm_grantAssessment');
+  }
+}

@@ -12,9 +12,9 @@
   <version>1.0.beta2</version>
   <develStage>beta</develStage>
   <compatibility>
-    <ver>4.3</ver>
+    <ver>4.4</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>The development of this extension was subsidized by the Registered Nurses Association of Ontario (RNAO) and JMA Consulting. </comments>
   <civix>
     <namespace>CRM/Grantprograms</namespace>
   </civix>

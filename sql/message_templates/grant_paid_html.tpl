@@ -14,7 +14,7 @@
 Grant Program Name: {$grant_programs} <br>
 Grant Type: {$grant_type}<br>
 Total Amount: {$grant.amount_total|crmMoney:$currency}<br>
-{if customField}
+{if $customField}
 {foreach from=$customField key=key item=data}
 <b>{$customGroup.$key}</b><br>
 {foreach from=$data key=dkey item=ddata}

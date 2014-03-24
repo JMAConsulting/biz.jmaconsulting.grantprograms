@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.1                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -65,8 +65,6 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
         if ( !CRM_Core_Permission::checkActionPermission( 'CiviGrant', CRM_Core_Action::PAY ) ) {
             CRM_Core_Error::fatal( ts( 'You do not have permission to access this page' ) );  
         }
-        require_once "CRM/Core/PseudoConstant.php";
-        require_once 'CRM/Core/OptionGroup.php';
         $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE );
         
         $paidGrants = $approvedGrants = array();

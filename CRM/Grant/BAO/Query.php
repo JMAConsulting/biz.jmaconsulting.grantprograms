@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -202,6 +202,11 @@ class CRM_Grant_BAO_Query {
       case 'grant_decision_date_notset':
         $query->_where[$grouping][] = "civicrm_grant.decision_date IS NULL";
         $query->_qill[$grouping][] = ts("Grant Decision Date is NULL");
+        $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
+        return;
+
+      case 'grant_id':
+        $query->_where[$grouping][] = "civicrm_grant.id = $value";
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
         return;
 
