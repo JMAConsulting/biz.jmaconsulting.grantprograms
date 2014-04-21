@@ -335,23 +335,9 @@ WHERE civicrm_contact.id = $id ";
         $sendTemplateParams['toName'] = $displayName;
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
-        CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        //CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
         if ($grantId && $status) {
-          $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
-          $activityType = CRM_Core_PseudoConstant::activityType();
-          $session = CRM_Core_Session::singleton();
-          $params = array( 
-            'source_contact_id'=> $session->get('userID'),
-            'source_record_id' => $grantId,
-            'activity_type_id'=> array_search('Grant Status Change', $activityType),
-            'assignee_contact_id'=> array($contactID),
-            'subject'=> "Grant status changed from {$status} to {$grantStatus}",
-            'activity_date_time'=> date('Ymdhis'),
-            'status_id'=> array_search('Completed', $activityStatus),
-            'priority_id'=> 2,
-            'details'=> CRM_Core_Smarty::singleton()->get_template_vars('messageBody'),
-          );
-          CRM_Activity_BAO_Activity::create($params);
+          self::createStatusChangeActivity($grantId, $grantStatus, $status, $contactID);
         }
       }
     }
@@ -423,5 +409,26 @@ WHERE civicrm_contact.id = $id ";
       }
     } 
     return $priority;
+  }
+
+  static function createStatusChangeActivity($grantId, $newStatus, $oldStatus, $contactID) {
+    if (($oldStatus == 'Draft' && $newStatus == 'Submitted') || $newStatus == $oldStatus || !$oldStatus) {
+      return;
+    }
+    $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
+    $activityType = CRM_Core_PseudoConstant::activityType();
+    $session = CRM_Core_Session::singleton();
+    $params = array( 
+      'source_contact_id'=> $session->get('userID'),
+      'source_record_id' => $grantId,
+      'activity_type_id'=> array_search('Grant Status Change', $activityType),
+      'assignee_contact_id'=> array($contactID),
+      'subject'=> "Grant status changed from {$oldStatus} to {$newStatus}",
+      'activity_date_time'=> date('Ymdhis'),
+      'status_id'=> array_search('Completed', $activityStatus),
+      'priority_id'=> 2,
+      'details'=> CRM_Core_Smarty::singleton()->get_template_vars('messageBody'),
+    );
+    CRM_Activity_BAO_Activity::create($params);
   }
 }

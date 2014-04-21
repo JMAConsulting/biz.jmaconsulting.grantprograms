@@ -93,6 +93,21 @@ function grantprograms_civicrm_grantAssessment(&$params) {
   if (!CRM_Utils_Array::value('grant_program_id', $params)) {
     return;
   }
+  
+  if (CRM_Utils_Array::value('custom', $params)) {
+    $assessmentAmount = 0;
+    foreach ($params['custom'] as $key => $value) {
+      foreach($value as $fieldKey => $fieldValue) {
+        if (in_array($fieldValue['table_name'], array('civicrm_value_full_board_review_22', 'civicrm_value_grant_committee_review_21', 'civicrm_value_tech_assistance_evaluation_20')) 
+          && CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $fieldValue['custom_field_id'], 'html_type') == 'Select') {
+          $assessmentAmount += $fieldValue['value'];
+        }
+      }
+    }
+    if ($assessmentAmount) {
+      $params['assessment'] = $assessmentAmount;
+    }
+  }
   $grantProgramParams['id'] = $params['grant_program_id'];
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($grantProgramParams, CRM_Core_DAO::$_nullArray);
   if (!empty($grantProgram->grant_program_id)) {
@@ -121,7 +136,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
   $algoType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $grantProgram->allocation_algorithm, 'grouping');
   $grantStatuses = CRM_Core_OptionGroup::values('grant_status', TRUE);
-  if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && $params['status_id'] == $grantStatuses['Eligible']) {
+  if ($algoType == 'immediate' && !CRM_Utils_Array::value('manualEdit', $params) && $params['status_id'] == CRM_Utils_Array::value('Eligible', $grantStatuses)) {
     $params['amount_granted'] = quickAllocate($grantProgram, $params);
     if (empty($params['amount_granted'])) {
       unset($params['amount_granted']);
@@ -316,6 +331,39 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       FALSE 
     );      
     $showFields = FALSE;
+    
+    if ( $form->getVar('_action') == CRM_Core_Action::UPDATE && $form->getVar('_id')) {
+      $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
+      $grantWeight = CRM_Core_OptionGroup::values('grant_status', FALSE, FALSE, FALSE, NULL, 'weight');
+      $currentStatus = $form->_defaultValues['status_id'];
+      $coreStatus = array(
+        array_search('Eligible', $grantStatuses),
+        array_search('Awaiting Information', $grantStatuses) => array('Eligible', '', ''),
+        array_search('Withdrawn', $grantStatuses),
+      );
+
+        $currentStatusWeight = $grantWeight[$currentStatus] + 1;
+        foreach ($grantStatuses as $statusId => $statusName) {
+          if ((($grantWeight[$currentStatus] >= 7 && $statusId == array_search('Ineligible', $grantStatuses)) 
+               || ($grantWeight[$currentStatus] >= 1 && $grantWeight[$currentStatus] <= 7 && $grantWeight[$statusId] > 7 && $statusId != array_search('Ineligible', $grantStatuses))
+              || $grantWeight[$currentStatus] > 7
+              || $grantWeight[$statusId] < $grantWeight[$currentStatus])
+              && $statusId != $currentStatus
+              && $statusId != array_search('Withdrawn', $grantStatuses)
+              && $currentStatusWeight != $grantWeight[$statusId]) {
+            unset($grantStatuses[$statusId]);
+          }
+        }
+      $form->removeElement('status_id');
+      
+      $element = $form->add('select', 'status_id', ts('Grant Status'),
+        $grantStatuses,
+        TRUE
+      );
+      if ($grantStatuses[$currentStatus] == 'Withdrawn') {
+        $element->freeze();
+      }      
+    }
     if ($form->getVar('_id')) {
       if (CRM_Core_Permission::check('administer CiviGrant')) {
         $form->add('text', 'assessment', ts('Assessment'));
@@ -614,6 +662,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
         }
       }
     }
+    
     if(!empty($assessmentAmount)) {
       $params['assessment'] = $assessmentAmount;
     } 
@@ -745,6 +794,15 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           $previousStatus = $grantStatuses[$previousGrant->status_id];
         }
         CRM_Grant_BAO_GrantProgram::sendMail($params['contact_id'], $params, $grantStatus, $objectId, $previousStatus);
+      }
+    }
+    else {
+      $smarty = CRM_Core_Smarty::singleton();
+      $previousGrant = $smarty->get_template_vars('previousGrant');
+      if ($previousGrant && property_exists($previousGrant, 'status_id')) {
+        $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
+        CRM_Grant_BAO_GrantProgram::createStatusChangeActivity($params['contact_id'], 
+        $grantStatuses[$params['status_id']], $grantStatuses[$previousGrant->status_id], $params['contact_id']);
       }
     }
     
