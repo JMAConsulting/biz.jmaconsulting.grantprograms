@@ -100,7 +100,10 @@ function grantprograms_civicrm_grantAssessment(&$params) {
       foreach($value as $fieldKey => $fieldValue) {
         if (in_array($fieldValue['table_name'], array('civicrm_value_full_board_review_22', 'civicrm_value_grant_committee_review_21', 'civicrm_value_tech_assistance_evaluation_20')) 
           && CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $fieldValue['custom_field_id'], 'html_type') == 'Select') {
-          $assessmentAmount += $fieldValue['value'];
+          if (is_nan((float)$fieldValue['value']) === FALSE) {
+            $assessmentAmount += $fieldValue['value'];
+            CRM_Core_Error::debug( '$fieldValue', $fieldValue['value'] );
+          }
         }
       }
     }
