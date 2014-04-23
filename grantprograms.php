@@ -2,6 +2,9 @@
 require_once 'grantprograms.civix.php';
 define('PAY_GRANTS', 5);
 define('DELETE_GRANTS', 1);
+define('PANEL_REVIEW_EVALUATION', 'civicrm_value_panel_review_evaluation_19');
+define('GRANT_COMMITTEE_REVIEW', 'civicrm_value_grant_committee_review_20');
+define('FULL_BOARD_REVIEW', 'civicrm_value_full_board_review_21');
 /**
  * Implementation of hook_civicrm_config
  */
@@ -98,7 +101,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     $assessmentAmount = 0;
     foreach ($params['custom'] as $key => $value) {
       foreach($value as $fieldKey => $fieldValue) {
-        if (in_array($fieldValue['table_name'], array('civicrm_value_full_board_review_22', 'civicrm_value_grant_committee_review_21', 'civicrm_value_tech_assistance_evaluation_20')) 
+        if (in_array($fieldValue['table_name'], array(PANEL_REVIEW_EVALUATION, GRANT_COMMITTEE_REVIEW, FULL_BOARD_REVIEW)) 
           && CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $fieldValue['custom_field_id'], 'html_type') == 'Select') {
           if (is_nan((float)$fieldValue['value']) === FALSE) {
             $assessmentAmount += $fieldValue['value'];
