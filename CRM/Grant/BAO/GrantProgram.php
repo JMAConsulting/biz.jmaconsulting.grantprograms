@@ -309,12 +309,14 @@ WHERE civicrm_contact.id = $id ";
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       if (isset($email)) {
-        $valueName = strtolower($grantStatus);
-        if ($grantStatus == 'Awaiting Information') {
-          $explode = explode(' ', $grantStatus);
+        $grantStatuses = CRM_Core_OptionGroup::values('grant_status', FALSE, FALSE, FALSE, NULL, 'name');
+        $grantStatuses = $grantStatuses[$values['status_id']];
+        $valueName = strtolower($grantStatuses);
+        if ($grantStatuses == 'Awaiting Information') {
+          $explode = explode(' ', $grantStatuses);
           $valueName = strtolower($explode[0]) . '_info';
         } 
-        elseif (strstr($grantStatus, 'Approved')) {
+        elseif (strstr($grantStatuses, 'Approved')) {
           $valueName = strtolower('Approved');
         }
         $sendTemplateParams = array(
@@ -335,7 +337,17 @@ WHERE civicrm_contact.id = $id ";
         $sendTemplateParams['toName'] = $displayName;
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['autoSubmitted'] = TRUE;
-        //CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        $query = 'SELECT msg_subject subject, msg_text text, msg_html html, pdf_format_id format
+                      FROM civicrm_msg_template mt
+                      JOIN civicrm_option_value ov ON workflow_id = ov.id
+                      JOIN civicrm_option_group og ON ov.option_group_id = og.id
+                      WHERE og.name = %1 AND ov.name = %2 AND mt.is_default = 1';
+        $sqlParams = array(1 => array($sendTemplateParams['groupName'], 'String'), 2 => array($sendTemplateParams['valueName'], 'String'));
+        $dao = CRM_Core_DAO::executeQuery($query, $sqlParams);
+        $dao->fetch();
+        if ($dao->N) {
+          CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+        }
         if ($grantId && $status) {
           self::createStatusChangeActivity($grantId, $grantStatus, $status, $contactID);
         }
