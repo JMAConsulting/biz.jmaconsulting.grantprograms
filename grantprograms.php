@@ -590,7 +590,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
     if (array_key_exists('amount_granted', $form->_submitValues) && CRM_Utils_Array::value('remainder_amount', $defaults) < $form->_submitValues['amount_granted']) {
-      $errors['amount_granted'] = ts('You need to increase the Grant Program Total Amount');
+      $errors['amount_granted'] = ts('You need to increase the Grant Program Remainder Amount');
     }
     
     if (CRM_Utils_Array::value('amount_granted', $fields) && $fields['amount_granted'] > 0 && !CRM_Utils_Array::value('financial_type_id', $fields) && CRM_Utils_Array::value('money_transfer_date', $fields)) {
