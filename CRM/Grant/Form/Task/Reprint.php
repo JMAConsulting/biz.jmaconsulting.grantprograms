@@ -179,7 +179,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $payment['payment_status_id']    = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Reprinted', 'name' );
       $payment['replaces_payment_id']  = $paymentId;
       
-      $result = CRM_Grant_BAO_GrantPayment::add( &$payment, $ids = array() );
+      $result = CRM_Grant_BAO_GrantPayment::add($payment, $ids = array());
       
       $newPaymentId = $result->id;
         
@@ -212,7 +212,8 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $grantPayment[$newEntityDAO->payment_id]['payment_date'        ] = date("Y-m-d", strtotime( $values['payment_date']));
       $grantPayment[$newEntityDAO->payment_id]['payment_created_date'] = date('Y-m-d');
       $grantPayment[$newEntityDAO->payment_id]['payable_to_name'     ] = CRM_Grant_BAO_GrantProgram::getDisplayName( $result->contact_id );
-      $grantPayment[$newEntityDAO->payment_id]['payable_to_address'  ] = CRM_Utils_Array::value( 'address', CRM_Grant_BAO_GrantProgram::getAddress( $result->contact_id ) );
+      $grantPayment[$newEntityDAO->payment_id]['payable_to_address'  ] =
+          CRM_Utils_Array::value( 'address', CRM_Grant_BAO_GrantProgram::getAddress($result->contact_id, NULL, true));
       $grantPayment[$newEntityDAO->payment_id]['amount'              ] = $result->amount;
       $grantPayment[$newEntityDAO->payment_id]['currency'            ] = $result->currency;
       $grantPayment[$newEntityDAO->payment_id]['payment_status_id'   ] = 3;
