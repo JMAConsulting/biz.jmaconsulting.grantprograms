@@ -179,7 +179,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask
       $payment['payment_status_id']    = CRM_Core_OptionGroup::getValue( 'grant_payment_status', 'Reprinted', 'name' );
       $payment['replaces_payment_id']  = $paymentId;
       
-      $result = CRM_Grant_BAO_GrantPayment::add( &$payment, $ids = array() );
+      $result = CRM_Grant_BAO_GrantPayment::add( $payment, $ids = array() );
       
       $newPaymentId = $result->id;
         
