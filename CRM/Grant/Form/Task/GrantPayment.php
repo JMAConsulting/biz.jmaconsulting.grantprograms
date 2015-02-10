@@ -266,7 +266,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         // Save payment
         $savePayment = $grantPayment[$grantKey];
         $savePayment['payable_to_address'] = str_replace('<br /> ', '', $savePayment['payable_to_address']);
-        $result = CRM_Grant_BAO_GrantPayment::add(&$savePayment, $ids = array());
+        $result = CRM_Grant_BAO_GrantPayment::add($savePayment, $ids = array());
         
         $grantPayment[$grantKey]['payment_id'] = $result->payment_number;
         $contactPayments[$grantKey] = $result->id;
