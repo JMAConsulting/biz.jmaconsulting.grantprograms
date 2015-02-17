@@ -283,9 +283,9 @@ SELECT @parentId1 := id FROM civicrm_navigation WHERE name = 'CiviGrant';
 SELECT @parentId2 := id FROM civicrm_navigation WHERE name = 'Grants';
 SELECT @weight := MAX(weight) FROM civicrm_navigation WHERE  parent_id = @parentId2;       
 INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
-(1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search&reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
+(1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search?reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
 (1, 'New Grant Program', 'New Grant Program', 'civicrm/grant_program?action=add&reset=1', 'access CiviCRM,access CiviGrant,edit grants', 'AND', @parentId2, 1, 0, @weight = @weight + 1),
-(1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program&reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
+(1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program?reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
 
 
 -- Accounting integration RG-125
