@@ -519,7 +519,17 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_elements[$form->_elementIndex['prev_assessment']]->freeze();
     // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
- }
+  }
+
+  // Expose value field for option value edit
+  if ($formName == 'CRM_Admin_Form_Options') {
+    $form->add('text',
+      'value',
+      ts('Value'),
+      CRM_Core_DAO::getAttribute('CRM_Core_DAO_OptionValue', 'value'),
+      true
+    );
+  }
 }
 
 function grantprograms_civicrm_pageRun( &$page ) {
