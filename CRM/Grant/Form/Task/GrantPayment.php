@@ -400,13 +400,14 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $entityDAO->entity_id    = $grantId;
         $entityDAO->payment_id   = $contactPayments[$contactGrants[$grantId]];
         $entityDAO->save();
-        $grantStatus = CRM_Core_OptionGroup::values( 'grant_status' );
+        $status_id = array_search('Paid', CRM_Core_OptionGroup::values('grant_status'));
         $grantType   = CRM_Core_OptionGroup::values( 'grant_type' );
         $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
         $this->assign( 'grant_type', $grantType[$mailParams[$grantId]['grant_type_id']] );
         $this->assign( 'grant_programs', $grantPrograms[$mailParams[$grantId]['grant_program_id']] );
         $this->assign( 'grant_status', 'Paid' );
         $this->assign( 'params', $mailParams[$grantId] );
+        $mailParams[$grantId]['status_id'] = $status_id;
         CRM_Grant_BAO_GrantProgram::sendMail($grantContctId[$grantId], $mailParams[$grantId], 'Paid', $grantId, 'Approved for Payment');
       }
       CRM_Core_Session::setStatus( "Created ".count($details)." payments to pay for ".count($this->_approvedGrants)." grants to ".count($details)." applicants." );
