@@ -85,6 +85,14 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
       $defaults['is_auto_email'] = 1;
       return $defaults;
     }
+
+    if (!isset($defaults['from_email_address']) || $defaults['from_email_address'] == '') {
+      // Set to default identity
+      $defaultEmails =
+        CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
+      $defaults['from_email_address'] = array_pop($defaultEmails);
+    }
+
     return $defaults;
   }
 
@@ -184,7 +192,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     }
 
     $values   = $this->controller->exportValues($this->_name);
-    $values['from_email_address'] = $_POST['from_email_address']; // avoid QuickForm's safe value for this field
+    $values['from_email_address'] = htmlspecialchars_decode($values['from_email_address']); // avoid QuickForm's safe value for this field
     $domainID = CRM_Core_Config::domainID();
 
     $result = $this->updateGrantProgram($values, $domainID);
