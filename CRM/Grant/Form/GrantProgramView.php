@@ -58,11 +58,11 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
     $this->assign('contributionType', $contributionTypes[$values['financial_type_id']] );
     $this->assign('grantProgramAlgorithm', CRM_Grant_BAO_GrantProgram::getOptionName( $values['allocation_algorithm']));
     $this->assign('grant_program_id', empty($grantPrograms[$values['grant_program_id']]) ? NULL : $grantPrograms[$values['grant_program_id']]);
-    $grantTokens = array('label','name','total_amount',
+    $grantTokens = array('label','name','total_amount','from_email_address',
       'remainder_amount', 'allocation_date', 'is_active', 'is_auto_email');
 
     foreach ($grantTokens as $token) {
-      $this->assign($token, CRM_Utils_Array::value($token, $values));
+      $this->assign($token, htmlspecialchars(CRM_Utils_Array::value($token, $values)));
     }
     $this->assign('id', $this->_id);
   }

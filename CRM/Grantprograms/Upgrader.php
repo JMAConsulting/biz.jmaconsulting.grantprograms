@@ -9,6 +9,17 @@ class CRM_Grantprograms_Upgrader extends CRM_Grantprograms_Upgrader_Base {
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
   /**
+   * Add from_email column to grant program table to allow
+   *
+   * @return bool
+   */
+  public function upgrade_4601() {
+    $this->ctx->log->info('Applying update 4601');
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_grant_program ADD COLUMN from_email_address VARCHAR(255)');
+    return TRUE;
+  }
+
+  /**
    * Example: Run an external SQL script when the module is installed
    *
   public function install() {
