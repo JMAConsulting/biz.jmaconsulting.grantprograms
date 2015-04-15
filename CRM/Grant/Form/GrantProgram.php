@@ -128,7 +128,12 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
         
     $this->add('text', 'remainder_amount', ts('Remainder Amount'),
       $attributes['remainder_amount'], FALSE);
-    $this->addRule('remainder_amount', ts('Please enter a valid amount.'), 'money'); 
+    $this->addRule('remainder_amount', ts('Please enter a valid amount.'), 'money');
+
+    $this->registerRule('from_identity', 'callback', '_validateIdentity', 'CRM_Grant_Form_GrantProgram');
+    $this->add('text', 'from_email_address', ts('FROM Email Address'),
+      $attributes['from_email_address'], FALSE);
+    $this->addRule('from_email_address', ts('Please follow the proper format for From Email Address'), 'from_identity');
 
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
     $this->add('select', 'financial_type_id', ts('Financial Types'),
@@ -179,6 +184,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     }
 
     $values   = $this->controller->exportValues($this->_name);
+    $values['from_email_address'] = $_POST['from_email_address']; // avoid QuickForm's safe value for this field
     $domainID = CRM_Core_Config::domainID();
 
     $result = $this->updateGrantProgram($values, $domainID);
@@ -203,6 +209,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $dao->grant_type_id = $values['grant_type_id'];
     $dao->total_amount = $values['total_amount'];
     $dao->remainder_amount = $values['remainder_amount'];
+    $dao->from_email_address = str_replace('"<', '" <', $values['from_email_address']); // apparently we need a space
     $dao->financial_type_id = $values['financial_type_id'];
     $dao->status_id = CRM_Grant_BAO_GrantProgram::getOptionValueID(CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup','grant_program_status','id','name'), $values['status_id']);
     $dao->allocation_date = CRM_Utils_Date::processDate($values['allocation_date']);
@@ -211,6 +218,26 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $dao->allocation_algorithm = CRM_Grant_BAO_GrantProgram::getOptionValueID(CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup','allocation_algorithm','id','name'), $values['allocation_algorithm']);
     $dao->grant_program_id = $values['grant_program_id'];
     return $dao->save();
+  }
+
+  /**
+   * Validate FROM identity.
+   *
+   * @param $data
+   * @return bool
+   */
+  static function _validateIdentity($data) {
+    $formEmail = CRM_Utils_Mail::pluckEmailFromHeader($data);
+    if (!CRM_Utils_Rule::email($formEmail)) {
+      return false;
+    }
+
+    $formName = explode('"', $data);
+    if (empty($formName[1]) || count($formName) != 3) {
+      return false;
+    }
+
+    return true;
   }
 }
 

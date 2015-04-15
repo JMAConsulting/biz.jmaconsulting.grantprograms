@@ -117,6 +117,12 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
    */
   public $remainder_amount;
   /**
+   * FROM identity default for grant program;
+   *
+   * @var string
+   */
+  public $from_email_address;
+  /**
    * Financial Type ID
    *
    * @var int unsigned
@@ -271,6 +277,13 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
           'headerPattern' => '',
           'dataPattern' => '/^\d+(\.\d{2})?$/',
           'export' => true,
+        ) ,
+        'from_email_address' => array(
+          'name' => 'from_email_address',
+          'type' => CRM_Utils_Type::T_STRING,
+          'title' => ts('FROM Email Address') ,
+          'maxlength' => 255,
+          'size' => CRM_Utils_Type::HUGE,
         ) ,
         'financial_type_id' => array(
           'name' => 'financial_type_id',
