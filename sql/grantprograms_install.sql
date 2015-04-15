@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
   `is_auto_email` tinyint(4) DEFAULT '1' COMMENT 'Is auto email active?',
   `allocation_algorithm` int(10) unsigned DEFAULT NULL COMMENT 'Allocation Algorithm.',
   `grant_program_id` int(11) DEFAULT NULL COMMENT 'FK reference to this civicrm_grant_program table, used to determine grants given to contact in previous year during assessment.',
+  `from_email_address` varchar(255) DEFAULT NULL COMMENT 'FROM Email Identity',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_grant_program_grant_type_id` (`grant_type_id`),
   KEY `FK_civicrm_grant_program_status_id` (`status_id`),
