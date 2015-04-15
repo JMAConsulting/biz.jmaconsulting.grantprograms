@@ -336,11 +336,12 @@ WHERE civicrm_contact.id = $id ";
 
         if (!isset($defaultAddress) || $defaultAddress == '') {
           $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
-        }
 
-
-        foreach ($defaultAddress as $id => $value) {
-          $sendTemplateParams['from'] = $value;
+          foreach ($defaultAddress as $id => $value) {
+            $sendTemplateParams['from'] = $value;
+          }
+        } else {
+          $sendTemplateParams['from'] = $defaultAddress;
         }
 
         $sendTemplateParams['toName'] = $displayName;
