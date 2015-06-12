@@ -646,7 +646,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
-      if ($params['status_id'] == $previousGrant->status_id) {
+      if (isset($params['status_id']) && $params['status_id'] == $previousGrant->status_id) {
         $sendMail = FALSE;
       }
       if ((CRM_Utils_Array::value('assessment', $params) == $previousGrant->assessment)) {
@@ -655,9 +655,11 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     }
     $smarty->assign('sendMail', $sendMail);
     $grantStatusApproved = array_search('Approved for Payment', $grantStatus);
-    if ($grantStatusApproved == $params['status_id']  && empty($params['decision_date']) && 
-      ($op == 'create') || ($previousGrant && !$previousGrant->decision_date && 
-      $previousGrant->status_id != $params['status_id'])) {
+    if ((isset($params['status_id']) && $grantStatusApproved == $params['status_id'] &&
+        empty($params['decision_date']) && $op == 'create') ||
+      ($previousGrant && !$previousGrant->decision_date && isset($params['status_id']) &&
+        $previousGrant->status_id != $params['status_id'])
+    ) {
       $params['decision_date'] = date('Ymd');
     }
     if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
