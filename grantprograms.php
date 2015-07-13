@@ -1081,3 +1081,28 @@ function grantprograms_civicrm_links( $op, $objectName, $objectId, &$links ) {
                  'ref'   => 'new-grant program');
     }
 }
+
+/**
+ * Implements hook_civicrm_merge().
+ * Move grant payments to new contact.
+ *
+ * @param $type
+ * @param $data
+ * @param null $mainId
+ * @param null $otherId
+ * @param null $tables
+ */
+function grantprograms_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL, $tables = NULL) {
+  if ($type == 'cidRefs') {
+    global $db_url;
+    if (!empty($db_url)) {
+      $db_default = is_array($db_url) ? $db_url['default'] : $db_url;
+      $db_default = ltrim(parse_url($db_default, PHP_URL_PATH), '/');
+    } else {
+      $db_default = '';
+    }
+
+    $data[$db_default . 'civicrm_payment'] = array('contact_id');
+  }
+}
+
