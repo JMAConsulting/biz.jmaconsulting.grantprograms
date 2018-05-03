@@ -254,6 +254,19 @@ function grantprograms_civicrm_permission(&$permissions) {
   $permissions['edit payments in CiviGrant'] = $prefix . ts('edit payments in CiviGrant');
   $permissions['create payments in CiviGrant'] = $prefix . ts('create payments in CiviGrant');
 }
+
+function grantprograms_civicrm_preProcess($formName, &$form) {
+  if ($formName == 'CRM_Grant_Form_Search') {
+    $programID = CRM_Utils_Request::retrieve('pid', 'String',
+      CRM_Core_DAO::$_nullObject
+    );
+    if ($programID) {
+      $form->_formValues['grant_program_id'] = $programID;
+      $form->defaults['grant_program_id'] = $programID;
+    }
+  }
+
+}
 /*
  * hook_civicrm_buildForm civicrm hook
  *
@@ -710,8 +723,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       $smarty = CRM_Core_Smarty::singleton();
       $smarty->assign('previousGrant', $previousGrant);
     }
-    $config = CRM_Core_Config::singleton();
-    $config->_params = $params;
+
+    $session = CRM_Core_Session::singleton();
+    $session->set('grant-params', $params);
   }
 }
 
@@ -721,9 +735,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   //send mail after grant save
-  $config = CRM_Core_Config::singleton();
-  if ($objectName == 'Grant' && isset($config->_params) && !isset($config->_params['restrictEmail'])) {
-    $params = $config->_params;
+  $config = CRM_Core_Session::singleton();
+  $params = $config->get('grant-params');
+  if ($objectName == 'Grant' && isset($params) && !isset($params['restrictEmail'])) {
     // added by JMA fixme in module
     $grantProgram  = new CRM_Grant_DAO_GrantProgram();
     $grantProgram->id = isset($params['grant_program_id']) ? $params['grant_program_id'] : NULL;
