@@ -74,7 +74,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'grant_amount_total',
     'grant_amount_requested',
     'grant_amount_granted',
-    'grant_application_received_date', 
+    'grant_application_received_date',
     'grant_payment_created',
     'program_name',
     'program_id',
@@ -305,11 +305,11 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     }
     $mask = CRM_Core_Action::mask($permissions);
     //added by JMA
-     $grant = $this->_query->searchQuery( 
+     $grant = $this->_query->searchQuery(
        $offset, $rowCount, $sort,
-       false, false, 
-       false, false, 
-       false, 
+       false, false,
+       false, false,
+       false,
        $this->_grantClause );
      while ($grant->fetch()) {
        $grants[$grant->id] = $grant->id;
@@ -326,11 +326,11 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
       $searchGrants = implode(',', $grants);
       foreach( $contactGrants as $gKey => $gVal) {
         if ($foundit) {
-          $next = $gKey; 
+          $next = $gKey;
           break;
         }
         if ($gKey == $result->id) {
-          $next = $gKey; 
+          $next = $gKey;
           if($gKey == end($contactGrants)) {
             reset($contactGrants);
             $next = key($contactGrants);
@@ -401,13 +401,14 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
    * @access public
    */
   public function &getColumnHeaders($action = NULL, $output = NULL) {
+    $statusHeader = array();
     if (!isset(self::$_columnHeaders)) {
-      $statusHeader = array(
-        array('name' => ts('Status'),
+      if (CRM_Core_DAO::singleValueQuery("SELECT is_active FROM civicrm_extension WHERE full_name = 'biz.jmaconsulting.grantapplications'") != 1) {
+        $statusHeader[] = array('name' => ts('Status'),
           'sort' => 'status_weight',
           'direction' => CRM_Utils_Sort::ASCENDING,
-        ),
-      );
+        );
+      }
       self::$_columnHeaders = array(
         array(
           'name' => ts('Program Name'),
@@ -471,4 +472,3 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
   }
 }
 //end of class
-

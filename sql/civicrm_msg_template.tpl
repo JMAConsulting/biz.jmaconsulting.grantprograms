@@ -68,7 +68,7 @@ INSERT INTO civicrm_option_value
     SELECT @tpl_ovid_{$vName} := MAX(id) FROM civicrm_option_value WHERE option_group_id = @tpl_ogid_{$gName} AND name = '{$vName}';
 {/foreach}
 {/foreach}
-INSERT INTO civicrm_msg_template
+INSERT IGNORE INTO civicrm_msg_template
   (msg_title,      msg_subject,                  msg_text,                  msg_html,                  workflow_id,        is_default, is_reserved) VALUES
 {foreach from=$ovNames key=gName item=ovs name=for_groups}
 {foreach from=$ovs key=vName item=title name=for_values}

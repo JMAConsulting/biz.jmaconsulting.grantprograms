@@ -99,7 +99,7 @@ class CRM_Grant_BAO_Query {
         $query->_element['grant_note'] = 1;
         $query->_tables['grant_note'] = 1;
       }
-      
+
       $query->_select['grant_amount_requested'] = 'civicrm_grant.amount_requested as grant_amount_requested';
       $query->_select['grant_amount_granted'] = 'civicrm_grant.amount_granted as grant_amount_granted';
       $query->_select['grant_amount_total'] = 'civicrm_grant.amount_total as grant_amount_total';
@@ -211,11 +211,11 @@ class CRM_Grant_BAO_Query {
 
         return;
       case 'grant_program_id':
-        
+
         $value = $strtolower(CRM_Core_DAO::escapeString(trim($value)));
-        
+
         $query->_where[$grouping][] = "civicrm_grant.grant_program_id $op '{$value}'";
-        
+
         $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
         $value = $grantPrograms[$value];
         $query->_qill[$grouping ][] = ts('Grant Type %2 %1', array(1 => $value, 2 => $op));
@@ -259,19 +259,19 @@ class CRM_Grant_BAO_Query {
       case 'grant_amount_high':
         $query->numberRangeBuilder($values,
           'civicrm_grant', 'grant_amount', 'amount_granted', 'Amount Granted'
-        ); 
+        );
       case 'grant_amount_total':
       case 'grant_amount_total_low':
       case 'grant_amount_total_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Requested' 
+          'civicrm_grant', 'grant_amount_total', 'amount_total', 'Amount Requested'
         );
       case 'grant_assessment':
       case 'grant_assessment_low':
       case 'grant_assessment_high':
         $query->numberRangeBuilder($values,
-          'civicrm_grant', 'grant_assessment', 'assessment', 'Assessment' 
-        );        
+          'civicrm_grant', 'grant_assessment', 'assessment', 'Assessment'
+        );
     }
   }
 
@@ -297,7 +297,7 @@ class CRM_Grant_BAO_Query {
         }
         $from .= "$side JOIN civicrm_entity_payment AS temp1 ON (civicrm_grant.id = temp1.entity_id AND temp1.entity_table = 'civicrm_grant')
 $side JOIN (SELECT payment_id AS payment_id, entity_id AS entity_id FROM civicrm_entity_payment ORDER BY payment_id DESC) AS temp2 ON temp1.entity_id = temp2.entity_id
-$side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)"; 
+$side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
 
         break;
 
@@ -433,4 +433,3 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
 
   static function tableNames(&$tables) {}
 }
-
