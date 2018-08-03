@@ -44,6 +44,6 @@ abstract class CRM_Grantprograms_Hook extends CRM_Utils_Hook {
    */
   static function grantAssessment(&$params) {
     return self::singleton( )->invoke(1, $params, self::$_nullObject, 
-      self::$_nullObject, self::$_nullObject, self::$_nullObject, 'civicrm_grantAssessment');
+      self::$_nullObject, self::$_nullObject, self::$_nullObject, self::$_nullObject, 'civicrm_grantAssessment');
   }
 }

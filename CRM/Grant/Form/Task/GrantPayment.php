@@ -36,15 +36,15 @@
 
 /**
  * This class generates form components for Payments
- * 
- */    
+ *
+ */
 class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
 {
-    
+
   protected $_id     = null;
   protected $_fields = null;
   function preProcess( ) {
-    parent::preProcess( ); 
+    parent::preProcess( );
     $this->_action     = CRM_Utils_Request::retrieve('action', 'String', $this );
     $this->_prid = CRM_Utils_Request::retrieve('prid', 'Positive', $this );
     if ( $this->_prid ) {
@@ -53,8 +53,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $session->pushUserContext( $url );
     }
   }
-    
-  function setDefaultValues( ) 
+
+  function setDefaultValues( )
   {
     $defaults = array();
     $paymentNumbers = CRM_Grant_BAO_GrantPayment::getMaxPayementBatchNumber( );
@@ -70,16 +70,16 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
    * @return None
    * @access public
    */
-  public function buildQuickForm( $check = false ) 
+  public function buildQuickForm( $check = false )
   {
     parent::buildQuickForm( );
     if ( $this->_action & CRM_Core_Action::DELETE ) {
-            
+
       $this->addButtons( array(
                                array ( 'type'      => 'next',
                                        'name'      => ts('Delete'),
                                        'isDefault' => true   ),
-                                     
+
                                array ( 'type'      => 'cancel',
                                        'name'      => ts('Cancel') ),
                                )
@@ -89,7 +89,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
 
     $this->applyFilter('__ALL__','trim');
     $attributes = CRM_Core_DAO::getAttribute( 'CRM_Grant_DAO_GrantProgram' );
-        
+
     $this->_contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
     $this->add('select', 'financial_type_id',  ts( 'From account' ),
                array( '' => ts( '- select -' ) ) + $this->_contributionTypes , true);
@@ -99,31 +99,31 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
 
     $this->add( 'text', 'payment_number', ts( 'Starting cheque number' ),
                 $attributes['label'], true );
-        
+
     $this->addDate( 'payment_date', ts('Payment date to appear on cheques'), false, array( 'formatType' => 'custom') );
     $buttonName = "Create Checks and CSV Export";
     if ( $this->_prid ) {
       $buttonName = "Reprint Checks and CSV Export";
     }
-    $this->addButtons(array( 
+    $this->addButtons(array(
                             array ( 'type'      => 'upload',
-                                    'name'      => ts($buttonName), 
+                                    'name'      => ts($buttonName),
                                     'isDefault' => true   ),
-                            array ( 'type'      => 'cancel', 
-                                    'name'      => ts('Cancel') ), 
-                             ) 
+                            array ( 'type'      => 'cancel',
+                                    'name'      => ts('Cancel') ),
+                             )
                       );
     $this->addFormRule( array( 'CRM_Grant_Form_Task_GrantPayment', 'formRule' ), $this );
-        
+
   }
 
-  public function formRule( $params, $files, $self ) 
+  public function formRule( $params, $files, $self )
   {
-    $errors = array( ); 
+    $errors = array( );
     $date  = date('m/d/Y', mktime(0, 0, 0, date("m")-6  , date("d")+1, date("Y")) );
     if( strtotime($params['payment_date']  < strtotime($date) ) )
       $errors['payment_date'] = ts( 'Payments may not be back-dated more than 6 months.' );
-         
+
     if ( ! CRM_Utils_Rule::integer($params['payment_number'] ) )
       $errors['payment_number'] = ts( "'{$params['payment_number']}' is not integer value." );
 
@@ -137,11 +137,11 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       $errors['payment_batch_number'] = ts( "Please enter valid payment batch number." );
 
     if ( CRM_Utils_Rule::integer( $params['payment_number'] ) )
-      if ( CRM_Grant_BAO_GrantPayment::getPaymentNumber( $params['payment_number'] ) ) 
+      if ( CRM_Grant_BAO_GrantPayment::getPaymentNumber( $params['payment_number'] ) )
         $errors['payment_number'] = ts( "Payment number already exists." );
 
     if ( CRM_Utils_Rule::integer( $params['payment_batch_number'] ) )
-      if (  CRM_Grant_BAO_GrantPayment::getPaymentBatchNumber( $params['payment_batch_number'] ) ) 
+      if (  CRM_Grant_BAO_GrantPayment::getPaymentBatchNumber( $params['payment_batch_number'] ) )
         $errors['payment_batch_number'] = ts( "Payment batch number already exists." );
 
     return empty($errors) ? true : $errors;
@@ -152,7 +152,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
    * @access public
    * @return None
    */
-  public function postProcess() 
+  public function postProcess()
   {
     $details = $allGrants = $grantPayments = $grantAmount = array();
     $grandTotal = 0;
@@ -223,46 +223,20 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         if (!empty($gProgram)) {
           $details[$dao->id]['grant_program_id'][$gProgram[$dao->grant_program_id]] = $gProgram[$dao->grant_program_id];
         }
-      } else {
-        $details[$dao->id]['payment_reason'][$dao->payment_reason] = $dao->payment_reason;
-      }
-    }
-    $totalAmount = 0;
-    $words = new CRM_Grant_Words();
-    foreach ($details as $id => $value) {
-      $grantPayment[$id]['contact_id'] = $id;
-      $grantPayment[$id]['financial_type_id'] = $values['financial_type_id'];
-      $grantPayment[$id]['payment_batch_number'] = $values['payment_batch_number'];
-      $grantPayment[$id]['payment_number'] = $values['payment_number'];
-      $grantPayment[$id]['payment_date'] = date("Y-m-d", strtotime($values['payment_date']));
-      $grantPayment[$id]['payment_created_date'] = date('Y-m-d');
-      $grantPayment[$id]['payable_to_name'] = CRM_Grant_BAO_GrantProgram::getDisplayName($id);
-      $grantPayment[$id]['payable_to_address'] =
-        CRM_Utils_Array::value('address', CRM_Grant_BAO_GrantProgram::getAddress($id, null, true));
-      $grantPayment[$id]['amount'] = $details[$id]['total_amount'];
-      $grantPayment[$id]['currency'] = $details[$id]['currency'];
-      $grantPayment[$id]['payment_status_id'] = 1;
-      if ($this->_prid) {
-        $grantPayment[$id]['payment_reason'] = implode(', ', $details[$id]['payment_reason']);
-        $grantPayment[$id]['replaces_payment_id'] = $this->_prid;
-        $grantPayment[$id]['payment_status_id'] = CRM_Core_OptionGroup::getValue('grant_payment_status', 'Reprinted', 'name');
-      } else {
-        $grantPayment[$id]['payment_reason'] = implode(', ', $details[$id]['grant_program_id']);
-        $grantPayment[$id]['replaces_payment_id'] = 'NULL';
-      }
-      $grantPayment[$id]['payment_details'] = $payment_details[$id];
-      $values['payment_number']++;
-      $totalAmount += $details[$id]['total_amount'];
-    }
+        require_once 'CRM/Grant/Words.php';
+        $words = new CRM_Grant_Words();
+        $amountInWords = ucwords($words->convert_number_to_words($grantInfo['amount']));
+        $grantPayment[$grantKey]['total_in_words'] = $grantInfo['total_in_words'] =
+        	$grantValues['total_in_words'] = $amountInWords;
+        $grantPayment[$grantKey]['amount'] = $grantInfo['amount'];
+        // Save payment
+        $savePayment = $grantPayment[$grantKey];
+        $savePayment['payable_to_address'] = str_replace('<br /> ', '', $savePayment['payable_to_address']);
+        $result = CRM_Grant_BAO_GrantPayment::add($savePayment, $ids = array());
 
-    foreach ($grantPayment as $grantKey => $grantInfo) {
-      $grantValues = $grantInfo;
-      if ($this->_prid) {
-        require_once 'CRM/Grant/DAO/GrantPayment.php';
-        $dao = new CRM_Grant_DAO_GrantPayment();
-        $dao->id = $this->_prid;
-        $dao->payment_status_id = CRM_Core_OptionGroup::getValue('grant_payment_status', 'Stopped', 'name');
-        $dao->save();
+        $grantPayment[$grantKey]['payment_id'] = $result->payment_number;
+        $contactPayments[$grantKey] = $result->id;
+        unset($grantPayment[$grantKey]['payment_status_id']);
       }
       require_once 'CRM/Grant/Words.php';
       $words = new CRM_Grant_Words();
@@ -323,7 +297,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $checkFile = CRM_Utils_File::makeFileName( $checkRegisterFile );
     $checkRegister = CRM_Grant_BAO_GrantPayment::makeReport( $checkFile, $grantPayment );
     $files[] = $checkRegister;
-    
+
 
     $fileDAO =& new CRM_Core_DAO_File();
     $fileDAO->uri           = $fileName;
@@ -331,24 +305,24 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $fileDAO->upload_date   = date('Ymdhis');
     $fileDAO->save();
     $grantPaymentFile = $fileDAO->id;
-    
+
     $entityFileDAO =& new CRM_Core_DAO_EntityFile();
     $entityFileDAO->entity_table = 'civicrm_contact';
     $entityFileDAO->entity_id    = $_SESSION[ 'CiviCRM' ][ 'userID' ];
     $entityFileDAO->file_id      = $grantPaymentFile;
     $entityFileDAO->save();
-    
+
     $fileDAO->uri           = $checkFile;
     $fileDAO->upload_date   = date('Ymdhis');
     $fileDAO->save();
     $grantPaymentCheckFile = $fileDAO->id;
-    
+
     $entityFileDAO =& new CRM_Core_DAO_EntityFile();
     $entityFileDAO->entity_table = 'civicrm_contact';
     $entityFileDAO->entity_id    = $_SESSION[ 'CiviCRM' ][ 'userID' ];
     $entityFileDAO->file_id      = $grantPaymentCheckFile;
-    $entityFileDAO->save(); 
-    
+    $entityFileDAO->save();
+
     //make Zip
     $zipFile  =  check_plain('GrantPayment').'_'.date('Ymdhis').'.zip';
     foreach($files as $file) {
@@ -362,7 +336,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
 
     $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
     $activityType = CRM_Core_PseudoConstant::activityType();
-    $params = array( 
+    $params = array(
       'source_contact_id' => $_SESSION['CiviCRM']['userID'],
       'activity_type_id' => array_search('Grant Payment', $activityType),
       'assignee_contact_id' => $_SESSION['CiviCRM']['userID'],
@@ -378,7 +352,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       ),
     );
     CRM_Activity_BAO_Activity::create($params);
-    
+
     require_once 'CRM/Grant/DAO/EntityPayment.php';
     if ( $this->_prid ) {
       foreach( $contactGrants as $grantId => $contact ) {
@@ -400,13 +374,14 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
         $entityDAO->entity_id    = $grantId;
         $entityDAO->payment_id   = $contactPayments[$contactGrants[$grantId]];
         $entityDAO->save();
-        $grantStatus = CRM_Core_OptionGroup::values( 'grant_status' );
+        $status_id = array_search('Paid', CRM_Core_OptionGroup::values('grant_status'));
         $grantType   = CRM_Core_OptionGroup::values( 'grant_type' );
         $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
         $this->assign( 'grant_type', $grantType[$mailParams[$grantId]['grant_type_id']] );
         $this->assign( 'grant_programs', $grantPrograms[$mailParams[$grantId]['grant_program_id']] );
         $this->assign( 'grant_status', 'Paid' );
         $this->assign( 'params', $mailParams[$grantId] );
+        $mailParams[$grantId]['status_id'] = $status_id;
         CRM_Grant_BAO_GrantProgram::sendMail($grantContctId[$grantId], $mailParams[$grantId], 'Paid', $grantId, 'Approved for Payment');
       }
       CRM_Core_Session::setStatus( "Created ".count($details)." payments to pay for ".count($this->_approvedGrants)." grants to ".count($details)." applicants." );

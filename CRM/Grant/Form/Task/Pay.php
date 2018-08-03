@@ -41,7 +41,7 @@ require_once 'CRM/Grant/Form/Task.php';
  * participations. This class provides functionality for the actual
  * deletion.
  */
-class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task 
+class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
 {
     /**
      * Are we operating in "single mode", i.e. deleting one
@@ -57,19 +57,20 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
      * @return void
      * @access public
      */
-    function preProcess( ) 
+    function preProcess( )
     {
         parent::preProcess( );
 
         //check permission for delete.
         if ( !CRM_Core_Permission::checkActionPermission( 'CiviGrant', CRM_Core_Action::PAY ) ) {
-            CRM_Core_Error::fatal( ts( 'You do not have permission to access this page' ) );  
+            CRM_Core_Error::fatal( ts( 'You do not have permission to access this page' ) );
         }
         $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE, FALSE, FALSE, NULL, 'name');
 
         $paidGrants = $approvedGrants = array();
-        CRM_Core_PseudoConstant::populate($paidGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}" );
-        CRM_Core_PseudoConstant::populate($approvedGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Approved for Payment']}" );
+
+        CRM_Core_PseudoConstant::populate($paidGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Paid']}");
+        CRM_Core_PseudoConstant::populate($approvedGrants, 'CRM_Grant_DAO_Grant', true, 'status_id', false, " id in (".implode ( ', ' , $this->_grantIds ).") AND status_id = {$grantStatus['Approved for Payment']}");
         
         $this->_paidGrants = $paidGrants;
         $this->_notApproved = count($this->_grantIds) - count( $this->_paidGrants ) - count( $approvedGrants );
@@ -103,7 +104,7 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
      * @access public
      * @return void
      */
-    function buildQuickForm( ) 
+    function buildQuickForm( )
     {
       $message = "";
       if (count($this->_approvedGrants)) {
@@ -120,28 +121,28 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
           $message .= 'Would you like to proceed to paying the '.count( $this->_approvedGrants ).' eligible or approved for payment but unpaid grants?';
           CRM_Core_Session::setStatus(ts($message), NULL, 'no-popup');
         }
-            
+
         $this->addButtons( array(
-          array ( 
+          array (
             'type' => 'next',
             'name' => ts('Continue >>'),
             'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'isDefault' => true,   
+            'isDefault' => true,
           ),
-          array ( 
+          array (
             'type' => 'cancel',
-            'name' => ts('Cancel'), 
+            'name' => ts('Cancel'),
           ),
           )
         );
-      } 
+      }
       else {
           CRM_Core_Session::setStatus(ts('Please select at least one grant that has been approved for payment or eligible and not been paid.'), NULL, 'no-popup');
-          $this->addButtons(array( 
+          $this->addButtons(array(
             array (
-              'type' => 'cancel', 
-              'name' => ts('Cancel') ), 
-            ) 
+              'type' => 'cancel',
+              'name' => ts('Cancel') ),
+            )
           );
         }
     }
@@ -152,11 +153,9 @@ class CRM_Grant_Form_Task_Pay extends CRM_Grant_Form_Task
      * @access public
      * @return None
      */
-    public function postProcess( ) 
+    public function postProcess( )
     {
         $this->set( 'approvedGrants', $this->_approvedGrants );
         $this->controller->resetPage( 'GrantPayment' );
     }
 }
-
-

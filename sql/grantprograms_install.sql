@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (
   `is_auto_email` tinyint(4) DEFAULT '1' COMMENT 'Is auto email active?',
   `allocation_algorithm` int(10) unsigned DEFAULT NULL COMMENT 'Allocation Algorithm.',
   `grant_program_id` int(11) DEFAULT NULL COMMENT 'FK reference to this civicrm_grant_program table, used to determine grants given to contact in previous year during assessment.',
+  `from_email_address` varchar(255) DEFAULT NULL COMMENT 'FROM Email Identity',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_grant_program_grant_type_id` (`grant_type_id`),
   KEY `FK_civicrm_grant_program_status_id` (`status_id`),
@@ -283,9 +284,9 @@ SELECT @parentId1 := id FROM civicrm_navigation WHERE name = 'CiviGrant';
 SELECT @parentId2 := id FROM civicrm_navigation WHERE name = 'Grants';
 SELECT @weight := MAX(weight) FROM civicrm_navigation WHERE  parent_id = @parentId2;       
 INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
-(1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search&reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
+(1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search?reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
 (1, 'New Grant Program', 'New Grant Program', 'civicrm/grant_program?action=add&reset=1', 'access CiviCRM,access CiviGrant,edit grants', 'AND', @parentId2, 1, 0, @weight = @weight + 1),
-(1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program&reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
+(1, 'Grant Programs', 'Grant Programs', 'civicrm/grant_program?reset=1', 'access CiviGrant,administer CiviCRM', 'AND', @parentId1, 1, NULL, 2);
 
 
 -- Accounting integration RG-125

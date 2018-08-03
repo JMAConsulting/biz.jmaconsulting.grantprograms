@@ -96,12 +96,12 @@ function grantprograms_civicrm_grantAssessment(&$params) {
   if (!CRM_Utils_Array::value('grant_program_id', $params)) {
     return;
   }
-  
+
   if (CRM_Utils_Array::value('custom', $params)) {
     $assessmentAmount = 0;
     foreach ($params['custom'] as $key => $value) {
       foreach($value as $fieldKey => $fieldValue) {
-        if (in_array($fieldValue['table_name'], array(PANEL_REVIEW_EVALUATION, GRANT_COMMITTEE_REVIEW, FULL_BOARD_REVIEW)) 
+        if (in_array($fieldValue['table_name'], array(PANEL_REVIEW_EVALUATION, GRANT_COMMITTEE_REVIEW, FULL_BOARD_REVIEW))
           && CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $fieldValue['custom_field_id'], 'html_type') == 'Select') {
           if (is_nan((float)$fieldValue['value']) === FALSE) {
             $assessmentAmount += $fieldValue['value'];
@@ -121,11 +121,11 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     if (!empty($sumAmountGranted)) {
       if ($sumAmountGranted >= $grantThresholds['Maximum Grant']) {
         $priority = 10;
-      } 
+      }
       elseif ($sumAmountGranted > 0) {
         $priority = 0;
       }
-    } 
+    }
     else {
       $priority = -10;
     }
@@ -135,7 +135,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
       }
     }
   }
-   
+
   $defaults = array();
   $programParams = array('id' => $params['grant_program_id']);
   $grantProgram = CRM_Grant_BAO_GrantProgram::retrieve($programParams, $defaults);
@@ -146,7 +146,7 @@ function grantprograms_civicrm_grantAssessment(&$params) {
     if (empty($params['amount_granted'])) {
       unset($params['amount_granted']);
     }
-  } 
+  }
 }
 
 /**
@@ -185,7 +185,7 @@ function quickAllocate($grantProgram, $value) {
       }
     }
   }
-   
+
   //Update grant program
   if ($amountGranted > 0) {
     $grantProgramParams['remainder_amount'] = $grantProgram->remainder_amount - $remainderDifference;
@@ -207,40 +207,40 @@ function &links() {
       'name'  => ts('View'),
       'url'   => 'civicrm/grant_program',
       'qs'    => 'action=view&id=%%id%%&reset=1',
-      'title' => ts('View Grant Program') 
+      'title' => ts('View Grant Program')
     ),
     CRM_Core_Action::UPDATE  => array(
       'name'  => ts('Edit'),
       'url'   => 'civicrm/grant_program',
       'qs'    => 'action=update&id=%%id%%&reset=1',
-      'title' => ts('Edit Grant Program') 
+      'title' => ts('Edit Grant Program')
     ),
     CRM_Core_Action::DELETE  => array(
       'name'  => ts('Delete'),
       'url'   => 'civicrm/grant_program',
       'qs'    => 'action=delete&id=%%id%%&reset=1',
-      'title' => ts('Delete') 
+      'title' => ts('Delete')
     ),
     CRM_Core_Action::ADD  => array(
       'name'  => ts('Allocate Approved (Trial)'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
       'extra'   => 'id=allocation',
-      'title' => ts('Allocate Approved (Trial)') 
+      'title' => ts('Allocate Approved (Trial)')
     ),
     CRM_Core_Action::BROWSE  => array(
       'name'  => ts('Finalize Approved Allocations'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
       'extra'   => 'id=finalize',
-      'title' => ts('Finalize Approved Allocations') 
+      'title' => ts('Finalize Approved Allocations')
     ),
     CRM_Core_Action::MAP  => array(
       'name'  => ts('Mark remaining unapproved Grants as Ineligible'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
       'extra'   => 'id=reject',
-      'title' => ts('Mark remaining unapproved Grants as Ineligible') 
+      'title' => ts('Mark remaining unapproved Grants as Ineligible')
     ),
   );
   return $_links;
@@ -254,9 +254,22 @@ function grantprograms_civicrm_permission(&$permissions) {
   $permissions['edit payments in CiviGrant'] = $prefix . ts('edit payments in CiviGrant');
   $permissions['create payments in CiviGrant'] = $prefix . ts('create payments in CiviGrant');
 }
+
+function grantprograms_civicrm_preProcess($formName, &$form) {
+  if ($formName == 'CRM_Grant_Form_Search') {
+    $programID = CRM_Utils_Request::retrieve('pid', 'String',
+      CRM_Core_DAO::$_nullObject
+    );
+    if ($programID) {
+      $form->_formValues['grant_program_id'] = $programID;
+      $form->defaults['grant_program_id'] = $programID;
+    }
+  }
+
+}
 /*
  * hook_civicrm_buildForm civicrm hook
- * 
+ *
  * @param string $formName form name
  * @param object $form form object
  *
@@ -270,11 +283,11 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     if (array_search('Grant Status Change', $activityType) != $activityValues['activity_type_id']) {
       return FALSE;
     }
-    $grantUrl = CRM_Utils_System::url('civicrm/contact/view/grant', 
+    $grantUrl = CRM_Utils_System::url('civicrm/contact/view/grant',
       'reset=1&action=view&id=' . $activityValues['source_record_id'] . '&cid=' . current($activityValues['assignee_contact']));
     $form->assign('grantUrl', $grantUrl);
   }
-  
+
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $form->_key = CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next = CRM_Utils_Request::retrieve('next', 'Positive', $form);
@@ -282,61 +295,61 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_searchGrants = CRM_Utils_Request::retrieve('searchGrants', 'String', $form);
     $form->_ncid = CRM_Utils_Request::retrieve('ncid', 'String', $form);
     if (CRM_Utils_Request::retrieve('context', 'String', $form) == 'search' && isset($form->_next)) {
-      $form->addButtons(array( 
+      $form->addButtons(array(
         array ('type' => 'upload',
-          'name' => ts('Save'), 
+          'name' => ts('Save'),
           'isDefault' => true),
         array ('type' => 'submit',
           'name' => ts('Save and Next'),
-          'subName' => 'savenext'),   
+          'subName' => 'savenext'),
         array ('type' => 'upload',
-          'name' => ts('Save and New'), 
+          'name' => ts('Save and New'),
           'js' => array('onclick' => "return verify();"),
           'subName' => 'new' ),
-        array ('type' => 'cancel', 
+        array ('type' => 'cancel',
           'name' => ts('Cancel')),
-        ) 
+        )
       );
     }
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Grant/Form/GrantExtra.tpl',
       ));
     $form->_reasonGrantRejected = CRM_Core_OptionGroup::values('reason_grant_ineligible');
-    $form->add('select', 
-      'grant_rejected_reason_id', 
+    $form->add('select',
+      'grant_rejected_reason_id',
       ts('Reason Grant Ineligible'),
-      array('' => ts('- select -')) + $form->_reasonGrantRejected, 
+      array('' => ts('- select -')) + $form->_reasonGrantRejected,
       FALSE
     );
 
     $form->_reasonGrantIncomplete = CRM_Core_OptionGroup::values('reason_grant_incomplete');
-    $form->add('select', 
-      'grant_incomplete_reason_id', 
+    $form->add('select',
+      'grant_incomplete_reason_id',
       ts('Reason Grant Incomplete'),
-      array('' => ts('- select -')) + $form->_reasonGrantIncomplete, 
+      array('' => ts('- select -')) + $form->_reasonGrantIncomplete,
       FALSE
     );
 
     $form->_grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-    $form->add('select', 
-      'grant_program_id', 
+    $form->add('select',
+      'grant_program_id',
       ts('Grant Programs'),
       array('' => ts('- select -')) + $form->_grantPrograms,
       TRUE
     );
-         
+
     //Financial Type RG-125
     $financialType = CRM_Contribute_PseudoConstant::financialType();
     if (count($financialType)) {
       $form->assign('financialType', $financialType);
     }
-    $form->add('select', 'financial_type_id', 
-      ts('Financial Type'), 
+    $form->add('select', 'financial_type_id',
+      ts('Financial Type'),
       array('' => ts('- Select Financial Type -')) + $financialType,
-      FALSE 
-    );      
+      FALSE
+    );
     $showFields = FALSE;
-    
+
     if ( $form->getVar('_action') == CRM_Core_Action::UPDATE && $form->getVar('_id')) {
       $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
       $grantWeight = CRM_Core_OptionGroup::values('grant_status', FALSE, FALSE, FALSE, NULL, 'weight');
@@ -349,7 +362,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
 
         $currentStatusWeight = $grantWeight[$currentStatus] + 1;
         foreach ($grantStatuses as $statusId => $statusName) {
-          if ((($grantWeight[$currentStatus] >= 7 && $statusId == array_search('Ineligible', $grantStatuses)) 
+          if ((($grantWeight[$currentStatus] >= 7 && $statusId == array_search('Ineligible', $grantStatuses))
                || ($grantWeight[$currentStatus] >= 1 && $grantWeight[$currentStatus] <= 7 && $grantWeight[$statusId] > 7 && $statusId != array_search('Ineligible', $grantStatuses))
               || $grantWeight[$currentStatus] > 7
               || $grantWeight[$statusId] < $grantWeight[$currentStatus])
@@ -360,20 +373,20 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
           }
         }
       $form->removeElement('status_id');
-      
+
       $element = $form->add('select', 'status_id', ts('Grant Status'),
         $grantStatuses,
         TRUE
       );
       if ($grantStatuses[$currentStatus] == 'Withdrawn') {
         $element->freeze();
-      }      
+      }
     }
     if ($form->getVar('_id')) {
       if (CRM_Core_Permission::check('administer CiviGrant')) {
         $form->add('text', 'assessment', ts('Assessment'));
       }
-    
+
       // freeze fields based on permissions
       if (CRM_Core_Permission::check('edit grants') && !CRM_Core_Permission::check('edit grant finance')) {
         if (CRM_Utils_Array::value('amount_granted', $form->_elementIndex)) {
@@ -398,105 +411,105 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
   }
   if ($formName == "CRM_Grant_Form_Search") {
     $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-    $form->add('select', 
-      'grant_program_id',  
+    $form->add('select',
+      'grant_program_id',
       ts('Grant Programs'),
       array('' => ts('- select -')) + $grantPrograms
     );
-    $form->add('text', 
-      'grant_amount_total_low', 
-      ts('From'), 
-      array('size' => 8, 'maxlength' => 8) 
-    ); 
-    $form->addRule('grant_amount_total_low', 
-      ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+    $form->add('text',
+      'grant_amount_total_low',
+      ts('From'),
+      array('size' => 8, 'maxlength' => 8)
+    );
+    $form->addRule('grant_amount_total_low',
+      ts('Please enter a valid money value (e.g. %1).',
+        array(1 => CRM_Utils_Money::format('9.99', ' '))),
       'money'
     );
-    $form->add('text', 
-      'grant_amount_total_high', 
-      ts('To'), 
+    $form->add('text',
+      'grant_amount_total_high',
+      ts('To'),
       array('size' => 8, 'maxlength' => 8)
-    ); 
-    $form->addRule('grant_amount_total_high', 
-      ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+    );
+    $form->addRule('grant_amount_total_high',
+      ts('Please enter a valid money value (e.g. %1).',
+        array(1 => CRM_Utils_Money::format('99.99', ' '))),
       'money'
     );
-    $form->add('text', 
-      'grant_assessment_low', 
-      ts('From'), 
+    $form->add('text',
+      'grant_assessment_low',
+      ts('From'),
       array('size' => 9, 'maxlength' => 9)
     );
-        
-    $form->add('text', 
-      'grant_assessment_high', 
-      ts('To'), 
+
+    $form->add('text',
+      'grant_assessment_high',
+      ts('To'),
       array('size' => 9, 'maxlength' => 9)
     );
-    $form->add('text', 
-      'grant_amount_low', 
-      ts('From'), 
+    $form->add('text',
+      'grant_amount_low',
+      ts('From'),
       array('size' => 8, 'maxlength' => 8)
-    ); 
-    $form->addRule('grant_amount_low', 
-      ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('9.99', ' '))), 
+    );
+    $form->addRule('grant_amount_low',
+      ts('Please enter a valid money value (e.g. %1).',
+        array(1 => CRM_Utils_Money::format('9.99', ' '))),
       'money'
     );
 
-    $form->add('text', 
-      'grant_amount_high', 
-      ts('To'), 
+    $form->add('text',
+      'grant_amount_high',
+      ts('To'),
       array('size' => 8, 'maxlength' => 8)
     );
-    $form->addRule('grant_amount_high', 
-      ts('Please enter a valid money value (e.g. %1).', 
-        array(1 => CRM_Utils_Money::format('99.99', ' '))), 
+    $form->addRule('grant_amount_high',
+      ts('Please enter a valid money value (e.g. %1).',
+        array(1 => CRM_Utils_Money::format('99.99', ' '))),
       'money'
     );
   }
 
-  
+
   if ($formName == 'CRM_Custom_Form_Field') {
-    
+
     for ($i = 1; $i <= $formName::NUM_OPTION; $i++) {
-      $form->add('text', 
-        'option_description['. $i .']', 
-        'Mark', 
-        array('id' => 'marks') 
+      $form->add('text',
+        'option_description['. $i .']',
+        'Mark',
+        array('id' => 'marks')
       );
-    } 
+    }
     $form->assign('edit_form', 1);
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/Grant/Form/CustomFields.tpl',
     ));
   }
   if ($formName == 'CRM_Custom_Form_Option') {
-    $form->add('text', 
-      'description', 
-      'Mark', 
+    $form->add('text',
+      'description',
+      'Mark',
       array('id' => 'marks')
     );
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/Grant/Form/CustomFields.tpl',
     ));
   }
-  
+
   if ($formName == 'CRM_Grant_Form_Search' && $form->get('context') == 'dashboard') {
     //Version of grant program listings
     $grantProgram = array();
     require_once 'CRM/Grant/DAO/GrantProgram.php';
     $dao = new CRM_Grant_DAO_GrantProgram();
-      
+
     $dao->orderBy('label');
     $dao->find();
-      
+
     while ($dao->fetch()) {
       $grantProgram[$dao->id] = array();
       CRM_Core_DAO::storeValues( $dao, $grantProgram[$dao->id]);
       $action = array_sum(array_keys(links()));
-      $grantProgram[$dao->id]['action'] = CRM_Core_Action::formLink(links(), $action, 
+      $grantProgram[$dao->id]['action'] = CRM_Core_Action::formLink(links(), $action,
                                           array('id' => $dao->id));
     }
     $grantType   = CRM_Core_OptionGroup::values('grant_type');
@@ -519,7 +532,17 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->_elements[$form->_elementIndex['prev_assessment']]->freeze();
     // Filter out grant being edited from search results
     $form->assign('grant_id', $form->getVar('_id'));
- }
+  }
+
+  // Expose value field for option value edit
+  if ($formName == 'CRM_Admin_Form_Options') {
+    $form->add('text',
+      'value',
+      ts('Value'),
+      CRM_Core_DAO::getAttribute('CRM_Core_DAO_OptionValue', 'value'),
+      true
+    );
+  }
 }
 
 function grantprograms_civicrm_pageRun( &$page ) {
@@ -539,8 +562,8 @@ function grantprograms_civicrm_pageRun( &$page ) {
       ));
     }
   }
-  
-  if ($page->getVar('_name') == "CRM_Custom_Page_Option") { 
+
+  if ($page->getVar('_name') == "CRM_Custom_Page_Option") {
     $params['id'] = $page->getVar('_fid');
     $params['custom_group_id'] = $page->getVar('_gid');
     CRM_Core_BAO_CustomField::retrieve($params, $defaults);
@@ -591,7 +614,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
     if (array_key_exists('amount_granted', $form->_submitValues) && CRM_Utils_Array::value('remainder_amount', $defaults) < $form->_submitValues['amount_granted']) {
       $errors['amount_granted'] = ts('You need to increase the Grant Program Remainder Amount');
     }
-    
+
     if (CRM_Utils_Array::value('amount_granted', $fields) && $fields['amount_granted'] > 0 && !CRM_Utils_Array::value('financial_type_id', $fields) && CRM_Utils_Array::value('money_transfer_date', $fields)) {
       $errors['financial_type_id'] = ts('Financial Type is a required field if Amount is Granted');
     }
@@ -620,12 +643,12 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
         }
       }
     }
-  } 
+  }
   return empty($errors) ? TRUE : $errors;
 }
 
 function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
-  if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) { 
+  if ($objectName == 'Grant' && ($op == 'edit' || $op == 'create')) {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status');
     $assessmentAmount = 0;
     $calculateAssessment = FALSE;
@@ -636,7 +659,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     if ($objectName == 'Grant' && $op == "edit") {
       $grantParams = array('id' => $id);
       $previousGrant = CRM_Grant_BAO_Grant::retrieve($grantParams, CRM_Core_DAO::$_nullArray);
-      if ($params['status_id'] == $previousGrant->status_id) {
+      if (isset($params['status_id']) && $params['status_id'] == $previousGrant->status_id) {
         $sendMail = FALSE;
       }
       if ((CRM_Utils_Array::value('assessment', $params) == $previousGrant->assessment)) {
@@ -645,9 +668,11 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     }
     $smarty->assign('sendMail', $sendMail);
     $grantStatusApproved = array_search('Approved for Payment', $grantStatus);
-    if ($grantStatusApproved == $params['status_id']  && empty($params['decision_date']) && 
-      ($op == 'create') || ($previousGrant && !$previousGrant->decision_date && 
-      $previousGrant->status_id != $params['status_id'])) {
+    if ((isset($params['status_id']) && $grantStatusApproved == $params['status_id'] &&
+        empty($params['decision_date']) && $op == 'create') ||
+      ($previousGrant && !$previousGrant->decision_date && isset($params['status_id']) &&
+        $previousGrant->status_id != $params['status_id'])
+    ) {
       $params['decision_date'] = date('Ymd');
     }
     if ((empty($params['assessment']) || $calculateAssessment) && ($op == 'create' || $op == 'edit')) {
@@ -656,7 +681,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
           foreach($value as $fieldKey => $fieldValue) {
             $customParams = array('id' => $key, 'is_active' => 1, 'html_type' => 'Select');
             $customFields = CRM_Core_BAO_CustomField::retrieve($customParams, $default = array());
-            if (!empty($customFields)) { 
+            if (!empty($customFields)) {
               $optionValueParams = array('option_group_id' => $customFields->option_group_id, 'value' => $fieldValue['value'], 'is_active' => 1);
               $optionValues = CRM_Core_BAO_OptionValue::retrieve($optionValueParams,  $default = array());
               if(!empty($optionValues->description)) {
@@ -667,10 +692,10 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
         }
       }
     }
-    
+
     if(!empty($assessmentAmount)) {
       $params['assessment'] = $assessmentAmount;
-    } 
+    }
     elseif ($objectName == 'Grant' && $op == "edit") {
       $params['adjustment_value'] = FALSE;
     }
@@ -689,7 +714,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     elseif ($objectName == 'Grant' && $op == "create" && CRM_Utils_Array::value('amount_granted', $params)) {
       $params['manualEdit'] = TRUE;
     }
-    
+
     if (!empty($id)) {
       $params['id'] = $id;
     }
@@ -698,8 +723,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       $smarty = CRM_Core_Smarty::singleton();
       $smarty->assign('previousGrant', $previousGrant);
     }
-    $config = CRM_Core_Config::singleton();
-    $config->_params = $params;
+
+    $session = CRM_Core_Session::singleton();
+    $session->set('grant-params', $params);
   }
 }
 
@@ -709,9 +735,9 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   //send mail after grant save
-  $config = CRM_Core_Config::singleton();
-  if ($objectName == 'Grant' && isset($config->_params) && !isset($config->_params['restrictEmail'])) {
-    $params = $config->_params;
+  $config = CRM_Core_Session::singleton();
+  $params = $config->get('grant-params');
+  if ($objectName == 'Grant' && isset($params) && !isset($params['restrictEmail'])) {
     // added by JMA fixme in module
     $grantProgram  = new CRM_Grant_DAO_GrantProgram();
     $grantProgram->id = isset($params['grant_program_id']) ? $params['grant_program_id'] : NULL;
@@ -719,7 +745,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     if ($grantProgram->find(TRUE)) {
       $params['is_auto_email'] = $grantProgram->is_auto_email;
     }
-     
+
     if ($params['is_auto_email'] == 1) {
       // FIXME: for grant profiles
       $customData = array();
@@ -752,10 +778,10 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
             $customFieldData = grantprograms_getCustomFieldData($dataValueKey);
             if (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select') {
               $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = grantprograms_getOptionValueLabel($customFieldData['option_group_id'],$dataValueValue);
-            } 
+            }
             elseif (CRM_Utils_Array::value('html_type', $customFieldData) == 'Select Date') {
               $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = date('Y-m-d', strtotime($dataValueValue));
-            } 
+            }
             else {
               $customField[$customGroupName]['custom_'.$dataValueKey]['value'] = $dataValueValue;
             }
@@ -765,7 +791,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       }
       $page->assign('customGroup', $customGroup);
       $page->assign('customField', $customField);
-      
+
       $grantStatuses = $grantStatus = CRM_Core_OptionGroup::values('grant_status');
       $grantPrograms = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
       $grantTypes = CRM_Core_OptionGroup::values('grant_type');
@@ -779,7 +805,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $grantStatus = $grantStatus[$params['status_id']];
       $grantIneligibleReasons = CRM_Core_OptionGroup::values('reason_grant_ineligible');
       $grantIncompleteReasons = CRM_Core_OptionGroup::values('reason_grant_incomplete');
-      
+
       $page->assign('grant_type', $grantType);
       $page->assign('grant_programs', $grantProgram);
       $page->assign('grant_status', $grantStatus);
@@ -806,11 +832,11 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $previousGrant = $smarty->get_template_vars('previousGrant');
       if ($previousGrant && property_exists($previousGrant, 'status_id')) {
         $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
-        CRM_Grant_BAO_GrantProgram::createStatusChangeActivity($params['contact_id'], 
+        CRM_Grant_BAO_GrantProgram::createStatusChangeActivity($params['contact_id'],
         $grantStatuses[$params['status_id']], $grantStatuses[$previousGrant->status_id], $params['contact_id']);
       }
     }
-    
+
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     if (isset($endDate)) {
       $infoTooLate = key(CRM_Core_PseudoConstant::accountOptionValues('grant_info_too_late'));
@@ -837,17 +863,15 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     $status = CRM_Core_OptionGroup::values('grant_status');
     $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
     $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
-    $amount = $objectRef->amount_granted;
+    $amount = $objectRef->amount_total;
     $params = array();
     if ($objectRef->status_id == array_search('Approved for Payment', $status)) {
-      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
-      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
       $financialItemStatusID = array_search('Unpaid', $financialItemStatus);
       $statusID = array_search('Pending', $contributionStatuses);
     }
     elseif ($objectRef->status_id == array_search('Paid', $status)) {
-      $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Asset Account is' "));
-      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+      $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Asset Account is');
       $statusID = array_search('Completed', $contributionStatuses);
       $createItem = FALSE;
     }
@@ -868,25 +892,21 @@ ORDER BY cft.id DESC LIMIT 1");
         'total_amount' => $amount,
         'currency' => $objectRef->currency,
         'status_id' => $statusID,
-      );
-      $trxnEntityTable = array(
         'entity_table' => 'civicrm_grant',
         'entity_id' => $objectId,
       );
       if ($previousGrant && $previousGrant->status_id == array_search('Approved for Payment', $status) && $objectRef->status_id == array_search('Paid', $status)) {
-        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Accounts Payable Account is' "));
-        $trxnParams['from_financial_account_id'] = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+        $trxnParams['from_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
       }
-      $trxnId = CRM_Core_BAO_FinancialTrxn::create($trxnParams, $trxnEntityTable);
+      $trxnId = CRM_Core_BAO_FinancialTrxn::create($trxnParams);
       if ($createItem) {
-        $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('account_relationship', NULL, " AND v.name LIKE 'Expense Account is' "));
-        $financialAccountId = CRM_Contribute_PseudoConstant::financialAccountType($objectRef->financial_type_id, $relationTypeId);
+        $financialAccountId = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
         $itemParams = array(
           'transaction_date' => date('YmdHis'),
-          'contact_id' => $objectRef->contact_id, 
+          'contact_id' => $objectRef->contact_id,
           'currency' => $objectRef->currency,
           'amount' => $amount,
-          'description' => NULL, 
+          'description' => NULL,
           'status_id' => $financialItemStatusID,
           'financial_account_id' => $financialAccountId,
           'entity_table' => 'civicrm_grant',
@@ -922,7 +942,7 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       }
     }
   }
-  
+
   if ($formName == "CRM_Custom_Form_Option") {
     $params = array(
       'id' => $form->_submitValues['optionId'],
@@ -933,7 +953,7 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
   }
 
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
-   
+
     // FIXME: cookies error
     if ($form->getVar('_context') == 'search') {
       $array['contact_id'] = $form->_ncid;
@@ -942,11 +962,11 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       $foundit = FALSE;
       foreach ($grants as $gKey => $gVal) {
         if ($foundit) {
-          $next = $gKey; 
+          $next = $gKey;
           break;
         }
-        if ($gKey == $form->_next) { 
-          $next = $gKey; 
+        if ($gKey == $form->_next) {
+          $next = $gKey;
           if($gVal == end($grants)) {
             reset($grants);
             $next = key($grants);
@@ -958,21 +978,21 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       $result = CRM_Grant_BAO_GrantProgram::getGrants($grantParams);
       if (CRM_Utils_Array::value($form->getButtonName('submit', 'savenext'), $_POST)) {
         if ($form->getVar('_id') != $form->_prev) {
-          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
+          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant',
             "reset=1&action=update&id={$form->_next}&cid={$array['contact_id']}&context=search&next={$next}&prev={$form->_prev}&key={$form->_key}&ncid={$result[$next]['contact_id']}&searchGrants={$form->_searchGrants}"));
-        } 
+        }
         else {
           CRM_Core_Session::setStatus( ts('The next record in the Search no longer exists. Select another record to edit if desired.'));
-          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 
+          CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search',
             "force=1&qfKey={$form->_key}"));
         }
-      } 
+      }
       elseif (CRM_Utils_Array::value( $form->getButtonName('upload', 'new'), $_POST)) {
-        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant', 
+        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant',
           "reset=1&action=add&context=grant&cid={$array['contact_id']}"));
-      } 
+      }
       else {
-        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search', 
+        CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/search',
           "force=1&qfKey={$form->_key}"));
       }
     }
@@ -987,12 +1007,12 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
  *
  */
 function grantprograms_civicrm_searchTasks($objectName, &$tasks) {
-  if ($objectName == 'grant' && !strstr($_GET['q'], 'payment/search') 
+  if ($objectName == 'grant' && !strstr($_GET['q'], 'payment/search')
     && CRM_Core_Permission::check('create payments in CiviGrant')) {
-    $tasks[PAY_GRANTS] = array( 
+    $tasks[PAY_GRANTS] = array(
       'title' => ts('Pay Grants'),
       'class' => array('CRM_Grant_Form_Task_Pay',
-        'CRM_Grant_Form_Task_GrantPayment' 
+        'CRM_Grant_Form_Task_GrantPayment'
       ),
       'result' => FALSE,
     );
@@ -1035,7 +1055,7 @@ function grantprograms_addRemoveMenu($enable) {
   CRM_Core_BAO_ConfigSetting::create($params);
   return;
 }
- 
+
 function getCustomFields($params, &$values) {
   static $_customGroup = array();
   if (empty($_customGroup)) {
@@ -1091,6 +1111,7 @@ function grantprograms_civicrm_merge($type, &$data, $mainId = NULL, $otherId = N
     } else {
       $db_default = '';
     }
+
     $data[$db_default . 'civicrm_payment'] = array('contact_id');
   }
 }

@@ -54,6 +54,8 @@
         <tr class="crm-grant-program-view-form-block-grant_type_id"><td class="label">{ts}Grant Type{/ts}</td> <td>{$grantType}</td></tr>
 	<tr class="crm-grant-program-view-form-block-total_amount"><td class="label">{ts}Total Amount{/ts}</td> <td>{$total_amount|crmMoney}</td></tr>
 	<tr class="crm-grant-program-view-form-block-remainder_amount"><td class="label">{ts}Remainder Amount{/ts}</td> <td>{$remainder_amount|crmMoney}</td></tr>
+      <tr class="crm-grant-program-view-form-block-from_email_address"><td class="label">{ts}FROM Email Address{/ts}</td>
+        <td>{$from_email_address}</td></tr>
 	<tr class="crm-grant-program-view-form-block-contribution_type_id"><td class="label">{ts}Contribution Type{/ts}</td> <td>{$contributionType}</td></tr>
         <tr class="crm-grant-program-view-form-block-status_id"><td class="label">{ts}Grant Status{/ts}</td> <td>{$grantProgramStatus}</td></tr>
 	<tr class="crm-grant-program-view-form-block-allocation_algorithm"><td class="label">{ts}Allocation Algorithm{/ts}</td> <td>{$grantProgramAlgorithm}</td></tr>

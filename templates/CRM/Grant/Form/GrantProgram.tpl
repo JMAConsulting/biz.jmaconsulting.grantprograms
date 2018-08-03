@@ -47,6 +47,12 @@
     	  <td class="label">{$form.remainder_amount.label}</td>
 	  <td class="html-adjust">{$form.remainder_amount.html}</td>
        </tr>
+       <tr class="crm-grant_program-form-block-from_email_address">
+         <td class="label">{$form.from_email_address.label}</td>
+         <td class="html-adjust">{$form.from_email_address.html}<br />
+           <span class="description">{ts}Include double-quotes (&quot;) around the name and angle-brackets (&lt; &gt;) around the email address.<br />EXAMPLE: <em>&quot;Client Services&quot; &lt;clientservices@example.org&gt;</em>{/ts}<span>
+         </td>
+       </tr>
        <tr class="crm-grant_program-form-block-contribution_type_id">
 	  <td class="label">{$form.financial_type_id.label}</td>
 	  <td class="html-adjust">{$form.financial_type_id.html}</td>

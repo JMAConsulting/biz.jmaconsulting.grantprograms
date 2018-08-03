@@ -328,10 +328,20 @@ WHERE civicrm_contact.id = $id ";
            ),
           'PDFFilename' => '',
         );
-        
-        $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
-        foreach ($defaultAddress as $id => $value) {
-          $sendTemplateParams['from'] = $value;
+
+        $emailQuery = "SELECT from_email_address FROM civicrm_grant_program WHERE id = %1";
+        $defaultAddress = CRM_Core_DAO::singleValueQuery($emailQuery, array(
+          1 => array($values['grant_program_id'], 'Integer')
+        ));
+
+        if (!isset($defaultAddress) || $defaultAddress == '') {
+          $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
+
+          foreach ($defaultAddress as $id => $value) {
+            $sendTemplateParams['from'] = $value;
+          }
+        } else {
+          $sendTemplateParams['from'] = $defaultAddress;
         }
 
         $sendTemplateParams['toName'] = $displayName;

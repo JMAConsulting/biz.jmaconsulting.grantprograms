@@ -110,6 +110,7 @@ class CRM_Grant_BAO_Query {
       $query->_element['grant_type_id'] = 1;
       $query->_element['grant_status_id'] = 1;
       $query->_tables['civicrm_grant'] = 1;
+      $query->_tables['civicrm_payment'] = 1;
       $query->_whereTables['civicrm_grant'] = 1;
     }
   }
@@ -297,7 +298,7 @@ class CRM_Grant_BAO_Query {
         }
         $from .= "$side JOIN civicrm_entity_payment AS temp1 ON (civicrm_grant.id = temp1.entity_id AND temp1.entity_table = 'civicrm_grant')
 $side JOIN (SELECT payment_id AS payment_id, entity_id AS entity_id FROM civicrm_entity_payment ORDER BY payment_id DESC) AS temp2 ON temp1.entity_id = temp2.entity_id
-$side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
+$side JOIN civicrm_payment civicrm_payment2 ON (temp2.payment_id = civicrm_payment2.id)";
 
         break;
 
@@ -311,6 +312,11 @@ $side JOIN civicrm_payment ON (temp2.payment_id = civicrm_payment.id)";
 
       case 'grant_program':
         $from .= " $side JOIN civicrm_grant_program gp ON (civicrm_grant.grant_program_id = gp.id)";
+        break;
+
+      case 'civicrm_payment':
+        $from .= " $side JOIN civicrm_entity_payment ep ON (civicrm_grant.id = ep.entity_id AND ep.entity_table = 'civicrm_grant')" .
+          " $side JOIN civicrm_payment civicrm_payment ON (ep.payment_id = civicrm_payment.id)";
         break;
     }
     return $from;
