@@ -101,12 +101,10 @@ class CRM_Grantprograms_Query extends CRM_Contact_BAO_Query_Interface {
    }
  }
 
- function &getFields() {
-  $fields = array();
-  return $fields;
-}
-
-
+  function &getFields() {
+    $fields = array();
+    return $fields;
+  }
 
 function from($name, $mode, $side) {
     if ($name == 'grant_program') {
@@ -121,7 +119,7 @@ function from($name, $mode, $side) {
     }
 }
 
-public function getPanesMapper(&$panes) {
+public static function getPanesMapper(&$panes) {
  }
 
 }

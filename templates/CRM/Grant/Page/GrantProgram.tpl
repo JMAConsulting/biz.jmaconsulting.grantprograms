@@ -46,12 +46,12 @@
             <th>{ts}Total{/ts}</th>
             <th>{ts}Status{/ts}</th>
 	    <th>{ts}Allocation Date{/ts}</th>
-	    <th>{ts}Enabled?{/ts}</th>	
+	    <th>{ts}Enabled?{/ts}</th>
             <th></th>
           </thead>
          {foreach from=$programs item=row}
         <tr id="row_{$row.id}"class="{cycle values="odd-row,even-row"} {$row.class}{if NOT $row.is_active} disabled{/if}">
-	        <td>{$row.label}</td>	
+	        <td>{$row.label}</td>
 	        <td>{$row.grant_type_id}</td>
             	<td>{$row.description}</td>
 	        <td>{$row.total_amount}</td>
@@ -76,7 +76,7 @@
         <div class="icon inform-icon"></div>
         {capture assign=crmURL}{crmURL q="action=add&reset=1"}{/capture}
         {ts 1=$crmURL}There are no Grant Programs entered. You can <a href='%1'>add one</a>.{/ts}
-    </div>    
+    </div>
 {/if}
 {/if}
 
@@ -89,15 +89,15 @@ cj('ul.panel').css('width','250px');
 cj('#allocation').click(function(event){
 var r=confirm("Do you want to do a trial allocation?");
 if (r==true)
-  {  
+  {
      event.preventDefault();
      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
           setTimeout("location.reload(true);",1500);
 	 }
       });
@@ -114,11 +114,13 @@ cj('#finalize').click(function(event){
  event.preventDefault();
  var data = 'pid={/literal}{$id}{literal}}&amount={/literal}{$total_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/finalize'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     console.log(data);
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
+           console.log(output);
 	 var result = eval('(' + output + ')');
 	 cj.each( result, function( index, value ) {
 alert(index);alert(value);
@@ -138,13 +140,13 @@ alert(index);alert(value);
 	 if (confirmed == 'confirm' ) {
 	    var r=confirm("Do you want finalize the award of grants for this grant program to the amounts currently allocated?");
 	    if (r==true)
-  	    { 
+  	    {
 	    var dataURL = {/literal}"{crmURL p='civicrm/grant_program/processFinalization'}"{literal};
-     	    cj.ajax({ 
-              url: dataURL,	
+     	    cj.ajax({
+              url: dataURL,
               data: data,
               type: 'POST',
-              success: function(output) { 
+              success: function(output) {
 	      setTimeout("location.reload(true);",1500);
 	      }
 	      });
@@ -153,7 +155,7 @@ alert(index);alert(value);
 alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater than the total amount available to be allocated by the program ($"+totalAmounts+"). Please reduce the amount granted in pending applications or increase the total amount available to be granted.");
 	  }
 	}
-   });  
+   });
 });
 
 
@@ -166,15 +168,15 @@ if (r==true)
   event.preventDefault();
  var data = 'pid={/literal}{$id}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
 	   setTimeout("location.reload(true);",1500);
 	 }
    });
-  }     
+  }
 });
 
 });

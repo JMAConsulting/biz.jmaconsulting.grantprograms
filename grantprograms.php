@@ -224,7 +224,7 @@ function &links() {
     CRM_Core_Action::ADD  => array(
       'name'  => ts('Allocate Approved (Trial)'),
       'url'   => 'civicrm/grant_program',
-      'qs'    => '#',
+      'qs'    => 'id=allocation',
       'extra'   => 'id=allocation',
       'title' => ts('Allocate Approved (Trial)')
     ),
@@ -264,10 +264,7 @@ function grantprograms_civicrm_preProcess($formName, &$form) {
       $form->_formValues['grant_program_id'] = $programID;
       $form->defaults['grant_program_id'] = $programID;
     }
-    else {
-    }
   }
-
 }
 
 /*
@@ -278,7 +275,6 @@ function grantprograms_civicrm_preProcess($formName, &$form) {
  *
 */
 function grantprograms_civicrm_buildForm($formName, &$form) {
-
   if ($formName == 'CRM_Activity_Form_Activity'
     && ($form->getVar('_action') == CRM_Core_Action::UPDATE || $form->getVar('_action') == CRM_Core_Action::VIEW)) {
     $activityType = CRM_Core_PseudoConstant::activityType();

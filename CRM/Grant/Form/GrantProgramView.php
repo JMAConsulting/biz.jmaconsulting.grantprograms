@@ -36,19 +36,19 @@
 
 /**
  * This class generates form components for processing a Grant
- * 
+ *
  */
 class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
 
-  /**  
-   * Function to set variables up before form is built  
-   *                                                            
-   * @return void  
-   * @access public  
+  /**
+   * Function to set variables up before form is built
+   *
+   * @return void
+   * @access public
    */
   public function preProcess() {
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
-    $values = array(); 
+    $values = array();
     $params['id'] = $this->_id;
     CRM_Grant_BAO_GrantProgram::retrieve($params, $values);
     $grantPrograms = CRM_Grant_BAO_GrantProgram::grantPrograms();
@@ -74,17 +74,17 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
-    $this->addButtons(array(  
-      array ( 
-        'type'      => 'cancel',  
-        'name'      => ts('Done'),  
-        'spacing'   => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',  
+    $this->addButtons(array(
+      array (
+        'type'      => 'cancel',
+        'name'      => ts('Done'),
+        'spacing'   => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE)
       )
     );
   }
 
-  public function allocate() {   
+  public function allocate() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $_POST['algorithm'], 'grouping', 'name');
     if ($algoName == 'immediate') {
@@ -106,11 +106,11 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         }
         $sort_order = SORT_DESC;
         array_multisort($order, $sort_order, $result);
-      } 
-      
+      }
+
       $totalAmount = $_POST['remainder_amount'];
-      
-      $contact = array(); 
+
+      $contact = array();
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
       foreach ($result as $key => $value) {
         $value['amount_total'] = CRM_Utils_Rule::cleanMoney($value['amount_total']);
@@ -125,18 +125,18 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
               $grant['granted'][] = $amountEligible;
               $totalAmount = $totalAmount - ($amountEligible - $value['amount_granted']);
               $value['amount_granted'] = $amountEligible;
-            } 
+            }
             else {
               $grant['eligible'][] = $value['amount_granted'];
               continue;
-            } 
-          } 
+            }
+          }
           else {
             if ($value['amount_total'] <= $totalAmount) {
               $grant['granted'][] = $value['amount_total'];
               $totalAmount = $totalAmount - ($value['amount_total'] - $value['amount_granted']);
               $value['amount_granted'] = $value['amount_total'];
-            } 
+            }
             else {
               $grant['eligible'][] = $value['amount_granted'];
               continue;
@@ -155,12 +155,12 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
             if ($amountEligible > $totalAmount) {
               $grant['eligible'][] = $amountEligible;
               continue;
-            } 
+            }
             else {
               if ($amountEligible != 0) {
                 $totalAmount = $totalAmount - ($amountEligible - $value['amount_granted']);
                 $value['amount_granted'] = $grant['granted'][] = $amountEligible;
-              } 
+              }
               else {
                 $grant['nonEligible'][] = $requestedAmount;
               }
@@ -177,11 +177,11 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
             }
           }
           $ids['grant_id'] = $key;
-        } 
+        }
         $value['allocation'] = TRUE;
         $value['grant_program_id'] = $_POST['pid'];
         $result = CRM_Grant_BAO_Grant::add($value, $ids);
-      } 
+      }
     }
 
     $grantProgramParams['remainder_amount'] = $totalAmount;
@@ -216,16 +216,16 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
       $remainingAmount = CRM_Utils_Money::format($totalAmount,NULL, NULL,FALSE)." remains unallocated.";
     }
     $message = ts("Trial Allocation Completed. " . CRM_Utils_Money::format($grantedAmount,NULL, NULL,FALSE) . " allocated to {$grantedCount} eligible applications. " . $eligibleCountMessage . $nonEligibleCountMessage . $remainingAmount);
-   
+
     $page->assign('message', $message);
-      
+
     $page->assign('grant_program_name', $grantPrograms[$_POST['pid']]);
     CRM_Core_Session::setStatus($message, '', 'no-popup');
     $params['is_auto_email'] = 1;
     CRM_Grant_BAO_GrantProgram::sendMail($_SESSION['CiviCRM']['userID'], $params, 'allocation');
   }
-    
-  public function finalize() {   
+
+  public function finalize() {
     $grantedAmount = 0;
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
@@ -250,17 +250,17 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         $data['confirm'] = 'confirm';
         $data['amount_granted'] =  $grantedAmount;
         echo json_encode($data);
-        exit(); 
-      } 
+        exit();
+      }
       else {
         $data['total_amount'] =  $totalAmount;
         $data['amount_granted'] =  $grantedAmount;
         echo json_encode($data);
-        exit(); 
+        exit();
       }
     }
   }
-    
+
   public function processFinalization() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $grantRej = CRM_Core_OptionGroup::values('reason_grant_ineligible', TRUE);
@@ -293,22 +293,22 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
           if ($amountEligible == 0) {
             $ids['grant'] = $key;
             $row['status_id'] = $grantStatus['Ineligible'];
-            $row['grant_rejected_reason_id'] = $grantRej['Applicant has received their annual maximum already'];       
+            $row['grant_rejected_reason_id'] = $grantRej['Applicant has received their annual maximum already'];
             $result = CRM_Grant_BAO_Grant::add($row, $ids);
           }
         }
-        
+
         if ( $row['amount_granted'] > 0 ) {
           $ids['grant'] = $key;
           $row['status_id'] = $grantStatus['Approved for Payment'];
-                    
+
           $result = CRM_Grant_BAO_Grant::add($row, $ids);
-        } 
+        }
       }
       CRM_Core_Session::setStatus(ts('Approved allocations finalized successfully.'), '', 'no-popup');
     }
   }
-    
+
   public function reject() {
     $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE);
     $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
