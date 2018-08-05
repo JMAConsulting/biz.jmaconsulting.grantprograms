@@ -72,11 +72,8 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
     'grant_amount_requested',
     'grant_amount_granted',
     'grant_application_received_date',
-<<<<<<< f38d014fc2c8a69496dc2881bc60ad4759f04353
-=======
     'grant_report_received',
     'grant_money_transfer_date',
->>>>>>> Initial changes to make it 5.* compatible
     'grant_payment_created',
     'program_name',
     'program_id',
@@ -315,7 +312,6 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
        false,
        $this->_grantClause );
      while ($grant->fetch()) {
-       CRM_Core_Error::Debug_var('as', $grant);
        $grants[$grant->grant_id] = $grant->grant_id;
        $grantContacts[$grant->grant_id] = $grant->contact_id;
      }
@@ -333,11 +329,7 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
           $next = $gKey;
           break;
         }
-<<<<<<< f38d014fc2c8a69496dc2881bc60ad4759f04353
-        if ($gKey == $result->id) {
-=======
         if ($gKey == $result->grant_id) {
->>>>>>> Initial changes to make it 5.* compatible
           $next = $gKey;
           if($gKey == end($contactGrants)) {
             reset($contactGrants);
@@ -411,21 +403,12 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
   public function &getColumnHeaders($action = NULL, $output = NULL) {
     $statusHeader = array();
     if (!isset(self::$_columnHeaders)) {
-<<<<<<< f38d014fc2c8a69496dc2881bc60ad4759f04353
-      if (CRM_Core_DAO::singleValueQuery("SELECT is_active FROM civicrm_extension WHERE full_name = 'biz.jmaconsulting.grantapplications'") != 1) {
-        $statusHeader[] = array('name' => ts('Status'),
-          'sort' => 'status_weight',
-          'direction' => CRM_Utils_Sort::ASCENDING,
-        );
-      }
-=======
       $statusHeader = array(
          array('name' => ts('Status'),
           'sort' => 'status_weight',
           'direction' => CRM_Utils_Sort::ASCENDING,
          ),
       );
->>>>>>> Initial changes to make it 5.* compatible
       self::$_columnHeaders = array(
         array(
           'name' => ts('Program Name'),
@@ -492,10 +475,6 @@ class CRM_Grant_Selector_Search extends CRM_Core_Selector_Base implements CRM_Co
   public function getExportFileName($output = 'csv') {
     return ts('CiviCRM Grant Search');
   }
-<<<<<<< f38d014fc2c8a69496dc2881bc60ad4759f04353
-}
-//end of class
-=======
+
 
 }
->>>>>>> Initial changes to make it 5.* compatible

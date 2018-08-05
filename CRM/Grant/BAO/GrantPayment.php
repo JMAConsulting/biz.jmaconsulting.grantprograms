@@ -74,53 +74,53 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     }
     return NULL;
   }
-  
+
   function &exportableFields() {
     if (!self::$_exportableFields) {
       if (!self::$_exportableFields) {
         self::$_exportableFields = array();
       }
-            
-      $grantFields = array( 
-        'id' => array( 
+
+      $grantFields = array(
+        'id' => array(
           'title' => 'Payment ID',
           'name' => 'id',
-          'data_type' => CRM_Utils_Type::T_INT 
+          'data_type' => CRM_Utils_Type::T_INT
         ),
-        'payment_batch_number' => array( 
+        'payment_batch_number' => array(
           'title' => 'Payment Batch Nnumber',
           'name' => 'payment_batch_number',
-          'data_type' => CRM_Utils_Type::T_INT 
+          'data_type' => CRM_Utils_Type::T_INT
         ),
-        'payment_number' => array( 
+        'payment_number' => array(
           'title' => 'Payment Number',
           'name' => 'payment_number',
-          'data_type' => CRM_Utils_Type::T_INT 
+          'data_type' => CRM_Utils_Type::T_INT
         ),
-        'financial_type_id' => array( 
+        'financial_type_id' => array(
           'title' => 'Financial Type ID',
           'name' => 'financial_type_id',
-          'data_type' => CRM_Utils_Type::T_INT 
+          'data_type' => CRM_Utils_Type::T_INT
         ),
-        'contact_id' => array( 
+        'contact_id' => array(
           'title' => 'Contact ID',
           'name' => 'contact_id',
-          'data_type' => CRM_Utils_Type::T_INT 
+          'data_type' => CRM_Utils_Type::T_INT
         ),
-        'payment_created_date' => array( 
+        'payment_created_date' => array(
           'title' => 'Payment Created Date',
           'name' => 'payment_created_date',
-          'data_type' => CRM_Utils_Type::T_DATE 
+          'data_type' => CRM_Utils_Type::T_DATE
         ),
-        'payment_date' => array( 
+        'payment_date' => array(
           'title' => 'Payment Date',
           'name' => 'payment_date',
-          'data_type' => CRM_Utils_Type::T_DATE 
+          'data_type' => CRM_Utils_Type::T_DATE
         ),
         'payable_to_name' => array(
           'title' => 'Payable To Name',
           'name' => 'payable_to_name',
-          'data_type' => CRM_Utils_Type::T_STRING 
+          'data_type' => CRM_Utils_Type::T_STRING
         ),
         'payable_to_address' => array(
           'title' => 'Payable To Address',
@@ -153,7 +153,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
           'data_type' => CRM_Utils_Type::T_STRING
         )
       );
-      
+
       $fields = CRM_Grant_DAO_GrantPayment::export();
       self::$_exportableFields = $fields;
     }
@@ -165,44 +165,44 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
    *
    * @param array $params reference array contains the values submitted by the form
    * @param array $ids    reference array contains the id
-   * 
+   *
    * @access public
-   * @static 
+   * @static
    * @return object
-   */ 
+   */
   static function add(&$params, &$ids) {
-    
+
     if (empty($params)) {
       return;
     }
-    
+
     if (isset( $params['total_amount'])) {
       $params[$field] = CRM_Utils_Rule::cleanMoney($params['total_amount']);
     }
     // convert dates to mysql format
-    $dates = array( 
+    $dates = array(
       'payment_date',
-      'payment_created_date' 
+      'payment_created_date'
     );
-        
+
     foreach ($dates as $date) {
       if (isset($params[$date])) {
         $params[$date] = CRM_Utils_Date::processDate($params[$date], NULL, TRUE);
       }
-    }           
+    }
     $grantPayment = new CRM_Grant_DAO_GrantPayment();
     $grantPayment->id = CRM_Utils_Array::value('id', $ids);
-        
+
     $grantPayment->copyValues($params);
     return $grantPayment->save();
   }
-    
 
-  static function del($id) { 
+
+  static function del($id) {
     CRM_Utils_Hook::pre('delete', 'GrantPayment', $id, CRM_Core_DAO::$_nullArray);
 
     $grantPayment = new CRM_Grant_DAO_GrantPayment();
-    $grantPayment->id = $id; 
+    $grantPayment->id = $id;
 
     $grantPayment->find();
 
@@ -220,7 +220,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     }
     return FALSE;
   }
-    
+
   static function getMaxPayementBatchNumber() {
     $query = "SELECT MAX(payment_number) as payment_number, MAX(payment_batch_number) as payment_batch_number FROM civicrm_payment";
     $dao = CRM_Core_DAO::executeQuery($query);
@@ -230,17 +230,17 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     }
     return $grantPrograms;
   }
-    
+
   static function getPaymentNumber($id) {
     $query = "SELECT id FROM civicrm_payment WHERE payment_number = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
-    
+
   static function getPaymentBatchNumber($id) {
     $query = "SELECT id FROM civicrm_payment WHERE payment_batch_number = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
-    
+
   static function makeReport($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
@@ -250,7 +250,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     if (!$dao->N) {
       if ($params['messageTemplateID']) {
         CRM_Core_Error::fatal(ts('No such message template: id=%1.', array(1 => $params['messageTemplateID'])));
-      } 
+      }
       else {
         CRM_Core_Error::fatal(ts('No such message template: option group %1, option value %2.', array(1 => $params['groupName'], 2 => $params['valueName'])));
       }
@@ -267,8 +267,8 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     foreach(array('text', 'html') as $elem) {
       $$elem = $smarty->fetch("string:{$$elem}");
     }
-    $output = file_put_contents($pdf_filename, 
-      CRM_Utils_PDF_Utils::html2pdf( 
+    $output = file_put_contents($pdf_filename,
+      CRM_Utils_PDF_Utils::html2pdf(
         $html,
         $fileName,
         true,
@@ -277,24 +277,24 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     );
     return $fileName;
   }
-    
+
   static function createCSV($filename, $grantPayment) {
-    
-    $headers[] = array ( 
-      'Contact Id', 
-      'Financial Type', 
-      'Batch Number', 
-      'Payment Number', 
-      'Payment Date', 
-      'Payment Created Date', 
-      'Payable To Name', 
-      'Payable To Address', 
-      'Amount', 
-      'Currency', 
-      'Payment Reason', 
-      'Payment Replaces Id', 
+
+    $headers[] = array (
+      'Contact Id',
+      'Financial Type',
+      'Batch Number',
+      'Payment Number',
+      'Payment Date',
+      'Payment Created Date',
+      'Payable To Name',
+      'Payable To Address',
+      'Amount',
+      'Currency',
+      'Payment Reason',
+      'Payment Replaces Id',
     );
-    
+
     $rows = array_merge($headers, $grantPayment);
     $fp = fopen($filename, "w");
     $line = '';
@@ -310,16 +310,16 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     fputs($fp, $line);
     fclose($fp);
   }
-  
+
   static function makePDF($fileName, $rows) {
     $config = CRM_Core_Config::singleton();
     $pdf_filename = $config->customFileUploadDir . $fileName;
     $query = "SELECT msg_subject subject, msg_html html, msg_text text, pdf_format_id format
-              FROM civicrm_msg_template 
+              FROM civicrm_msg_template
               WHERE msg_title = 'Grant Payment Check' AND is_default = 1;";
     $grantDao = CRM_Core_DAO::executeQuery($query);
     $grantDao->fetch();
-                
+
     if (!$grantDao->N) {
       if ($params['messageTemplateID']) {
         CRM_Core_Error::fatal(ts('No such message template.'));
@@ -330,16 +330,16 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     $text = $grantDao->text;
     $format = $grantDao->format;
     $grantDao->free();
-    
+
     civicrm_smarty_register_string_resource();
     $smarty = CRM_Core_Smarty::singleton();
     foreach(array('text', 'html') as $elem) {
       $$elem = $smarty->fetch("string:{$$elem}");
     }
-    
-    $output = file_put_contents( 
-      $pdf_filename, 
-      CRM_Utils_PDF_Utils::html2pdf( 
+
+    $output = file_put_contents(
+      $pdf_filename,
+      CRM_Utils_PDF_Utils::html2pdf(
         $html,
         $fileName,
         TRUE,
@@ -348,4 +348,102 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     );
     return $fileName;
   }
+
+  /**
+   * Function to get events Summary
+   *
+   * @static
+   *
+   * @return array Array of event summary values
+   */
+  static function getGrantSummary($admin = FALSE) {
+    $query = "SELECT
+      p.id,
+      p.label,
+      g.status_id,
+      count(g.id) AS status_total,
+      sum(g.amount_total) AS amount_requested,
+      sum(g.amount_granted) AS amount_granted,
+      sum(cp.amount) AS total_paid,
+      sum(g.amount_granted)/count(g.id) AS average_amount
+      FROM civicrm_grant_program p
+      LEFT JOIN civicrm_grant g ON g.grant_program_id = p.id
+      LEFT JOIN civicrm_entity_payment ep ON ep.entity_id = g.id AND ep.entity_table = 'civicrm_grant'
+      LEFT JOIN civicrm_payment cp ON cp.id = ep.payment_id
+      WHERE g.status_id IS NOT NULL
+      GROUP BY g.grant_program_id, g.status_id WITH ROLLUP";
+
+    $dao = CRM_Core_DAO::executeQuery($query, CRM_Core_DAO::$_nullArray);
+
+    $status = array( );
+    $summary = array( );
+    $summary['total_grants'] = $programs = NULL;
+    $summary['no_of_grants'] = NULL;
+    $querys = "SELECT
+      v.label as label,
+      v.weight as value,
+      v.value as info
+      FROM civicrm_option_value v, civicrm_option_group g
+      WHERE  v.option_group_id = g.id
+      AND  g.name = 'grant_status'
+      AND  g.is_active = 1
+      ORDER BY v.weight";
+    $daos = CRM_Core_DAO::executeQuery($querys, CRM_Core_DAO::$_nullArray);
+    while ($daos->fetch()) {
+      $status[$daos->value] = array(
+        'weight' => $daos->value,
+        'value' => $daos->info,
+        'label' => $daos->label,
+        'total' => 0,
+      );
+    }
+    foreach ($status as $id => $name) {
+      $stats[$status[$id]['value']] = array(
+        'label' => $name['label'],
+        'value' => $name['value'],
+        'weight' => $name['weight'],
+        'total' => 0
+      );
+    }
+    $count = 1;
+    while ($dao->fetch()) {
+      if ($dao->N == $count) {
+        $summary['total_grants']['total_requested'] = $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0);
+        $summary['total_grants']['total_granted'] = $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0);
+        $summary['total_grants']['total_paid'] = $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0);
+        $summary['total_grants']['total_average'] = $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0);
+        continue;
+      }
+      if (!empty($dao->status_id)) {
+        $programs[$dao->label][$stats[$dao->status_id]['weight']] = array(
+          'label' => $stats[$dao->status_id]['label'],
+          'total' => $dao->status_total,
+          'value' => $stats[$dao->status_id]['value'],
+          'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
+          'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
+          'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
+          'average_amount' => $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0),
+          'pid' => $dao->id,
+        );
+        $programs[$dao->label] = $programs[$dao->label] + array_diff_key($status, $programs[$dao->label]); //add the two arrays
+        ksort($programs[$dao->label]);
+        $summary['total_grants']['all'] = 'All';
+        $summary['no_of_grants'] += $dao->status_total;
+      }
+      else {
+        $programs["<b>Subtotal $dao->label </b>"]['subtotal'] = array(
+          'label' => '',
+          'total' => $dao->status_total,
+          'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
+          'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
+          'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
+          'average_amount' => $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0),
+        );
+      }
+      $count++;
+    }
+    $summary['per_status'] = $programs;
+    return $summary;
+  }
+
 }

@@ -48,7 +48,7 @@ function grantprograms_civicrm_uninstall() {
  */
 function grantprograms_civicrm_enable() {
   $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprograms/sql/grantprograms_enable.sql');
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir . 'biz.jmaconsulting.grantprograms/sql/grantprograms_enable.sql');
   grantprograms_addRemoveMenu(TRUE);
   return _grantprograms_civix_civicrm_enable();
 }
@@ -58,7 +58,7 @@ function grantprograms_civicrm_enable() {
  */
 function grantprograms_civicrm_disable() {
   $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprograms/sql/grantprograms_disable.sql');
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir . 'biz.jmaconsulting.grantprograms/sql/grantprograms_disable.sql');
   grantprograms_addRemoveMenu(FALSE);
   return _grantprograms_civix_civicrm_disable();
 }
@@ -264,9 +264,12 @@ function grantprograms_civicrm_preProcess($formName, &$form) {
       $form->_formValues['grant_program_id'] = $programID;
       $form->defaults['grant_program_id'] = $programID;
     }
+    else {
+    }
   }
 
 }
+
 /*
  * hook_civicrm_buildForm civicrm hook
  *
@@ -579,7 +582,24 @@ function grantprograms_civicrm_pageRun( &$page ) {
       'template' => 'CRM/Grant/Form/CustomFieldsView.tpl',
     ));
   }
+
+  if ($page->getVar('_name') == "CRM_Grant_Page_DashBoard") {
+    $page->assign('grantSummary', CRM_Grant_BAO_GrantPayment::getGrantSummary(CRM_Core_Permission::check('administer CiviCRM')));
+  }
 }
+
+function grantprograms_civicrm_alterTemplateFile($formName, &$form, $context, &$tplName) {
+  if ($tplName == 'CRM/Grant/Page/DashBoard.tpl') {
+    $tplName = 'CRM/Grant/Page/DashBoardExtra.tpl';
+  }
+}
+
+function grantprograms_civicrm_queryObjects(&$queryObjects, $type) {
+  if ($type == 'Contact') {
+     $queryObjects[] = new CRM_Grantprograms_Query();
+   }
+}
+
 /*
  * hook_civicrm_validate
  *
@@ -1037,23 +1057,21 @@ function grantprograms_getCustomFieldData($id) {
 }
 
 function grantprograms_addRemoveMenu($enable) {
-  $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
-  $params['enableComponents'] = $config_backend['enableComponents'];
-  $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
+  $config = CRM_Core_Config::singleton();
+  $params['enableComponents'] = $config->enableComponents;
   if ($enable) {
+    if (array_search('CiviGrant', $config->enableComponents)) {
+      return NULL;
+    }
     $params['enableComponents'][] = 'CiviGrant';
-    $params['enableComponentIDs'][] = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'");
   }
   else {
-    foreach (array_keys($params['enableComponents'], 'CiviGrant', TRUE) as $key) {
+    $key = array_search('CiviGrant', $params['enableComponents']);
+    if ($key) {
       unset($params['enableComponents'][$key]);
     }
-    foreach (array_keys($params['enableComponentIDs'], (int)CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'"), TRUE) as $key) {
-      unset($params['enableComponentIDs'][$key]);
-    }
   }
-  CRM_Core_BAO_ConfigSetting::create($params);
-  return;
+  CRM_Core_BAO_Setting::setItem($params['enableComponents'], CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
 }
 
 function getCustomFields($params, &$values) {

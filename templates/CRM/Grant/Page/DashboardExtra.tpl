@@ -65,7 +65,7 @@ You have {$grantSummary.no_of_grants} grant(s) registered in your database.
 <tr>
     <td style="font-size: 1.1em; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: bold;">{ts}TOTAL{/ts}:</td>
     {foreach from=$grantSummary.total_grants item=values key=indexes }
-      <td style="font-size: 1.1em; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: bold;">{$values}</td> 
+      <td style="font-size: 1.1em; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-weight: bold;">{$values}</td>
     {/foreach}
 </tr>
 </table>
@@ -80,7 +80,7 @@ You have {$grantSummary.no_of_grants} grant(s) registered in your database.
     </div>
 
 
-{if $pager->_totalItems}   
+{if $pager->_totalItems}
     <h3>{ts}Recent Grants{/ts}</h3>
     <div class="form-item">
         {include file="CRM/Grant/Form/Selector.tpl" context="DashBoard"}
