@@ -1,32 +1,32 @@
 /**
  * Grant Programs extension improves grant allocation
- * in CiviGrant 
- * 
+ * in CiviGrant
+ *
  * Copyright (C) 2012 JMA Consulting
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Support: https://github.com/JMAConsulting/biz.jmaconsulting.grantprograms/issues
- * 
+ *
  * Contact: info@jmaconsulting.biz
  *          JMA Consulting
  *          215 Spadina Ave, Ste 400
- *          Toronto, ON  
+ *          Toronto, ON
  *          Canada   M5T 2C7
  */
 
--- create civicrm_payment table. 
+-- create civicrm_payment table.
 CREATE TABLE IF NOT EXISTS `civicrm_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Id',
   `payment_batch_number` int(10) unsigned NOT NULL COMMENT 'Payment Batch Nnumber',
@@ -114,7 +114,7 @@ SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Stopped' AND option_
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Withdrawn' AND option_group_id = @opGId;
 SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Cancelled' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv1, @opGId, 'Printed', '1', 'Printed', NULL, 0, 0, 1, 'Payment that has had cheque or other payment created via PDF or csv download. The default status.', 0, 1, 1, NULL, 1, NULL),
 (@opv3, @opGId, 'Stopped', '2', 'Stopped', NULL, 0, 0, 2, 'The bank has been told to put a Stop Payment on the cheque or payment. Usually caused by a lost cheque that is being replaced by a newly printed one.', 0, 1, 1, NULL, 1, NULL),
@@ -137,7 +137,7 @@ SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Accepting Applicatio
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Trial Allocation' AND option_group_id = @opGId;
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Allocation Finalized' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv1, @opGId, 'Accepting Applications', '1', 'Accepting Applications', NULL, 0, 0, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Trial Allocation', '2', 'Trial Allocation', NULL, 0, 0, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -156,7 +156,7 @@ SET @opv2 := '';
 SELECT @opv1 := id FROM civicrm_option_value WHERE  name = 'Best To Worst, Fully Funded' AND option_group_id = @opGId;
 SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Over Threshold, Percentage Of Request Funded' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv2, @opGId, 'Over Threshold, Percentage Of Request Funded', '1', 'Over Threshold, Percentage Of Request Funded', 'immediate', 0, 1, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv1, @opGId, 'Best To Worst, Fully Funded', '2', 'Best To Worst, Fully Funded', 'batch', 0, 0, 1, NULL, 0, 0, 1, NULL, 1, NULL);
@@ -169,7 +169,7 @@ INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`,
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'grant_thresholds';
 
 -- option values
-SET @opv1 := ''; 
+SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
@@ -179,7 +179,7 @@ SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Maximum Grant' AND o
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Minimum Score For Grant Award' AND option_group_id = @opGId;
 SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Maximum number of checks per pdf file' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv1, @opGId, 'Funding factor', '85', NULL, NULL, 0, 0, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Fixed Percentage Of Grant', '80', 'Fixed Percentage Of Grant', NULL, 0, 0, 3, NULL, 0, 1, 1, NULL, NULL, NULL),
@@ -217,15 +217,14 @@ SELECT @opv10 := id FROM civicrm_option_value WHERE  name = 'Submitted' AND opti
 
 SELECT @gtype := id FROM civicrm_option_group WHERE name = 'grant_type';
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv7, @opGId, 'Approved for Payment', '7', 'Approved for Payment', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv3, @opGId, 'Awaiting Information', 5, 'Awaiting Information', NULL, 0, 0, 2, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv8, @opGId, 'Ineligible', 3, 'Ineligible', NULL, 0, 0, 4, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv5, @opGId, 'Paid', 4, 'Paid', NULL, 0, 0, 5, NULL, 0, 1, 1, NULL, NULL, NULL),
 (@opv10, @opGId, 'Submitted', 1, 'Submitted', NULL, 0, 0, 1, NULL, 0, 1, 1, NULL, NULL, NULL),
-(@opv4, @opGId, 'Withdrawn', 6, 'Withdrawn', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL),
-('', @gtype, 'NEI Grant', 6, 'NEI Grant', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, 1, NULL);
+(@opv4, @opGId, 'Withdrawn', 6, 'Withdrawn', NULL, 0, 0, 7, NULL, 0, 1, 1, NULL, NULL, NULL);
 
 -- reason_grant_ineligible
 SET @opGId := '';
@@ -235,7 +234,7 @@ INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`,
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_ineligible';
 
 -- option values
-SET @opv1 := ''; 
+SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
@@ -246,7 +245,7 @@ SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'Information not rece
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Insufficient funds in program' AND option_group_id = @opGId;
 SELECT @opv5 := id FROM civicrm_option_value WHERE  name = 'Applicant has received their annual maximum already' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv1, @opGId, 'Outside dates', '1', 'Outside dates', NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, 1, NULL),
 (@opv2, @opGId, 'Ineligible', '2', 'Ineligible', NULL, 0, 2, 1, NULL, 0, 0, 1, NULL, 1, NULL),
@@ -262,7 +261,7 @@ INSERT IGNORE INTO `civicrm_option_group` (`id`, `name`, `title`, `description`,
 SELECT @opGId := id FROM civicrm_option_group WHERE name = 'reason_grant_incomplete';
 
 -- option values
-SET @opv1 := ''; 
+SET @opv1 := '';
 SET @opv2 := '';
 SET @opv3 := '';
 SET @opv4 := '';
@@ -271,7 +270,7 @@ SELECT @opv2 := id FROM civicrm_option_value WHERE  name = 'Inadequate Receipts'
 SELECT @opv3 := id FROM civicrm_option_value WHERE  name = 'No Proof of completion' AND option_group_id = @opGId;
 SELECT @opv4 := id FROM civicrm_option_value WHERE  name = 'Inadaquate Proof of completion' AND option_group_id = @opGId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) 
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`)
  VALUES
 (@opv1, @opGId, 'No Receipts', '1', 'No Receipts', NULL, 0, 0, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
 (@opv2, @opGId, 'Inadequate Receipts', '2', 'Inadequate Receipts', NULL, 0, 0, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -282,7 +281,7 @@ INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `va
 
 SELECT @parentId1 := id FROM civicrm_navigation WHERE name = 'CiviGrant';
 SELECT @parentId2 := id FROM civicrm_navigation WHERE name = 'Grants';
-SELECT @weight := MAX(weight) FROM civicrm_navigation WHERE  parent_id = @parentId2;       
+SELECT @weight := MAX(weight) FROM civicrm_navigation WHERE  parent_id = @parentId2;
 INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
 (1, 'Find Grant Payments', 'Find Grant Payments', 'civicrm/grant/payment/search?reset=1', 'access CiviGrant', 'AND', @parentId2, 1, 1, @weight = @weight + 1),
 (1, 'New Grant Program', 'New Grant Program', 'civicrm/grant_program?action=add&reset=1', 'access CiviCRM,access CiviGrant,edit grants', 'AND', @parentId2, 1, 0, @weight = @weight + 1),
@@ -294,7 +293,7 @@ SELECT @contactId := contact_id FROM civicrm_domain WHERE  id = 1;
 
 SELECT @option_group_id_arel := max(id) from civicrm_option_group where name = 'account_relationship';
 
-SELECT @weight := max(weight) from civicrm_option_value where option_group_id = @option_group_id_arel; 
+SELECT @weight := max(weight) from civicrm_option_value where option_group_id = @option_group_id_arel;
 SET @weight := @weight + 1;
 
 
@@ -305,26 +304,6 @@ INSERT INTO
    `civicrm_option_value` (`option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `visibility_id`)
 VALUES
     (@option_group_id_arel, 'Accounts Payable Account is', @weight, 'Accounts Payable Account is', NULL, 0, 0, @weight, 'Accounts Payable Account is', 0, 1, 1, 2, NULL);
-
-SELECT @financialAccount := id FROM civicrm_financial_account WHERE  name = 'NEI Grant';
-SELECT @depositAccount := id FROM civicrm_financial_account WHERE  name = 'Deposit Bank Account';
-SELECT @accountPayable := id FROM civicrm_financial_account WHERE  name = 'Accounts Payable';
-
-INSERT IGNORE INTO civicrm_financial_account (id, name, contact_id, is_header_account, financial_account_type_id, accounting_code, account_type_code, is_active) 
-VAlUES (@financialAccount, 'NEI Grant', @contactId, 0, 5, 5555, 'EXP', 1);
-SET @financialAccountID := LAST_INSERT_ID();
-
-INSERT INTO civicrm_financial_type (name, is_deductible, is_reserved, is_active)
-VALUES ('NEI Grant', 0, 0, 1);
-SET @financialTypeID := LAST_INSERT_ID();
-
-INSERT INTO civicrm_entity_financial_account (entity_table, entity_id, account_relationship, financial_account_id) 
--- Expense account
-VALUES('civicrm_financial_type', @financialTypeID, @option_value_rel_id_exp, IFNULL(@financialAccount, @financialAccountID)),
--- Asset Account of
-('civicrm_financial_type', @financialTypeID, @option_value_rel_id_as, @depositAccount),
--- Account Payable
-('civicrm_financial_type', @financialTypeID, @weight, @accountPayable);
 
 -- RG-149
 INSERT INTO `civicrm_option_group` (`name`, `title`, `description`, `is_reserved`, `is_active`) VALUES
@@ -340,10 +319,9 @@ VALUES
 -- RG-212
 SELECT @activityType := cog.id, @value := max(cast(value as unsigned)) + 1 FROM civicrm_option_group cog INNER JOIN civicrm_option_value cov ON cov.option_group_id = cog.id WHERE  cog.name = 'activity_type';
 
-INSERT INTO civicrm_option_value(option_group_id, label, value, name, grouping, filter, is_default, weight, description, is_optgroup, is_reserved, is_active, component_id, visibility_id) 
+INSERT INTO civicrm_option_value(option_group_id, label, value, name, grouping, filter, is_default, weight, description, is_optgroup, is_reserved, is_active, component_id, visibility_id)
 VALUES (@activityType, 'Grant Status Change', @value, 'grant_status_change', NULL, 0, 0, @value, 'Grant status change', 0, 1, 1, 5, NULL),
        (@activityType, 'Grant Payment', @value + 1, 'grant_payment', NULL, 0, 0, @value + 1, 'Grant payment', 0, 1, 1, 5, NULL);
-
 
 -- Enter a default grant program
 SET @opGId := '';
@@ -360,7 +338,7 @@ INSERT INTO `civicrm_grant_program` (`label`, `name`, `grant_type_id`, `total_am
 ('Default Grant Program', 'Default Grant Program', 1, 1000000.00, 1000000.00, 1, @statusId, NULL, NULL, NULL, 1, 1, @algId, 0);
 
 -- add columns to civicrm_grant
-ALTER TABLE `civicrm_grant` 
+ALTER TABLE `civicrm_grant`
   ADD `grant_program_id` INT( 10 ) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Grant Program ID of grant program record given grant belongs to.' AFTER `contact_id`,
   ADD `grant_rejected_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Rejected Reason.' AFTER `status_id` ,
   ADD `grant_incomplete_reason_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL COMMENT 'Id of Grant Incomplete Reason.' AFTER `grant_rejected_reason_id` ,
@@ -370,4 +348,3 @@ ALTER TABLE `civicrm_grant`
 -- Constraints for table `civicrm_grant`
 ALTER TABLE `civicrm_grant`
   ADD CONSTRAINT `FK_civicrm_grant_grant_program_id` FOREIGN KEY (`grant_program_id`) REFERENCES `civicrm_grant_program` (`id`) ON DELETE CASCADE;
-

@@ -357,7 +357,7 @@ class CRM_Grant_DAO_GrantProgram extends CRM_Core_DAO
         'grant_program_id' => array(
           'name' => 'grant_program_id',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts("Previous Year's NEI Grant Program") ,
+          'title' => ts("Previous Year's Grant Program") ,
           'required' => true,
           'import' => true,
           'where' => 'civicrm_grant_program.grant_program_id',
