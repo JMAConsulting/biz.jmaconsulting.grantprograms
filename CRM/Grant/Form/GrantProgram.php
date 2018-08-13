@@ -36,7 +36,7 @@
 
 /**
  * This class generates form components for Par Service Fees
- * 
+ *
  */
 class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
   protected $_id = NULL;
@@ -47,12 +47,12 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
   function preProcess() {
     $this->_action = CRM_Utils_Request::retrieve('action', 'String', $this);
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
-        
+
     $title = NULL;
     if ($this->_action & CRM_Core_Action::UPDATE) $title = ts('Edit Grant Program');
     if ($this->_action & CRM_Core_Action::DELETE) $title = ts('Delete Grant Program');
     if ($title) CRM_Utils_System::setTitle($title);
-        
+
     $session = CRM_Core_Session::singleton();
     $session->pushUserContext(CRM_Utils_System::url('civicrm/grant_program', 'reset=1'));
     $this->assign('action', $this->_action);
@@ -60,7 +60,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $this->_values = $this->get('values');
     if (!is_array($this->_values)) {
       $this->_values = array( );
-            
+
       // if we are editing
       if (isset($this->_id) && $this->_id) {
         $params = array('id' => $this->_id);
@@ -70,7 +70,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
       $this->set('values', $this->_values);
     }
   }
-    
+
   function setDefaultValues() {
     $defaults = $this->_values;
     if (!empty( $defaults)) {
@@ -104,11 +104,11 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
    */
   public function buildQuickForm($check = FALSE) {
     parent::buildQuickForm();
-        
+
     if ($this->_action & CRM_Core_Action::DELETE) {
-            
+
       $this->addButtons(array(
-        array ( 
+        array (
           'type' => 'next',
           'name'=> ts('Delete'),
           'isDefault' => TRUE),
@@ -122,18 +122,18 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $this->applyFilter('__ALL__','trim');
     $attributes = CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantProgram');
     $grantPrograms = CRM_Grant_BAO_GrantProgram::grantPrograms();
-        
+
     $this->add('text', 'label', ts('Label'),
       $attributes['label'], TRUE);
-        
+
     $grantType = CRM_Core_OptionGroup::values('grant_type');
     $this->add('select', 'grant_type_id', ts('Grant Type'),
       array('' => ts('- select -' )) + $grantType , TRUE);
 
     $this->add('text', 'total_amount', ts('Total Amount'),
-      $attributes['total_amount'], FALSE);         
-    $this->addRule('total_amount', ts('Please enter a valid amount.'), 'money'); 
-        
+      $attributes['total_amount'], FALSE);
+    $this->addRule('total_amount', ts('Please enter a valid amount.'), 'money');
+
     $this->add('text', 'remainder_amount', ts('Remainder Amount'),
       $attributes['remainder_amount'], FALSE);
     $this->addRule('remainder_amount', ts('Please enter a valid amount.'), 'money');
@@ -146,34 +146,34 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
     $this->add('select', 'financial_type_id', ts('Financial Types'),
       array('' => ts('- select -')) + $contributionTypes, TRUE);
-        
+
     $grantStatus = CRM_Core_OptionGroup::values('grant_program_status');
     $this->add('select', 'status_id', ts('Grant Status'),
       array('' => ts('- select -')) + $grantStatus, TRUE);
 
     $grantAlgorithm = CRM_Core_OptionGroup::values('allocation_algorithm');
     $this->add('select', 'allocation_algorithm', ts('Allocation Algorithm'),
-      array('' => ts('- select -')) + $grantAlgorithm , TRUE); 
-    
-    $this->add('select', 'grant_program_id', ts("Previous Year's NEI Grant Program"),
+      array('' => ts('- select -')) + $grantAlgorithm , TRUE);
+
+    $this->add('select', 'grant_program_id', ts("Previous Year's Grant Program"),
       array('' => ts('- select -')) + $grantPrograms, FALSE);
-    
+
     $this->addDate('allocation_date', ts('Allocation Date'), FALSE, array('formatType' => 'custom'));
 
     $this->add('checkbox', 'is_active', ts('Enabled?'));
 
     $this->add('checkbox', 'is_auto_email', ts('Auto email?'));
 
-    $this->addButtons(array( 
-      array ( 
+    $this->addButtons(array(
+      array (
         'type' => 'upload',
-        'name' => ts('Save'), 
+        'name' => ts('Save'),
         'isDefault' => TRUE),
-      array ( 
-        'type' => 'cancel', 
-        'name' => ts('Cancel')), 
-      ) 
-    );     
+      array (
+        'type' => 'cancel',
+        'name' => ts('Cancel')),
+      )
+    );
   }
 
   /**
@@ -201,7 +201,7 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
       $session = CRM_Core_Session::singleton();
       $session->pushUserContext(CRM_Utils_System::url('civicrm/grant_program', 'reset=1&action=browse&id=' . $result->id));
     }
-        
+
   }
 
   function updateGrantProgram(&$values, $domainID) {
@@ -248,5 +248,3 @@ class CRM_Grant_Form_GrantProgram extends CRM_Core_Form {
     return true;
   }
 }
-
-

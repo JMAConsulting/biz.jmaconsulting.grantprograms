@@ -23,7 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{* this template is used for viewing grants *} 
+{* this template is used for viewing grants *}
 <h3>{ts}View Grant Program{/ts}</h3>
 <div class="crm-block crm-content-block crm-grant-view-block">
     <div class="crm-submit-buttons">
@@ -42,7 +42,7 @@
             <a class="button" href="{crmURL p='civicrm/grant_program' q=$urlParams}"><span><div class="icon delete-icon"></div>{ts}Delete{/ts}</span></a>
         {/if}
         {include file="CRM/common/formButtons.tpl" location="top"}<br/>
-        
+
     </div>
     <div class="buttonset" style="width:50px">
     <input type="button" class="allocation" value="Allocate Approved (Trial)">
@@ -50,7 +50,7 @@
     <input type="button" class="reject" value="Mark remaining unapproved Grants as Ineligible">
     </div>
     <table class="crm-info-panel">
-        <tr class="crm-grant-program-view-form-block-name"><td class="label">{ts}Name{/ts}</td><td class="bold">{$name}</td></tr>    
+        <tr class="crm-grant-program-view-form-block-name"><td class="label">{ts}Name{/ts}</td><td class="bold">{$name}</td></tr>
         <tr class="crm-grant-program-view-form-block-grant_type_id"><td class="label">{ts}Grant Type{/ts}</td> <td>{$grantType}</td></tr>
 	<tr class="crm-grant-program-view-form-block-total_amount"><td class="label">{ts}Total Amount{/ts}</td> <td>{$total_amount|crmMoney}</td></tr>
 	<tr class="crm-grant-program-view-form-block-remainder_amount"><td class="label">{ts}Remainder Amount{/ts}</td> <td>{$remainder_amount|crmMoney}</td></tr>
@@ -59,12 +59,12 @@
 	<tr class="crm-grant-program-view-form-block-contribution_type_id"><td class="label">{ts}Contribution Type{/ts}</td> <td>{$contributionType}</td></tr>
         <tr class="crm-grant-program-view-form-block-status_id"><td class="label">{ts}Grant Status{/ts}</td> <td>{$grantProgramStatus}</td></tr>
 	<tr class="crm-grant-program-view-form-block-allocation_algorithm"><td class="label">{ts}Allocation Algorithm{/ts}</td> <td>{$grantProgramAlgorithm}</td></tr>
-	<tr class="crm-grant-program-view-form-block-grant_program_id"><td class="label">{ts}Previous Year's NEI Grant{/ts}</td> <td>{$grant_program_id}</td></tr>
+	<tr class="crm-grant-program-view-form-block-grant_program_id"><td class="label">{ts}Previous Year's Grant{/ts}</td> <td>{$grant_program_id}</td></tr>
         <tr class="crm-grant-program-view-form-block-allocation_date"><td class="label">{ts}Allocation Date{/ts}</td> <td>{$allocation_date|crmDate}</td></tr>
         <tr class="crm-grant-program-view-form-block-is_active"><td class="label">{ts}Enabled?{/ts}</td> <td>{if $is_active}{ts}Yes{/ts} {else}{ts}No{/ts}{/if}</td></tr>
 	<tr class="crm-grant-program-view-form-block-is_active"><td class="label">{ts}Auto Email?{/ts}</td> <td>{if $is_auto_email}{ts}Yes{/ts} {else}{ts}No{/ts}{/if}</td></tr>
     </table>
-    {include file="CRM/Custom/Page/CustomDataView.tpl"} 
+    {include file="CRM/Custom/Page/CustomDataView.tpl"}
     <div class="crm-submit-buttons">
         {if call_user_func(array('CRM_Core_Permission','check'), 'edit grants')}
             {assign var='urlParams' value="action=update&id=$id&reset=1"}
@@ -95,14 +95,14 @@
 cj('.allocation').click(function(){
 var r = confirm("Do you want to do a trial allocation?");
 if (r == true)
-  {    
+  {
      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
            setTimeout("location.reload(true);",1500);
 	 }
       });
@@ -115,11 +115,11 @@ cj('.finalize').click(function(){
  var grantedAmount = 0;
  var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/finalize'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
 	 var result = eval('(' + output + ')');
 	 cj.each( result, function( index, value ) {
 	 if( index == 'confirm' ) {
@@ -137,13 +137,13 @@ cj('.finalize').click(function(){
 	 if (confirmed == 'confirm' ) {
 	    var r=confirm("Do you want finalize the award of grants for this grant program to the amounts currently allocated?");
 	    if (r==true)
-  	    { 
+  	    {
 	    var dataURL = {/literal}"{crmURL p='civicrm/grant_program/processFinalization'}"{literal};
-     	    cj.ajax({ 
-              url: dataURL,	
+     	    cj.ajax({
+              url: dataURL,
               data: data,
               type: 'POST',
-              success: function(output) { 
+              success: function(output) {
 	        setTimeout("location.reload(true);",1500);
 	      }
 	      });
@@ -152,7 +152,7 @@ cj('.finalize').click(function(){
 alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater than the total amount available to be allocated by the program ($"+totalAmounts+"). Please reduce the amount granted in pending applications or increase the total amount available to be granted.");
 	  }
 	}
-   });  
+   });
 });
 cj('.reject').click(function(){
 
@@ -161,15 +161,15 @@ if (r==true)
   {
  var data = 'pid={/literal}{$id}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}';
      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
-     cj.ajax({ 
-         url: dataURL,	
+     cj.ajax({
+         url: dataURL,
          data: data,
          type: 'POST',
-         success: function(output) { 
+         success: function(output) {
 	   setTimeout("location.reload(true);",1500);
 	 }
    });
-  }     
+  }
 });
 
 </script>
