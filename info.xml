@@ -10,10 +10,10 @@ Grants which have been allocated and approved for payment can be selected and pa
     <author>JMA Consulting</author>
     <email>joe.murray@jmaconsulting.biz</email>
   </maintainer>
-  <releaseDate>2013-03-13</releaseDate>
+  <releaseDate>2018-08-21</releaseDate>
   <version>1.0</version>
   <compatibility>
-    <ver>4.4</ver>
+    <ver>5.0</ver>
   </compatibility>
   <comments>The development of this extension was subsidized by the Registered Nurses Association of Ontario (RNAO) and JMA Consulting. </comments>
   <civix>
