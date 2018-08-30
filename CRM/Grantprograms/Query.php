@@ -122,4 +122,141 @@ function from($name, $mode, $side) {
 public static function getPanesMapper(&$panes) {
  }
 
+ /**
+  * Function to retrieve financial items assigned for a batch
+  *
+  * @param int $entityID
+  * @param array $returnValues
+  * @param null $notPresent
+  * @param null $params
+  * @return Object
+  */
+ static function getBatchFinancialItems($entityID, $returnValues, $notPresent = NULL, $params = NULL, $getCount = FALSE) {
+   if (!$getCount) {
+     if (!empty($params['rowCount']) &&
+       $params['rowCount'] > 0
+     ) {
+       $limit = " LIMIT {$params['offset']}, {$params['rowCount']} ";
+     }
+   }
+   // action is taken depending upon the mode
+   $select = 'civicrm_financial_trxn.id ';
+   if (!empty( $returnValues)) {
+     $select .= " , ".implode(' , ', $returnValues);
+   }
+
+   $orderBy = " ORDER BY civicrm_financial_trxn.id";
+   if (!empty($params['sort'])) {
+     $orderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['sort'], 'String');
+   }
+
+   $from = "civicrm_financial_trxn
+ LEFT JOIN civicrm_entity_financial_trxn ON civicrm_entity_financial_trxn.financial_trxn_id = civicrm_financial_trxn.id
+ LEFT JOIN civicrm_entity_batch ON civicrm_entity_batch.entity_id = civicrm_financial_trxn.id
+ LEFT OUTER JOIN civicrm_contribution ON civicrm_contribution.id = civicrm_entity_financial_trxn.entity_id AND civicrm_entity_financial_trxn.entity_table = 'civicrm_contribution'
+ LEFT OUTER JOIN civicrm_grant ON civicrm_grant.id = civicrm_entity_financial_trxn.entity_id AND civicrm_entity_financial_trxn.entity_table = 'civicrm_grant'
+ LEFT JOIN civicrm_financial_type ON civicrm_financial_type.id = IFNULL(civicrm_contribution.financial_type_id, civicrm_grant.financial_type_id)
+ LEFT JOIN civicrm_contact contact_a ON contact_a.id = IFNULL(civicrm_contribution.contact_id, civicrm_grant.contact_id)
+ LEFT JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id = civicrm_contribution.id
+ ";
+
+   $searchFields =
+     array(
+       'sort_name',
+       'financial_type_id',
+       'contribution_page_id',
+       'contribution_payment_instrument_id',
+       'contribution_transaction_id',
+       'contribution_source',
+       'contribution_currency_type',
+       'contribution_pay_later',
+       'contribution_recurring',
+       'contribution_test',
+       'contribution_thankyou_date_is_not_null',
+       'contribution_receipt_date_is_not_null',
+       'contribution_pcp_made_through_id',
+       'contribution_pcp_display_in_roll',
+       'contribution_date_relative',
+       'contribution_amount_low',
+       'contribution_amount_high',
+       'contribution_in_honor_of',
+       'contact_tags',
+       'group',
+       'contribution_date_relative',
+       'contribution_date_high',
+       'contribution_date_low',
+       'contribution_check_number',
+       'contribution_status_id',
+     );
+   $values = array();
+   foreach ($searchFields as $field) {
+     if (isset($params[$field])) {
+       $values[$field] = $params[$field];
+       if ($field == 'sort_name') {
+         $from .= " LEFT JOIN civicrm_contact contact_b ON contact_b.id = civicrm_contribution.contact_id
+         LEFT JOIN civicrm_email ON contact_b.id = civicrm_email.contact_id";
+       }
+       if ($field == 'contribution_in_honor_of') {
+         $from .= " LEFT JOIN civicrm_contact contact_b ON contact_b.id = civicrm_contribution.contact_id";
+       }
+       if ($field == 'contact_tags') {
+         $from .= " LEFT JOIN civicrm_entity_tag `civicrm_entity_tag-{$params[$field]}` ON `civicrm_entity_tag-{$params[$field]}`.entity_id = contact_a.id";
+       }
+       if ($field == 'group') {
+         $from .= " LEFT JOIN civicrm_group_contact `civicrm_group_contact-{$params[$field]}` ON contact_a.id = `civicrm_group_contact-{$params[$field]}`.contact_id ";
+       }
+       if ($field == 'contribution_date_relative') {
+         $relativeDate = explode('.', $params[$field]);
+         $date = CRM_Utils_Date::relativeToAbsolute($relativeDate[0], $relativeDate[1]);
+         $values['contribution_date_low'] = $date['from'];
+         $values['contribution_date_high'] = $date['to'];
+       }
+       $searchParams = CRM_Contact_BAO_Query::convertFormValues($values);
+       $query = new CRM_Contact_BAO_Query($searchParams,
+         CRM_Contribute_BAO_Query::defaultReturnProperties(CRM_Contact_BAO_Query::MODE_CONTRIBUTE,
+           FALSE
+         ),NULL, FALSE, FALSE,CRM_Contact_BAO_Query::MODE_CONTRIBUTE
+       );
+       if ($field == 'contribution_date_high' || $field == 'contribution_date_low') {
+         $query->dateQueryBuilder($params[$field], 'civicrm_contribution', 'contribution_date', 'receive_date', 'Contribution Date');
+       }
+     }
+   }
+   if (!empty($query->_where[0])) {
+     $where = implode(' AND ', $query->_where[0]) .
+       " AND civicrm_entity_batch.batch_id IS NULL
+         AND (civicrm_grant.id IS NOT NULL OR civicrm_contribution.id IS NOT NULL)";
+     $searchValue = TRUE;
+   }
+   else {
+     $searchValue = FALSE;
+   }
+
+   if (!$searchValue) {
+     if (!$notPresent) {
+       $where =  " ( civicrm_entity_batch.batch_id = {$entityID}
+       AND civicrm_entity_batch.entity_table = 'civicrm_financial_trxn'
+       AND (civicrm_grant.id IS NOT NULL OR civicrm_contribution.id IS NOT NULL) )";
+     }
+     else {
+       $where = " ( civicrm_entity_batch.batch_id IS NULL
+       AND (civicrm_grant.id IS NOT NULL OR civicrm_contribution.id IS NOT NULL) )";
+     }
+   }
+
+   $sql = "
+ SELECT {$select}
+ FROM   {$from}
+ WHERE  {$where}
+      {$orderBy}
+ ";
+
+   if (isset($limit)) {
+     $sql .= "{$limit}";
+   }
+
+   $result = CRM_Core_DAO::executeQuery($sql);
+   return $result;
+ }
+
 }
