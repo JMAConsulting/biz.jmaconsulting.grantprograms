@@ -327,14 +327,14 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $files[] = $checkRegister;
 
 
-    $fileDAO =& new CRM_Core_DAO_File();
+    $fileDAO = new CRM_Core_DAO_File();
     $fileDAO->uri           = $fileName;
     $fileDAO->mime_type = 'application/zip';
     $fileDAO->upload_date   = date('Ymdhis');
     $fileDAO->save();
     $grantPaymentFile = $fileDAO->id;
 
-    $entityFileDAO =& new CRM_Core_DAO_EntityFile();
+    $entityFileDAO = new CRM_Core_DAO_EntityFile();
     $entityFileDAO->entity_table = 'civicrm_contact';
     $entityFileDAO->entity_id    = $_SESSION[ 'CiviCRM' ][ 'userID' ];
     $entityFileDAO->file_id      = $grantPaymentFile;
@@ -345,7 +345,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     $fileDAO->save();
     $grantPaymentCheckFile = $fileDAO->id;
 
-    $entityFileDAO =& new CRM_Core_DAO_EntityFile();
+    $entityFileDAO = new CRM_Core_DAO_EntityFile();
     $entityFileDAO->entity_table = 'civicrm_contact';
     $entityFileDAO->entity_id    = $_SESSION[ 'CiviCRM' ][ 'userID' ];
     $entityFileDAO->file_id      = $grantPaymentCheckFile;
@@ -384,7 +384,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
     require_once 'CRM/Grant/DAO/EntityPayment.php';
     if ( $this->_prid ) {
       foreach( $contactGrants as $grantId => $contact ) {
-        $entityDAO =& new CRM_Grant_DAO_EntityPayment();
+        $entityDAO = new CRM_Grant_DAO_EntityPayment();
         $entityDAO->entity_table = 'civicrm_grant';
         $entityDAO->entity_id    = $grantId;
         $entityDAO->payment_id   = $contactPayments[$contact];
@@ -393,11 +393,11 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form
       CRM_Core_Session::setStatus( "Selected payment stopped and reprinted successfully.");
     } else {
       foreach ( $this->_approvedGrants as $grantId => $status ) {
-        $grantDAO =& new CRM_Grant_DAO_Grant();
+        $grantDAO = new CRM_Grant_DAO_Grant();
         $grantDAO->id        = $grantId;
         $grantDAO->status_id = CRM_Core_OptionGroup::getValue( 'grant_status', 'Paid', 'name' );
         $grantDAO->save();
-        $entityDAO =& new CRM_Grant_DAO_EntityPayment();
+        $entityDAO = new CRM_Grant_DAO_EntityPayment();
         $entityDAO->entity_table = 'civicrm_grant';
         $entityDAO->entity_id    = $grantId;
         $entityDAO->payment_id   = $contactPayments[$contactGrants[$grantId]];

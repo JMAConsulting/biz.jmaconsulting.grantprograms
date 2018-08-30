@@ -161,21 +161,18 @@ alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater 
 
 
 cj('#reject').click(function(event){
-
-var r=confirm("Do you want to reject all Pending grant applications for this Grant Program??");
-if (r==true)
-  {
   event.preventDefault();
- var data = 'pid={/literal}{$id}{literal}';
-     var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
-     cj.ajax({
-         url: dataURL,
-         data: data,
-         type: 'POST',
-         success: function(output) {
-	   setTimeout("location.reload(true);",1500);
-	 }
-   });
+  if (confirm("Do you want to reject all Pending grant applications for this Grant Program??") === true) {
+    var data = 'pid={/literal}{$id}{literal}';
+    var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
+    cj.ajax({
+      url: dataURL,
+      data: data,
+      type: 'POST',
+      success: function(output) {
+        setTimeout("location.reload(true);",1500);
+      }
+    });
   }
 });
 

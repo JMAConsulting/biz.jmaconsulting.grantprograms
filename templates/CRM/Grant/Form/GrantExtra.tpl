@@ -28,15 +28,15 @@
   <tr class="crm-grant-form-block-grant_rejected_reason_id grant_rejected_reason_id">
     <td class="label">{$form.grant_rejected_reason_id.label}</td>
     <td>{$form.grant_rejected_reason_id.html}</td>
-  </tr> 
+  </tr>
   <tr class="crm-grant-form-block-grant_incomplete_reason_id grant_incomplete_reason_id">
     <td class="label">{$form.grant_incomplete_reason_id.label}</td>
     <td>{$form.grant_incomplete_reason_id.html}</td>
-  </tr>   
+  </tr>
   <tr class="crm-grant-form-block-grant_program_id">
     <td class="label">{$form.grant_program_id.label}</td>
     <td>{$form.grant_program_id.html}</td>
-  </tr>  
+  </tr>
   <tr class="crm-grant-form-block-assessment">
     <td class="label">{$form.assessment.label}</td>
     <td>{$form.assessment.html}</td>
@@ -57,84 +57,41 @@
         {$form.financial_type_id.html}
       {/if}
     </td>
-  </tr>  
+  </tr>
 </tbody></table>
 
-{*if $pager->_totalItems*}
-  <h3>{ts}Recent Grants{/ts}</h3>
-  <div class="form-item" id = "RecentGrants">
-    {* include file="CRM/Grant/Form/Selector.tpl" context="DashBoard" *}
-  </div>
-{*/if*}
 {/if}
-<script type="text/javascript">
 {literal}
-cj(document).ready(function(){
-  cj('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
-  cj('.crm-grant-form-block-grant_incomplete_reason_id').insertAfter('.crm-grant-form-block-status_id');
-  cj('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
-  cj('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
-  cj('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
-  cj('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
-{/literal} 
-{if !$showFields}
-{literal} 
-  cj('.crm-grant-form-block-amount_granted').remove();
-{/literal} 
-{/if}
-{literal} 
-if ( cj("#status_id option:selected").text() == 'Ineligible') {
-  cj('.grant_rejected_reason_id').show();
-} else {
-  cj('.grant_rejected_reason_id').hide();
-}
+<script type="text/javascript">
+  CRM.$(function($) {
+    $('.crm-grant-form-block-grant_rejected_reason_id').insertAfter('.crm-grant-form-block-status_id');
+    $('.crm-grant-form-block-grant_incomplete_reason_id').insertAfter('.crm-grant-form-block-status_id');
+    $('.crm-grant-form-block-grant_program_id').insertAfter('.crm-grant-form-block-grant_type_id');
+    $('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
+    $('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
+    $('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
 
-if (cj("#status_id option:selected").text() == 'Awaiting Information') {
-  cj('.grant_incomplete_reason_id').show();
-} else {
-  cj('.grant_incomplete_reason_id').hide();
-}
+    {/literal}{if !$showFields}{literal}
+      $('.crm-grant-form-block-amount_granted').remove();
+    {/literal}{/if}{literal}
 
-cj('#status_id').change(function(){
-if (this.options[this.selectedIndex].text == 'Ineligible') {
-  cj('.grant_rejected_reason_id').show();
-} else {
-  cj('.grant_rejected_reason_id').hide();
-}
-if (this.options[this.selectedIndex].text == 'Awaiting Information') {
-  cj('.grant_incomplete_reason_id').show();
-} else {
-  cj('.grant_incomplete_reason_id').hide();
-}
-});
-var grantId = {/literal}{if $grant_id}{$grant_id}{else}{literal}0{/literal}{/if}{literal};
-var dataUrl = {/literal}"{crmURL p='civicrm/grant/search' h=0 q="snippet=1&force=1"}"{literal};
-dataUrl = dataUrl + '&cid=' + "{/literal}{$contactId}{literal}" + '&key=' + "{/literal}{$qfKey}{literal}";
-var response = cj.ajax({
-  url: dataUrl,
-  async: false,
-  success: function(response) {
-    cj('#RecentGrants').html(response);
-    cj('div.crm-search-form-block, .crm-search-tasks').hide();
-    cj('tr#crm-grant_'+grantId).hide();
-  }
- }).responseText;	
-});
-cj(document).ready( function(){
-// RG-116 hide attachments
-{/literal}{if $hideAttachments}{literal}
-cj('div.crm-grant-form-block-attachment').hide();
-{/literal}{/if}{literal}
-var total = 0;
-cj(".form-select").change(function(){
-cj(".form-select").each(function(){
-var name = cj(this).attr('id');
-  var customName = name.split('_');
-if (customName[0] == 'custom') {
-  total += parseInt(cj('#'+name).val());
-}
-});
-});
-});
-{/literal}
+    var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn']) > -1);
+    $('.grant_rejected_reason_id').toggle(($("#status_id option:selected").text() == 'Ineligible'));
+    $('.grant_incomplete_reason_id').toggle(($("#status_id option:selected").text() == 'Awaiting Information'));
+    $('.crm-grant-form-block-financial_type').toggle(statusChange);
+    if (!statusChange) {
+      $('#financial_type_id').val('');
+    }
+
+    $('#status_id').on('change', function() {
+      var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn']) > -1);
+      $('.grant_rejected_reason_id').toggle(($("#status_id option:selected").text() == 'Ineligible'));
+      $('.grant_incomplete_reason_id').toggle(($("#status_id option:selected").text() == 'Awaiting Information'));
+      $('.crm-grant-form-block-financial_type').toggle(statusChange);
+      if (!statusChange) {
+        $('#financial_type_id').val('');
+      }
+    });
+  });
 </script>
+{/literal}

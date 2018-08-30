@@ -52,7 +52,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
    * @var array
    * @static
    */
-  private static $grantProgramStatus; 
+  private static $grantProgramStatus;
 
 
   /**
@@ -79,9 +79,9 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
 
   /**
    * Function  to delete Grant Program
-   * 
+   *
    * @param  int  $grantProgramID     ID of the par service fee to be deleted.
-   * 
+   *
    * @access public
    * @static
    */
@@ -89,7 +89,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     if (!$grantProgramID) {
       CRM_Core_Error::fatal(ts('Invalid value passed to delete function'));
     }
-    
+
     $dao = new CRM_Grant_DAO_GrantProgram();
     $dao->id = $grantProgramID;
     if (!$dao->find(TRUE)) {
@@ -102,7 +102,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     $query = "SELECT id FROM civicrm_option_value WHERE  option_group_id = {$optioGroupID} AND value = {$value}";
     return CRM_Core_DAO::singleValueQuery($query);
   }
-    
+
   static function getOptionValue($id) {
     $query = "SELECT value FROM civicrm_option_value WHERE id = {$id}";
     return CRM_Core_DAO::singleValueQuery($query);
@@ -123,13 +123,13 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     while ($dao->fetch()) {
       if (!empty($id)) {
         $grantPrograms = $dao->label;
-      } 
+      }
       else {
         $grantPrograms[$dao->id] = $dao->label;
       }
     }
     return empty($grantPrograms) ? array() : $grantPrograms;
-  }  
+  }
 
   static function contributionTypes() {
     $typeDao = new CRM_Financial_DAO_FinancialType();
@@ -139,14 +139,14 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     }
     return $contributionTypes;
   }
-    
+
   static function create(&$params, &$ids) {
     if (empty($params)) {
       return;
     }
-    $moneyFields = array( 
+    $moneyFields = array(
       'total_amount',
-      'remainder_amount' 
+      'remainder_amount'
     );
     foreach ($moneyFields as $field) {
       if (isset($params[$field])) {
@@ -155,7 +155,7 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     }
     // convert dates to mysql format
     $dates = array('allocation_date');
-        
+
     foreach ($dates as $date) {
       if (isset( $params[$date])) {
         $params[$date] = CRM_Utils_Date::processDate($params[$date], NULL, TRUE);
@@ -163,9 +163,9 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     }
     $grantProgram = new CRM_Grant_DAO_GrantProgram();
     $grantProgram->id = CRM_Utils_Array::value('grant_program', $ids);
-        
+
     $grantProgram->copyValues($params);
-        
+
     return $result = $grantProgram->save();
   }
 
@@ -173,8 +173,8 @@ class CRM_Grant_BAO_GrantProgram extends CRM_Grant_DAO_GrantProgram {
     $sql = "SELECT display_name FROM civicrm_contact WHERE civicrm_contact.id = $id ";
     return CRM_Core_DAO::singleValueQuery($sql);
   }
-     
-     
+
+
   public function getAddress($id, $locationTypeID = NULL, $twoLines = false) {
     $sql = "
    SELECT civicrm_contact.id as contact_id,
@@ -197,7 +197,7 @@ WHERE civicrm_contact.id = $id ";
     $params = array();
     if (!$locationTypeID) {
       $sql .= " AND civicrm_address.is_primary = 1";
-    } 
+    }
     else {
       $sql .= " AND civicrm_address.location_type_id = %1";
       $params[1] = array($locationTypeID, 'Integer');
@@ -221,9 +221,9 @@ WHERE civicrm_contact.id = $id ";
 	      	)
       	);
       } else {
-	      CRM_Utils_String::append( 
+	      CRM_Utils_String::append(
 	        $address, ', ',
-	        array( 
+	        array(
 	          $dao->street_address,
 	          $dao->supplemental_address_1,
 	          $dao->supplemental_address_2,
@@ -231,13 +231,13 @@ WHERE civicrm_contact.id = $id ";
 	          $dao->state,
 	          $dao->postal_code,
 	          $dao->country
-	        ) 
+	        )
 	      );
       }
       $location['address'] = addslashes($address);
-    } 
+    }
     return $location;
-  }  
+  }
   /**
    * Get all the n grant program statuses
    *
@@ -252,11 +252,11 @@ WHERE civicrm_contact.id = $id ";
     }
     if($id) {
       return self::$grantProgramStatus[$id];
-    }    
+    }
     return self::$grantProgramStatus;
   }
-  
-  
+
+
   static function getGrantPrograms($id = NULL) {
     $grantPrograms = array();
     $where = ' WHERE is_active = 1';
@@ -270,19 +270,19 @@ WHERE civicrm_contact.id = $id ";
     }
     return $grantPrograms;
   }
-    
+
   static function getGrants($params) {
     $grants = array();
     if (!empty($params)) {
-      $where = "WHERE "; 
+      $where = "WHERE ";
       foreach ($params as $key => $value) {
         if ($key == 'status_id') {
           $where .= "{$key} IN ( {$value} ) AND ";
-        } 
+        }
         else {
           if (strstr($value, 'NULL')) {
             $where .= "{$key} IS {$value} AND ";
-          } 
+          }
           else {
             $where .= "{$key} = '{$value}' AND ";
           }
@@ -298,12 +298,12 @@ WHERE civicrm_contact.id = $id ";
         $grants[$dao->id]['amount_granted'] = $dao->amount_granted;
         $grants[$dao->id]['status_id'] = $dao->status_id;
         $grants[$dao->id]['contact_id'] = $dao->contact_id;
-        $grants[$dao->id]['grant_id'] = $dao->id;     
+        $grants[$dao->id]['grant_id'] = $dao->id;
       }
     }
     return $grants;
   }
-    
+
   static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE, $status = '') {
     $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
@@ -315,7 +315,7 @@ WHERE civicrm_contact.id = $id ";
         if ($grantStatuses == 'Awaiting Information') {
           $explode = explode(' ', $grantStatuses);
           $valueName = strtolower($explode[0]) . '_info';
-        } 
+        }
         elseif (strstr($grantStatuses, 'Approved')) {
           $valueName = strtolower('Approved');
         }
@@ -323,9 +323,7 @@ WHERE civicrm_contact.id = $id ";
           'groupName' => 'msg_tpl_workflow_grant',
           'valueName' => 'grant_'.$valueName,
           'contactId' => $contactID,
-          'tplParams' => array(
-            'email' => $email,
-           ),
+          'tplParams' => array_merge(['email' => $email], CRM_Utils_Array::value('tplParams', $params, [])),
           'PDFFilename' => '',
         );
 
@@ -388,7 +386,7 @@ WHERE civicrm_contact.id = $id ";
     }
     return empty($amountGranted) ? 0 : $amountGranted;
   }
-  
+
   /**
    * Function to get current grant granted amount
    *
@@ -422,14 +420,14 @@ WHERE civicrm_contact.id = $id ";
     if (!empty($amount)) {
       if ($amount == $grantThresholds['Maximum Grant']) {
         $priority = -10;
-      } 
+      }
       elseif ($amount == 0) {
         $priority = 10;
       }
       elseif ((0 <= $amount) && ($amount <= $grantThresholds['Maximum Grant'])) {
         $priority = 0;
       }
-    } 
+    }
     return $priority;
   }
 
@@ -440,7 +438,7 @@ WHERE civicrm_contact.id = $id ";
     $activityStatus = CRM_Core_PseudoConstant::activityStatus('name');
     $activityType = CRM_Core_PseudoConstant::activityType();
     $session = CRM_Core_Session::singleton();
-    $params = array( 
+    $params = array(
       'source_contact_id'=> $session->get('userID'),
       'source_record_id' => $grantId,
       'activity_type_id'=> array_search('Grant Status Change', $activityType),
