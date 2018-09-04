@@ -309,14 +309,12 @@ WHERE civicrm_contact.id = $id ";
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       if (isset($email)) {
-        $grantStatuses = CRM_Core_OptionGroup::values('grant_status', FALSE, FALSE, FALSE, NULL, 'name');
-        $grantStatuses = $grantStatuses[$values['status_id']];
-        $valueName = strtolower($grantStatuses);
-        if ($grantStatuses == 'Awaiting Information') {
-          $explode = explode(' ', $grantStatuses);
+        $valueName = strtolower($grantStatus);
+        if ($grantStatus == 'Awaiting Information') {
+          $explode = explode(' ', $grantStatuse);
           $valueName = strtolower($explode[0]) . '_info';
         }
-        elseif (strstr($grantStatuses, 'Approved')) {
+        elseif (strstr($grantStatus, 'Approved')) {
           $valueName = strtolower('Approved');
         }
         $sendTemplateParams = array(
@@ -451,4 +449,121 @@ WHERE civicrm_contact.id = $id ";
     );
     CRM_Activity_BAO_Activity::create($params);
   }
+
+  public static function getAssetFinancialAccountID() {
+    $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('financial_account_type', NULL, " AND v.name LIKE 'Asset' "));
+    return CRM_Core_DAO::singleValueQuery(
+      "SELECT id FROM civicrm_financial_account WHERE is_default = 1 AND financial_account_type_id = %1",
+      [1 => [$relationTypeId, 'Integer']]
+    );
+  }
+
+  public static function convertNumberToWords($number) {
+    $hyphen = '-';
+    $conjunction = ' and ';
+    $separator = ', ';
+    $negative = 'negative ';
+    $decimal = ' and ';
+    $dictionary = array(
+      0 => 'zero',
+      1 => 'one',
+      2 => 'two',
+      3 => 'three',
+      4 => 'four',
+      5 => 'five',
+      6 => 'six',
+      7 => 'seven',
+      8 => 'eight',
+      9 => 'nine',
+      10 => 'ten',
+      11 => 'eleven',
+      12 => 'twelve',
+      13 => 'thirteen',
+      14 => 'fourteen',
+      15 => 'fifteen',
+      16 => 'sixteen',
+      17 => 'seventeen',
+      18 => 'eighteen',
+      19 => 'nineteen',
+      20 => 'twenty',
+      30 => 'thirty',
+      40 => 'fourty',
+      50 => 'fifty',
+      60 => 'sixty',
+      70 => 'seventy',
+      80 => 'eighty',
+      90 => 'ninety',
+      100 => 'hundred',
+      1000 => 'thousand',
+      1000000 => 'million',
+      1000000000 => 'billion',
+      1000000000000 => 'trillion',
+      1000000000000000 => 'quadrillion',
+      1000000000000000000 => 'quintillion'
+    );
+
+    if (!is_numeric($number)) {
+      return FALSE;
+    }
+
+    if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
+      // overflow
+      trigger_error(
+        'convertNumberToWords only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX,
+        E_USER_WARNING
+      );
+      return FALSE;
+    }
+
+    if ($number < 0) {
+      return $negative . self::convertNumberToWords(abs($number));
+    }
+
+    $string = $fraction = NULL;
+
+    if (strpos($number, '.') !== FALSE) {
+      list($number, $fraction) = explode('.', $number);
+    }
+
+    switch (TRUE) {
+    case $number < 21:
+      $string = $dictionary[$number];
+      break;
+    case $number < 100:
+      $tens   = ((int) ($number / 10)) * 10;
+      $units  = $number % 10;
+      $string = $dictionary[$tens];
+      if ($units) {
+        $string .= $hyphen . $dictionary[$units];
+      }
+      break;
+    case $number < 1000:
+      $hundreds  = $number / 100;
+      $remainder = $number % 100;
+      $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
+      if ($remainder) {
+
+        $string .= $conjunction . self::convertNumberToWords(abs($remainder));
+      }
+      break;
+    default:
+      $baseUnit = pow(1000, floor(log($number, 1000)));
+      $numBaseUnits = (int) ($number / $baseUnit);
+      $remainder = $number % $baseUnit;
+      $string = self::convertNumberToWords($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+      if ($remainder) {
+        $string .= $remainder < 100 ? $conjunction : $separator;
+        $string .= self::convertNumberToWords($remainder);
+      }
+      break;
+    }
+
+    if (NULL !== $fraction && is_numeric($fraction)) {
+      $string .= $decimal;
+      $string .= $fraction . '/100';
+    }
+
+    return $string;
+  }
+
 }

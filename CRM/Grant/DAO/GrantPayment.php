@@ -86,30 +86,7 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
    * @var int unsigned
    */
   public $id;
-  /**
-   * Payment Batch Nnumber
-   *
-   * @var int unsigned
-   */
-  public $payment_batch_number;
-  /**
-   * Payment Number
-   *
-   * @var int unsigned
-   */
-  public $payment_number;
-  /**
-   * Financial Type ID
-   *
-   * @var int unsigned
-   */
-  public $financial_type_id;
-  /**
-   * Contact ID
-   *
-   * @var int unsigned
-   */
-  public $contact_id;
+  public $financial_trxn_id;
   /**
    * Payment Created Date.
    *
@@ -122,35 +99,6 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
    * @var date
    */
   public $payment_date;
-  /**
-   * Payable To Name.
-   *
-   * @var string
-   */
-  public $payable_to_name;
-  /**
-   * Payable To Address.
-   *
-   * @var string
-   */
-  public $payable_to_address;
-  /**
-   * Requested grant amount, in default currency.
-   *
-   * @var float
-   */
-  public $amount;
-  /**
-   * 3 character string, value from config setting or input via user.
-   *
-   * @var string
-   */
-  public $currency;
-  /**
-   * Payment Reason.
-   *
-   * @var string
-   */
   public $payment_reason;
   /**
    * Payment Status ID
@@ -196,46 +144,13 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
           'dataPattern' => '',
           'export' => true,
         ) ,
-        'payment_batch_number' => array(
-          'name' => 'payment_batch_number',
+        'financial_trxn_id' => array(
+          'name' => 'financial_trxn_id',
           'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Payment Batch Nnumber') ,
+          'title' => ts('Financial Trxn ID') ,
           'required' => true,
           'import' => true,
-          'where' => 'civicrm_payment.payment_batch_number',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'payment_number' => array(
-          'name' => 'payment_number',
-          'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Payment Number') ,
-          'required' => true,
-          'import' => true,
-          'where' => 'civicrm_payment.payment_number',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'financial_type_id' => array(
-          'name' => 'financial_type_id',
-          'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Financial Type ID') ,
-          'required' => true,
-          'import' => true,
-          'where' => 'civicrm_payment.financial_type_id',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'contact_id' => array(
-          'name' => 'contact_id',
-          'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Contact ID') ,
-          'required' => true,
-          'import' => true,
-          'where' => 'civicrm_payment.contact_id',
+          'where' => 'civicrm_payment.financial_trxn_id',
           'headerPattern' => '',
           'dataPattern' => '',
           'export' => true,
@@ -248,63 +163,6 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
           'where' => 'civicrm_payment.payment_created_date',
           'headerPattern' => '',
           'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'payment_date' => array(
-          'name' => 'payment_date',
-          'type' => CRM_Utils_Type::T_DATE,
-          'title' => ts('Payment Date') ,
-          'import' => true,
-          'where' => 'civicrm_payment.payment_date',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'payable_to_name' => array(
-          'name' => 'payable_to_name',
-          'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Payable To Name') ,
-          'maxlength' => 255,
-          'size' => CRM_Utils_Type::HUGE,
-          'import' => true,
-          'where' => 'civicrm_payment.payable_to_name',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'payable_to_address' => array(
-          'name' => 'payable_to_address',
-          'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Payable To Address') ,
-          'maxlength' => 255,
-          'size' => CRM_Utils_Type::HUGE,
-          'import' => true,
-          'where' => 'civicrm_payment.payable_to_address',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'export' => true,
-        ) ,
-        'amount' => array(
-          'name' => 'amount',
-          'type' => CRM_Utils_Type::T_MONEY,
-          'title' => ts('Amount') ,
-          'required' => true,
-          'import' => true,
-          'where' => 'civicrm_payment.amount',
-          'headerPattern' => '',
-          'dataPattern' => '/^\d+(\.\d{2})?$/',
-          'export' => true,
-        ) ,
-        'currency' => array(
-          'name' => 'currency',
-          'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Currency') ,
-          'maxlength' => 3,
-          'size' => CRM_Utils_Type::FOUR,
-          'import' => true,
-          'where' => 'civicrm_payment.currency',
-          'headerPattern' => '/cur(rency)?/i',
-          'dataPattern' => '/^[A-Z]{3}$/i',
           'export' => true,
         ) ,
         'payment_reason' => array(
@@ -323,6 +181,9 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
           'name' => 'payment_status_id',
           'type' => CRM_Utils_Type::T_INT,
           'title' => ts('Payment Status') ,
+          'pseudoconstant' => [
+            'optionGroupName' => 'grant_payment_status',
+          ]
         ) ,
         'replaces_payment_id' => array(
           'name' => 'replaces_payment_id',

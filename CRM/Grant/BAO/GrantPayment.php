@@ -36,7 +36,9 @@
 
 
 class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
-
+  const
+    STOP = 1,
+    REPRINT = 2;
   /**
    * static field for all the grant information that we can potentially export
    * @var array
@@ -93,7 +95,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
           'data_type' => CRM_Utils_Type::T_INT
         ),
         'payment_number' => array(
-          'title' => 'Payment Number',
+          'title' => 'Check Number',
           'name' => 'payment_number',
           'data_type' => CRM_Utils_Type::T_INT
         ),
@@ -170,26 +172,19 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
    * @static
    * @return object
    */
-  static function add(&$params, &$ids) {
-
+  static function add(&$params, &$ids = []) {
     if (empty($params)) {
       return;
     }
 
-    if (isset( $params['total_amount'])) {
+    if (isset($params['total_amount'])) {
       $params[$field] = CRM_Utils_Rule::cleanMoney($params['total_amount']);
     }
     // convert dates to mysql format
-    $dates = array(
-      'payment_date',
-      'payment_created_date'
-    );
-
-    foreach ($dates as $date) {
-      if (isset($params[$date])) {
-        $params[$date] = CRM_Utils_Date::processDate($params[$date], NULL, TRUE);
-      }
+    if (isset($params['payment_created_date'])) {
+      $params['payment_created_date'] = CRM_Utils_Date::processDate($params['payment_created_date'], NULL, TRUE);
     }
+
     $grantPayment = new CRM_Grant_DAO_GrantPayment();
     $grantPayment->id = CRM_Utils_Array::value('id', $ids);
 
@@ -321,9 +316,7 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     $grantDao->fetch();
 
     if (!$grantDao->N) {
-      if ($params['messageTemplateID']) {
-        CRM_Core_Error::fatal(ts('No such message template.'));
-      }
+      CRM_Core_Error::fatal(ts('No such message template.'));
     }
     $subject = $grantDao->subject;
     $html = $grantDao->html;

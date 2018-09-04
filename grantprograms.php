@@ -287,6 +287,7 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
     $form->assign('grantUrl', $grantUrl);
   }
 
+
   if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $form->_key = CRM_Utils_Request::retrieve('key', 'String', $form);
     $form->_next = CRM_Utils_Request::retrieve('next', 'Positive', $form);
@@ -682,7 +683,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
       $params['id'] = $id;
     }
     if (($grantStatusApproved == CRM_Utils_Array::value('status_id', $params) && empty($params['decision_date'])) ||
-      (empty($previousGrant['decision_date']) && $previousGrant['status_id'] != CRM_Utils_Array::value('status_id', $params))
+      (empty($previousGrant['decision_date']) && CRM_Utils_Array::value('status_id', $previousGrant) != CRM_Utils_Array::value('status_id', $params))
     ) {
       $params['decision_date'] = date('Ymd');
     }
@@ -793,12 +794,12 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $statusID = array_search('Pending', $contributionStatuses);
       }
       elseif ($objectRef->status_id == array_search('Paid', $grantStatuses)) {
-        $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Asset Account is') ?: getAssetFinancialAccountID();
+        $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Asset Account is') ?: CRM_Grant_BAO_GrantProgram::getAssetFinancialAccountID();
         $statusID = array_search('Completed', $contributionStatuses);
         $createItem = empty($previousGrant);
       }
       elseif ($op == 'edit' && $objectRef->status_id == array_search('Withdrawn', $grantStatuses)) {
-        $params['to_financial_account_id'] = getAssetFinancialAccountID();
+        $params['to_financial_account_id'] = CRM_Grant_BAO_GrantProgram::getAssetFinancialAccountID();
         $params['from_financial_account_id'] = CRM_Core_DAO::singleValueQuery("
         SELECT to_financial_account_id FROM civicrm_financial_trxn  cft
           INNER JOIN civicrm_entity_financial_trxn ecft ON ecft.financial_trxn_id = cft.id
@@ -847,14 +848,6 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       }
     }
   }
-}
-
-function getAssetFinancialAccountID() {
-  $relationTypeId = key(CRM_Core_PseudoConstant::accountOptionValues('financial_account_type', NULL, " AND v.name LIKE 'Asset' "));
-  return CRM_Core_DAO::singleValueQuery(
-    "SELECT id FROM civicrm_financial_account WHERE is_default = 1 AND financial_account_type_id = %1",
-    [1 => [$relationTypeId, 'Integer']]
-  );
 }
 
 /*

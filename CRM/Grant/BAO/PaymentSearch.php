@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /*
  +--------------------------------------------------------------------+
@@ -34,28 +34,28 @@
  *
  */
 
-class CRM_Grant_BAO_PaymentSearch { 
+class CRM_Grant_BAO_PaymentSearch {
 
   const
     MODE_GRANT_PAYMENT = 1;
-    
+
   static function &getFields() {
     $fields = array();
     $fields = CRM_Grant_BAO_GrantPayment::exportableFields();
     return $fields;
   }
-    
-  function __construct($params = NULL, 
-    $returnProperties = NULL, 
+
+  function __construct($params = NULL,
+    $returnProperties = NULL,
     $fields = NULL,
-    $includeContactIds = FALSE, 
-    $strict = FALSE, 
+    $includeContactIds = FALSE,
+    $strict = FALSE,
     $mode = 1,
-    $skipPermission = FALSE, 
+    $skipPermission = FALSE,
     $searchDescendentGroups = TRUE,
-    $smartGroupCache = TRUE, 
+    $smartGroupCache = TRUE,
     $displayRelationshipType = NULL,
-    $operator = 'AND' 
+    $operator = 'AND'
   ) {
     $this->_params =& $params;
 
@@ -64,7 +64,7 @@ class CRM_Grant_BAO_PaymentSearch {
     }
     if (empty($returnProperties)) {
       $this->_returnProperties = self::defaultReturnProperties($mode);
-    } 
+    }
     else {
       $this->_returnProperties =& $returnProperties;
     }
@@ -75,7 +75,7 @@ class CRM_Grant_BAO_PaymentSearch {
     $this->_smartGroupCache = $smartGroupCache;
     $this->_displayRelationshipType = $displayRelationshipType;
     $this->setOperator($operator);
-        
+
     if ($fields) {
       $this->_fields =& $fields;
       $this->_search = FALSE;
@@ -88,11 +88,11 @@ class CRM_Grant_BAO_PaymentSearch {
   }
 
   function initialize() {
-    $this->_select = array(); 
-    $this->_element = array(); 
+    $this->_select = array();
+    $this->_element = array();
     $this->_tables = array();
     $this->_whereTables = array();
-    $this->_where = array(); 
+    $this->_where = array();
     $this->_qill = array();
     $this->_options = array();
     $this->_cfIDs = array();
@@ -100,7 +100,7 @@ class CRM_Grant_BAO_PaymentSearch {
     $this->_having = array();
 
     $this->_customQuery = NULL;
-    $this->select(); 
+    $this->select();
     $this->element();
     if (!empty($this->_params)) {
       $this->buildParamsLookup();
@@ -108,7 +108,7 @@ class CRM_Grant_BAO_PaymentSearch {
     $this->_whereClause = $this->whereClause();
     $this->_tables = array('civicrm_payment' => 1);
     $this->_whereTables = array('civicrm_payment' => 1);
-        
+
     $this->_fromClause = "FROM civicrm_payment";
     $this->_simpleFromClause = "FROM civicrm_payment";
   }
@@ -126,19 +126,19 @@ class CRM_Grant_BAO_PaymentSearch {
         }
         $this->_cfIDs[$cfID][] = $value;
       }
-             
+
       if (!array_key_exists($value[0], $this->_paramLookup)) {
         $this->_paramLookup[$value[0]] = array();
       }
       $this->_paramLookup[$value[0]][] = $value;
     }
   }
-     
+
   function whereClause() {
     $this->_where[0] = array();
     $this->_qill[0] = array();
     $config = CRM_Core_Config::singleton();
-        
+
     if (!empty( $this->_params)) {
 
       foreach (array_keys($this->_params) as $id) {
@@ -157,10 +157,10 @@ class CRM_Grant_BAO_PaymentSearch {
       }
       $this->_qill  = CRM_Utils_Array::crmArrayMerge($this->_qill , $this->_customQuery->_qill);
     }
-         
+
     $clauses    = array();
     $andClauses = array();
-         
+
     $validClauses = 0;
     if (!empty($this->_where)) {
       foreach ($this->_where as $grouping => $values) {
@@ -169,22 +169,22 @@ class CRM_Grant_BAO_PaymentSearch {
           $validClauses++;
         }
       }
-             
+
       if (!empty($this->_where[0])) {
         $andClauses[] = ' ( ' . implode(" AND", $this->_where[0]) . ' ) ';
       }
       if (!empty($clauses)) {
         $andClauses[] = ' ( ' . implode(' OR ', $clauses) . ' ) ';
       }
-             
+
       if ($validClauses > 1) {
         $this->_useDistinct = TRUE;
       }
     }
-         
+
     return implode(' AND ', $andClauses);
   }
-    
+
   function whereClauseSingle(&$values) {
     switch ($values[0]) {
     case 'payment_status_id':
@@ -200,7 +200,7 @@ class CRM_Grant_BAO_PaymentSearch {
       $this->payment_number($values);
       return;
     case 'amount':
-      $this->amount($values); 
+      $this->amount($values);
       return;
     case 'payment_created_date_low':
     case 'payment_created_date_high':
@@ -209,74 +209,74 @@ class CRM_Grant_BAO_PaymentSearch {
 
     }
   }
-    
+
   function payment_status(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
-         
+
     if (!$op) {
       $op = '=';
     }
-    $n = trim($value); 
+    $n = trim($value);
     if (strtolower($n) == 'odd') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id % 2 = 1 )";
       $this->_qill[$grouping][]  = ts( 'Payment Status Id is odd' );
-    } 
+    }
     else if (strtolower($n) == 'even') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id % 2 = 0 )";
       $this->_qill[$grouping][]  = ts('Payment Status Id is even');
-    } 
+    }
     else {
       $value = strtolower(CRM_Core_DAO::escapeString($n));
       $value = "'$value'";
-             
+
       $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id $op $value )";
       $paymentStatus = CRM_Core_OptionGroup::values('payment');
       $n =$paymentStatus[$n];
       $this->_qill[$grouping][]  = ts('Payment Status') . " $op '$n'";
     }
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1; 
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
 
   function payableName(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
     $op = 'LIKE';
     $newName = $name;
-    $name    = trim($value); 
-        
+    $name    = trim($value);
+
     if (empty($name)) {
       return;
     }
 
     $config = CRM_Core_Config::singleton();
 
-    $sub  = array(); 
+    $sub  = array();
 
     //By default, $sub elements should be joined together with OR statements (don't change this variable).
     $subGlue = ' OR ';
 
     $strtolower = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
-        
+
     if (substr($name, 0, 1) == '"' &&
          substr($name, -1, 1) == '"') {
-      //If name is encased in double quotes, the value should be taken to be the string in entirety and the 
+      //If name is encased in double quotes, the value should be taken to be the string in entirety and the
       $value = substr($name, 1, -1);
       $value = $strtolower(CRM_Core_DAO::escapeString($value));
       $wc = ( $newName == 'payable_to_name') ? 'LOWER(civicrm_payment.payable_to_name)' : 'LOWER(civicrm_payment.payable_to_name)';
 
       $sub[] = " ( $wc = '%$value%' ) ";
-    } 
+    }
     else if (strpos($name, ',') !== FALSE) {
-      // if we have a comma in the string, search for the entire string 
+      // if we have a comma in the string, search for the entire string
       $value = $strtolower(CRM_Core_DAO::escapeString($name));
       if ($wildcard) {
         if ($config->includeWildCardInName) {
           $value = "'%$value%'";
-        } 
+        }
         else {
           $value = "'$value%'";
         }
         $op = 'LIKE';
-      } 
+      }
       else {
         $value = "'%$value%'";
       }
@@ -284,11 +284,11 @@ class CRM_Grant_BAO_PaymentSearch {
         $wc = ($op != 'LIKE') ? "LOWER(civicrm_payment.payable_to_name)" : "civicrm_payment.payable_to_name";
       }
       $sub[] = " ( $wc $op $value )";
-    } 
+    }
     else {
       //Else, the string should be treated as a series of keywords to be matched with match ANY/ match ALL depending on Civi config settings (see CiviAdmin)
-            
-      // The Civi configuration setting can be overridden if the string *starts* with the case insenstive strings 'AND:' or 'OR:'  
+
+      // The Civi configuration setting can be overridden if the string *starts* with the case insenstive strings 'AND:' or 'OR:'
       // TO THINK ABOUT: what happens when someone searches for the following "AND: 'a string in quotes'"? - probably nothing - it would make the AND OR variable reduntant because there is only one search string?
 
       // Check to see if the $subGlue is overridden in the search text
@@ -300,7 +300,7 @@ class CRM_Grant_BAO_PaymentSearch {
         $name = substr($name, 3);
         $subGlue = ' OR ';
       }
-        	
+
       $firstChar = substr($name, 0, 1);
       $lastChar = substr($name, -1, 1);
       $quotes = array("'", '"');
@@ -309,27 +309,27 @@ class CRM_Grant_BAO_PaymentSearch {
         $name = substr($name,  1);
         $name = substr($name, 0, -1);
         $pieces = array($name);
-      } 
+      }
       else {
         $pieces = explode(' ', $name);
       }
-      foreach ($pieces as $piece) { 
+      foreach ($pieces as $piece) {
         $value = $strtolower(CRM_Core_DAO::escapeString(trim($piece)));
         if (strlen($value)) {
           // Added If as a sanitization - without it, when you do an OR search, any string with
           // double spaces (i.e. "  ") or that has a space after the keyword (e.g. "OR: ") will
           // return all contacts because it will include a condition similar to "OR contact
-          // name LIKE '%'".  It might be better to replace this with array_filter. 
+          // name LIKE '%'".  It might be better to replace this with array_filter.
           $fieldsub = array();
           if ($wildcard) {
             if ($config->includeWildCardInName) {
               $value = "'%$value%'";
-            } 
+            }
             else {
               $value = "'$value%'";
             }
             $op = 'LIKE';
-          } 
+          }
           else {
             $value = "'%$value%'";
           }
@@ -341,29 +341,29 @@ class CRM_Grant_BAO_PaymentSearch {
           // I seperated the glueing in two.  The first stage should always be OR because we are searching for matches in *ANY* of these fields
         }
       }
-    } 
+    }
 
     $sub = ' ( ' . implode($subGlue, $sub) . ' ) ';
     $this->_where[$grouping][] = $sub;
     $this->_qill[$grouping][]  = ts('Payee Name like') . " - '$name'";
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1; 
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
 
   function paymentDates($values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
-       
+
     if (($name == 'payment_created_date_low') || ($name == 'payment_created_date_high')) {
-            
-      $this->dateQueryBuilder( 
+
+      $this->dateQueryBuilder(
         $values,
-        'civicrm_payment', 
-        'payment_created_date', 
-        'payment_created_date', 
-        ts('Date') 
+        'civicrm_payment',
+        'payment_created_date',
+        'payment_created_date',
+        ts('Date')
       );
-    } 
+    }
   }
-    
+
   function &getWhereValues($name, $grouping)  {
     $result = NULL;
     foreach ($this->_params as $id => $values) {
@@ -374,13 +374,13 @@ class CRM_Grant_BAO_PaymentSearch {
     return $result;
   }
 
-  function dateQueryBuilder( 
+  function dateQueryBuilder(
     &$values,
-    $tableName, 
-    $fieldName, 
-    $dbFieldName, 
+    $tableName,
+    $fieldName,
+    $dbFieldName,
     $fieldTitle,
-    $appendTimeStamp = TRUE 
+    $appendTimeStamp = TRUE
   ) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
 
@@ -416,7 +416,7 @@ class CRM_Grant_BAO_PaymentSearch {
           $secondDate = CRM_Utils_Date::processDate($secondValue);
         }
 
-      } 
+      }
       else if ($name == $fieldName . '_high') {
         $firstOP = '<=';
         $firstPhrase = 'less than or equal to';
@@ -455,11 +455,11 @@ class CRM_Grant_BAO_PaymentSearch {
 ( {$tableName}.{$dbFieldName} $firstOP '$firstDate' ) AND
 ( {$tableName}.{$dbFieldName} $secondOP '$secondDate' )
 ";
-        $this->_qill[$grouping][]  = 
+        $this->_qill[$grouping][]  =
           "$fieldTitle - $firstPhrase \"$firstDateFormat\" " .
           ts('AND') .
           " $secondPhrase \"$secondDateFormat\"";
-      } 
+      }
       else {
         $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $firstOP '$firstDate'";
         $this->_qill[$grouping][]  = "$fieldTitle - $firstPhrase \"$firstDateFormat\"";
@@ -477,7 +477,7 @@ class CRM_Grant_BAO_PaymentSearch {
       }
 
       $format = CRM_Utils_Date::customFormat($date);
-            
+
       if ($date) {
         $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op '$date'";
         if ($tableName == 'civicrm_log' &&
@@ -487,7 +487,7 @@ class CRM_Grant_BAO_PaymentSearch {
           $addedDateQuery = 'select id from civicrm_log group by entity_id order by id';
           $this->_where[$grouping][] = "civicrm_log.id IN ( {$addedDateQuery} )";
         }
-      } 
+      }
       else {
         $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op";
       }
@@ -498,70 +498,70 @@ class CRM_Grant_BAO_PaymentSearch {
 
   function amount(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
-        
+
     if (!$op) {
       $op = '=';
     }
-    $n = trim($value); 
+    $n = trim($value);
     if (strtolower($n) == 'odd') {
       $this->_where[$grouping][] = " ( civicrm_payment.amount % 2 = 1 )";
       $this->_qill[$grouping][] = ts('Payment Amount is odd');
-    } 
+    }
     elseif (strtolower($n) == 'even') {
       $this->_where[$grouping][] = " ( civicrm_payment.amount % 2 = 0 )";
       $this->_qill[$grouping][]  = ts('Payment Amount is even');
-    } 
+    }
     else {
       $value = strtolower(CRM_Core_DAO::escapeString($n));
       $value = "'$value'";
-             
+
       $this->_where[$grouping][] = " ( civicrm_payment.amount $op $value )";
       $this->_qill[$grouping][]  = ts( 'Payment Amount' ) . " $op '$n'";
-    }         
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1; 
+    }
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
 
   function payment_number(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
-         
+
     if (!$op) {
       $op = '=';
     }
-    $n = trim($value); 
+    $n = trim($value);
     if (strtolower($n) == 'odd') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_number % 2 = 1 )";
       $this->_qill[$grouping][]  = ts( 'Payment Batch Number is odd' );
-    } 
+    }
     elseif (strtolower($n) == 'even') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_number % 2 = 0 )";
       $this->_qill[$grouping][]  = ts('Payment Batch Number is even');
-    } 
+    }
     else {
       $value = strtolower(CRM_Core_DAO::escapeString($n));
       $value = "'$value'";
-             
+
       $this->_where[$grouping][] = " ( civicrm_payment.payment_number $op $value )";
-      $this->_qill[$grouping][]  = ts('Payment Number') . " $op '$n'";
+      $this->_qill[$grouping][]  = ts('Check Number') . " $op '$n'";
     }
-         
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1; 
+
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
-     
+
   function payment_batch_number(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
-        
+
     if (!$op) {
       $op = '=';
     }
-    $n = trim($value); 
+    $n = trim($value);
     if (strtolower($n) == 'odd') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_batch_number % 2 = 1 )";
       $this->_qill[$grouping][] = ts('Payment Batch Number is odd');
-    } 
+    }
     elseif (strtolower($n) == 'even') {
       $this->_where[$grouping][] = " ( civicrm_payment.payment_batch_number % 2 = 0 )";
       $this->_qill[$grouping][] = ts('Payment Batch Number is even');
-    } 
+    }
     else {
       $value = strtolower(CRM_Core_DAO::escapeString($n));
       $value = "'$value'";
@@ -570,32 +570,32 @@ class CRM_Grant_BAO_PaymentSearch {
       $this->_qill[$grouping][]  = ts('Payment Batch Number') . " $op '$n'";
     }
 
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1; 
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
 
   function grantID(&$values) {
     $this->_where[$grouping][] = " ( civicrm_entity_payment.entity_id = $values )";
-    $this->_tables['civicrm_entity_payment'] = $this->_whereTables['civicrm_entity_payment'] = 1; 
+    $this->_tables['civicrm_entity_payment'] = $this->_whereTables['civicrm_entity_payment'] = 1;
   }
 
-  /** 
-   * build select for CiviGrant 
-   * 
-   * @return void  
-   * @access public  
+  /**
+   * build select for CiviGrant
+   *
+   * @return void
+   * @access public
    */
-  function select() {   
-    $this->_select['id'] = 'civicrm_payment.id as id';
-    $this->_select['payable_to_name'] = 'civicrm_payment.payable_to_name as payable_to_name';
-    $this->_select['payment_batch_number'] = 'civicrm_payment.payment_batch_number as payment_batch_number';
-    $this->_select['payment_number'] = 'civicrm_payment.payment_number as payment_number';
-    $this->_select['payment_status_id'] = 'civicrm_payment.payment_status_id as payment_status_id';
-    $this->_select['payment_created_date'] = 'civicrm_payment.payment_created_date as payment_created_date';
-    $this->_select['amount'] = 'civicrm_payment.amount as amount';
+  function select() {
+    $this->_select['id'] = 'p.id as id';
+    $this->_select['payable_to_name'] = 'cc.display_name as payable_to_name';
+    $this->_select['payment_batch_number'] = 'b.id as payment_batch_number';
+    $this->_select['payment_status_id'] = 'p.payment_status_id';
+    $this->_select['payment_created_date'] = 'p.payment_created_date';
+    $this->_select['amount'] = 'ft.total_amount as amount';
+    $this->_select['payment_number'] = 'ft.check_number as payment_number';
     return $this->_select;
   }
-    
-  function element() {    
+
+  function element() {
     $this->_element['id'] = 1;
     $this->_element['payable_to_name'] = 1;
     $this->_element['payment_batch_number'] = 1;
@@ -606,14 +606,14 @@ class CRM_Grant_BAO_PaymentSearch {
     return $this->_select;
     return $this->_element;
   }
-    
-  /** 
+
+  /**
    * Given a list of conditions in params generate the required
    * where clause
-   * 
-   * @return void 
-   * @access public 
-   */ 
+   *
+   * @return void
+   * @access public
+   */
   static function where(&$query) {
     foreach (array_keys($query->_params) as $id) {
       if (substr($query->_params[$id][0], 0, 6) == 'grant_') {
@@ -621,7 +621,7 @@ class CRM_Grant_BAO_PaymentSearch {
       }
     }
   }
-  
+
   /**
    * getter for the qill object
    *
@@ -631,9 +631,9 @@ class CRM_Grant_BAO_PaymentSearch {
   function qill() {
     return (isset($this->_qill)) ? $this->_qill : "";
   }
-   
+
   static function defaultReturnProperties($mode,
-    $includeCustomFields = TRUE 
+    $includeCustomFields = TRUE
   ) {
     $properties = NULL;
     if ($mode & CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT) {
@@ -653,41 +653,50 @@ class CRM_Grant_BAO_PaymentSearch {
   /**
    * add all the elements shared between grant search and advanaced search
    *
-   * @access public 
+   * @access public
    * @return void
    * @static
-   */   
-        
+   */
+
   static function addShowHide(&$showHide) {
     $showHide->addHide('grantForm');
     $showHide->addShow('grantForm_show');
   }
-    
+
   static function searchAction(&$row, $id) {
   }
 
   static function tableNames(&$tables) {
   }
-  
+
+
   function query($count = FALSE, $sortByChar = FALSE, $groupContacts = FALSE) {
     $select = 'SELECT ';
     if (!$count) {
       if (! empty($this->_select)) {
         $select .= implode(', ', $this->_select);
       }
-    } 
+    }
     else {
       $select .= "count( DISTINCT ".$this->_distinctComponentClause." ) ";
     }
-    $from = '';
-    if (!empty($this->_fromClause)) {
-      $from = $this->_fromClause;
-    }
+    $from = " FROM civicrm_payment p
+     LEFT JOIN civicrm_financial_trxn ft ON ft.id = p.financial_trxn_id
+     LEFT JOIN civicrm_entity_financial_trxn eft ON eft.financial_trxn_id = ft.id AND eft.entity_table = 'civicrm_grant'
+     LEFT JOIN civicrm_grant g ON g.id = eft.entity_id
+     LEFT JOIN civicrm_entity_financial_trxn eft1 ON eft1.financial_trxn_id = ft.id AND eft1.entity_table = 'civicrm_financial_item'
+     LEFT JOIN civicrm_financial_item fi ON fi.id = eft1.entity_id
+     LEFT JOIN civicrm_grant_program gp ON gp.id = g.grant_program_id
+     LEFT JOIN civicrm_entity_batch eb ON eb.entity_id = ft.id AND eb.entity_table = 'civicrm_financial_trxn'
+     LEFT JOIN civicrm_batch b ON eb.batch_id = b.id
+     LEFT JOIN civicrm_contact cc ON cc.id = fi.contact_id
+    ";
+
     $where = '';
     if (!empty($this->_whereClause)) {
       $where = "WHERE {$this->_whereClause}";
     }
-        
+
     $having = '';
     if (!empty($this->_having)) {
       foreach ($this->_having as $havingsets) {
@@ -699,34 +708,34 @@ class CRM_Grant_BAO_PaymentSearch {
     }
     return array($select, $from, $where, $having);
   }
-    
-  function searchQuery( 
-    $offset = 0, 
-    $rowCount = 0, 
-    $sort = NULL, 
-    $count = FALSE, 
+
+  function searchQuery(
+    $offset = 0,
+    $rowCount = 0,
+    $sort = NULL,
+    $count = FALSE,
     $includeContactIds = FALSE,
-    $sortByChar = FALSE, 
+    $sortByChar = FALSE,
     $groupContacts = FALSE,
     $returnQuery = FALSE,
-    $additionalWhereClause = NULL, 
+    $additionalWhereClause = NULL,
     $sortOrder = NULL,
     $additionalFromClause = NULL,
-    $skipOrderAndLimit = FALSE 
+    $skipOrderAndLimit = FALSE
   ) {
-        
+
     list($select, $from, $where, $having) = $this->query($count, $sortByChar, $groupContacts);
     $order = $orderBy = $limit = '';
     if (!$count)  {
-            
+
       $config = CRM_Core_Config::singleton();
       if ($config->includeOrderByClause ||
         isset($this->_distinctComponentClause)) {
-             
+
         if ($sort) {
           if (is_string($sort)) {
             $orderBy = $sort;
-          } 
+          }
           else {
             $orderBy = trim($sort->orderBy());
           }
@@ -736,36 +745,40 @@ class CRM_Grant_BAO_PaymentSearch {
               $order .= " $sortOrder";
             }
           }
-        } 
-        elseif ($sortByChar) { 
-          $order = " ORDER BY UPPER(LEFT(civicrm_payment.payable_to_name, 1)) asc";
-        } 
+        }
+        elseif ($sortByChar) {
+          $order = " ORDER BY UPPER(LEFT(cc.display_name, 1)) asc";
+        }
         else {
-          $order = " ORDER BY civicrm_payment.payable_to_name asc, civicrm_payment.id";
+          $order = " ORDER BY cc.display_name asc, ft.id";
         }
       }
 
       if ($rowCount > 0 && $offset >= 0) {
         $limit = " LIMIT $offset, $rowCount ";
-                
+
         if (isset($this->_distinctComponentClause)) {
           $limitSelect = "SELECT {$this->_distinctComponentClause}";
-        } 
+        }
         else {
           $limitSelect = ($this->_useDistinct) ?
-            'SELECT DISTINCT(civicrm_payment.id) as id' :
-            'SELECT civicrm_payment.id as id';
+            'SELECT DISTINCT(ft.id) as id' :
+            'SELECT ft.id as id';
         }
       }
-      $groupBy = 'GROUP BY civicrm_payment.id';
+      $groupBy = 'GROUP BY ft.id';
       $query = "$select $from $where $having $groupBy $order $limit";
     }
-        
+
     if ($count) {
       $query = "$select $from $where";
       return CRM_Core_DAO::singleValueQuery($query);
     }
-       
+    elseif (empty($query)) {
+      $query = "$select $from $where $having $groupBy $order $limit";
+    }
+    //CRM_Core_Error::debug_var('q', $query);
+
     $dao = CRM_Core_DAO::executeQuery($query);
     if ($groupContacts) {
       $ids = array();
@@ -804,14 +817,14 @@ class CRM_Grant_BAO_PaymentSearch {
     }
 
     if (!$skipWhere) {
-      $skipWhere = array( 
-        'task', 
-        'radio_ts', 
+      $skipWhere = array(
+        'task',
+        'radio_ts',
         'uf_group_id',
-        'component_mode', 
-        'qfKey', 
+        'component_mode',
+        'qfKey',
         'operator',
-        'display_relationship_type' 
+        'display_relationship_type'
       );
     }
 
@@ -828,10 +841,10 @@ class CRM_Grant_BAO_PaymentSearch {
     if (!$useEquals &&
       in_array($id, $likeNames)) {
       $result = array($id, 'LIKE', $values, 0, 1);
-    } 
+    }
     elseif (is_string($values) && strpos($values, '%') !== FALSE) {
       $result = array($id, 'LIKE', $values, 0, 0);
-    } 
+    }
     elseif ($id == 'group') {
       if (is_array($values)) {
         foreach ($values as $groupIds => $val) {
@@ -843,7 +856,7 @@ class CRM_Grant_BAO_PaymentSearch {
             }
           }
         }
-      } 
+      }
       else {
         $groupIds = explode(',', $values);
         unset($values);
@@ -852,7 +865,7 @@ class CRM_Grant_BAO_PaymentSearch {
         }
       }
       $result = array($id, 'IN', $values, 0, 0);
-    } 
+    }
     elseif ($id == 'contact_tags' || $id == 'tag') {
       if (!is_array($values)) {
         $tagIds = explode(',', $values);
@@ -862,7 +875,7 @@ class CRM_Grant_BAO_PaymentSearch {
         }
       }
       $result = array($id, 'IN', $values, 0, 0);
-    } 
+    }
     else {
       $result = array($id, '=', $values, 0, $wildcard);
     }
