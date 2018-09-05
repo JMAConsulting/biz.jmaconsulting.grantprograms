@@ -27,7 +27,7 @@
 <div class="crm-block crm-form-block crm-search-form-block">
 	<div class="crm-accordion-wrapper crm-member_search_form-accordion {if $rows}crm-accordion-closed{else}crm-accordion-open{/if}">
 	 <div class="crm-accordion-header crm-master-accordion-header">
-	    <div class="icon crm-accordion-pointer"></div> 
+	    <div class="icon crm-accordion-pointer"></div>
 	    {ts}Edit Search Criteria{/ts}
  	 </div><!-- /.crm-accordion-header -->
 	<div class="crm-accordion-body">
@@ -37,38 +37,44 @@
         </div>
         <table class="form-layout">
             <tr>
-               <td class="font-size12pt" colspan="4">
-                    {$form.payable_to_name.label}&nbsp;&nbsp;{$form.payable_to_name.html|crmReplace:class:'twenty'}&nbsp;&nbsp;&nbsp;{$form.buttons.html}<br />
-               </td>       
+               <td class="font-size12pt">
+                    {$form.payable_to_name.label}&nbsp;&nbsp;{$form.payable_to_name.html}<br />
+               </td>
+               <td>
+                 {$form.payment_status_id.label}&nbsp;&nbsp;
+                 {$form.payment_status_id.html}
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td>
+                      <label>{ts}Payment Created:{/ts}</label>
+                    </td>
+                      {include file="CRM/Core/DateRange.tpl" fieldName="payment_created_date" from='_low' to='_high'}
+                  </tr>
+                </table>
+              </td>
             </tr>
             <tr>
-	       <td colspan="2">
-                    {$form.payment_status_id.label}&nbsp;&nbsp;
-                    {$form.payment_status_id.html}
-               </td>
-               <td colspan="2">
+               <td >
                     {$form.payment_batch_number.label}&nbsp;&nbsp;
                     {$form.payment_batch_number.html}
                </td>
-               <td colspan="2">
+               <td>
                     {$form.payment_number.label}&nbsp;&nbsp;
-                    {$form.payment_number.html} 
+                    {$form.payment_number.html}
                </td>
-             </tr>
-	     	<tr> 
-		<td colspan="2">
-		{$form.payment_created_date_low.label}&nbsp;&nbsp;
-        	{include file="CRM/common/jcalendar.tpl" elementName=payment_created_date_low}
-		</td>
-	       <td colspan="2">
-                    {$form.payment_created_date_high.label}&nbsp;&nbsp;
-                    {include file="CRM/common/jcalendar.tpl" elementName=payment_created_date_high}
-               </td>
-               <td colspan="2">
-                    {$form.amount.label}&nbsp;&nbsp;
-                    {$form.amount.html}
-               </td>
-             </tr>    
+               <td colspan="3">
+                 {ts}Amounts{/ts}</label> <br />
+                 {$form.amount_low.label}
+                 {$form.amount_low.html} &nbsp;&nbsp;
+                 {$form.amount_high.label}
+                 {$form.amount_high.html}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">{$form.buttons.html}</td>
+            </tr>
         </table>
         {/strip}
     </div><!-- /.crm-accordion-body -->
@@ -81,7 +87,7 @@
     </div>
 {/if}
 {if $rows}
-    {* Search request has returned 1 or more matching rows. Display results and collapse the search criteria fieldset. *}    
+    {* Search request has returned 1 or more matching rows. Display results and collapse the search criteria fieldset. *}
 	<div class="crm-results-block">
         {* This section handles form elements for action task select and submit *}
         <div class="crm-search-tasks">
@@ -94,20 +100,8 @@
     </div><!-- /.crm-results-block -->
 {/if}
 </div><!-- /.crm-content-block -->
-{if $download}
-<div id ="download"> 
-<a href={$download} class="download" "style="text-decoration: none;" >Download</a>
-</div>
-{/if}
-{literal}
 <script type="text/javascript">
-var download = "{/literal}{$download}{literal}";
-if ( download ) {
-cj("#download").hide();
-window.location.href = cj(".download").attr('href');
-}
-cj(function() {	
-   cj().crmAccordions(); 
-});
+{* this function is called to change the color of selected row(s) *}
+   var fname = "{$form.formName}";
+   on_load_init_checkboxes(fname);
 </script>
-{/literal}

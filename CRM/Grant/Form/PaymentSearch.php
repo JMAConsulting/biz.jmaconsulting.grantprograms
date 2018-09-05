@@ -236,20 +236,24 @@ class CRM_Grant_Form_PaymentSearch extends CRM_Core_Form {
     $this->add('select', 'payment_status_id',  ts('Status'),
       array('' => ts('- select -')) + $paymentStatus);
 
-    $this->addElement('text', 'payment_batch_number', ts('Batch Number'), array('size' => 8, 'maxlength' => 8));
+    $this->add('select', 'payment_batch_number',
+      ts('Batch'),
+        // CRM-19325
+        ['' => ts('None')] + CRM_Contribute_PseudoConstant::batch(),
+      FALSE, array('class' => 'crm-select2')
+    );
 
     $this->addElement('text', 'payment_number', ts('Payment Number'), array('size' => 10, 'maxlength' => 10));
 
-    $this->addDate('payment_created_date_low', ts('From'), FALSE, array('formatType' => 'searchDate'));
-    $this->addDate('payment_created_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
+    CRM_Core_Form_Date::buildDateRange($this, 'payment_created_date', 1, '_low', '_high', ts('From:'), FALSE);
 
     $this->addElement('text', 'payable_to_name', ts('Payee name'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantPayment', 'payable_to_name'));
 
-    $this->add('text', 'amount', ts('Amount'), array('size' => 8, 'maxlength' => 8));
-    /*
-     * add form checkboxes for each row. This is needed out here to conform to QF protocol
-     * of all elements being declared in builQuickForm
-     */
+    $this->add('text', 'amount_low', ts('From'), array('size' => 8, 'maxlength' => 8));
+    $this->addRule('amount_low', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('9.99', ' '))), 'money');
+
+    $this->add('text', 'amount_high', ts('To'), array('size' => 8, 'maxlength' => 8));
+    $this->addRule('amount_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
 
     $rows = $this->get('rows');
 
@@ -339,7 +343,7 @@ class CRM_Grant_Form_PaymentSearch extends CRM_Core_Form {
     if ($buttonName == $this->_actionButtonName || $buttonName == $this->_printButtonName) {
       // check actionName and if next, then do not repeat a search, since we are going to the next page
       // hack, make sure we reset the task values
-      $stateMachine =& $this->controller->getStateMachine();
+      $stateMachine = $this->controller->getStateMachine();
       $formName = $stateMachine->getTaskFormName();
       $this->controller->resetPage($formName);
       return;

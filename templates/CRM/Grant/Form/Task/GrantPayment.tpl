@@ -25,7 +25,6 @@
 *}
 
 {* this template is used for adding/editing/deleting financial type  *}
-<h2>{ts}Pay Grants{/ts}</h2>
 <div class="crm-block crm-form-block crm-contribution_type-form-block">
      <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
      <table class="form-layout-compressed">

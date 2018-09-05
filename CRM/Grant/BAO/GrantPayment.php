@@ -37,8 +37,9 @@
 
 class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
   const
-    STOP = 1,
-    REPRINT = 2;
+    STOP = 100,
+    REPRINT = 200,
+    WITHDRAW = 300;
   /**
    * static field for all the grant information that we can potentially export
    * @var array

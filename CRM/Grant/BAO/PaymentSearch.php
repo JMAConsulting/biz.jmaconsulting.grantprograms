@@ -138,9 +138,7 @@ class CRM_Grant_BAO_PaymentSearch {
     $this->_where[0] = array();
     $this->_qill[0] = array();
     $config = CRM_Core_Config::singleton();
-
-    if (!empty( $this->_params)) {
-
+    if (!empty($this->_params)) {
       foreach (array_keys($this->_params) as $id) {
         if (!CRM_Utils_Array::value(0, $this->_params[$id])) {
           continue;
@@ -171,7 +169,7 @@ class CRM_Grant_BAO_PaymentSearch {
       }
 
       if (!empty($this->_where[0])) {
-        $andClauses[] = ' ( ' . implode(" AND", $this->_where[0]) . ' ) ';
+        $andClauses[] = ' ( ' . implode(" AND ", $this->_where[0]) . ' ) ';
       }
       if (!empty($clauses)) {
         $andClauses[] = ' ( ' . implode(' OR ', $clauses) . ' ) ';
@@ -186,181 +184,67 @@ class CRM_Grant_BAO_PaymentSearch {
   }
 
   function whereClauseSingle(&$values) {
+    list($name, $op, $value, $grouping, $wildcard) = $values;
     switch ($values[0]) {
     case 'payment_status_id':
-      $this->payment_status($values);
+      $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("p.$name", $op, $value, 'Int');
+      $this->_qill[$grouping][] = ts('Payment Status is ') . CRM_Core_PseudoConstant::getLabel('CRM_Grant_DAO_GrantPayment', 'payment_status_id', $value);
+      $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
       return;
+
     case 'payable_to_name':
-      $this->payableName($values);
+      $op = 'LIKE';
+
+      if (empty(trim($value))) {
+        return;
+      }
+      $this->_qill[$grouping][] = ts(sprintf('Payee Name contains "%s"', $value));
+
+      $strtolower = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+      $value = '%' . $strtolower(CRM_Core_DAO::escapeString($value)) . '%';
+      $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("cc.display_name", $op, $value);
       return;
+
     case 'payment_batch_number':
-      $this->payment_batch_number($values);
+      $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("b.id", $op, $value, 'Int');
+      $this->_qill[$grouping][] = ts('Batch is - ') . CRM_Utils_Array::value($value, CRM_Contribute_PseudoConstant::batch());
       return;
+
     case 'payment_number':
-      $this->payment_number($values);
+      $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("ft.check_number", $op, $value);
+      $this->_qill[$grouping][] = ts('Payment Number is ') .  $value;
       return;
-    case 'amount':
-      $this->amount($values);
+
+    case 'payment_created_date_relative':
+      $from = $to = NULL;
+      if ($value) {
+        list($from, $to) = CRM_Utils_Date::getFromTo($value, $from, $to);
+        $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("p.payment_created_date", '>=', $from);
+        $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("p.payment_created_date", '<=', $to);
+        $this->_qill[$grouping][] = ts('Payment Created date from "%1" to "%2" ', [
+          1 => CRM_Utils_Date::customFormat($from),
+          2 => CRM_Utils_Date::customFormat($to),
+        ]);
+      }
       return;
+
+    case 'amount_low':
+    case 'amount_high':
+      // process min/max amount
+      $this->numberRangeBuilder($values,
+        'ft', 'amount',
+        'total_amount', 'Amount',
+        NULL
+      );
+      return;
+
     case 'payment_created_date_low':
     case 'payment_created_date_high':
-      $this->paymentDates($values);
+    $this->dateQueryBuilder($values,
+      'p', 'payment_created_date', 'payment_created_date', ts('Payment Created Date')
+    );
       return;
 
-    }
-  }
-
-  function payment_status(&$values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (!$op) {
-      $op = '=';
-    }
-    $n = trim($value);
-    if (strtolower($n) == 'odd') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id % 2 = 1 )";
-      $this->_qill[$grouping][]  = ts( 'Payment Status Id is odd' );
-    }
-    else if (strtolower($n) == 'even') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id % 2 = 0 )";
-      $this->_qill[$grouping][]  = ts('Payment Status Id is even');
-    }
-    else {
-      $value = strtolower(CRM_Core_DAO::escapeString($n));
-      $value = "'$value'";
-
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_status_id $op $value )";
-      $paymentStatus = CRM_Core_OptionGroup::values('payment');
-      $n =$paymentStatus[$n];
-      $this->_qill[$grouping][]  = ts('Payment Status') . " $op '$n'";
-    }
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
-  }
-
-  function payableName(&$values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-    $op = 'LIKE';
-    $newName = $name;
-    $name    = trim($value);
-
-    if (empty($name)) {
-      return;
-    }
-
-    $config = CRM_Core_Config::singleton();
-
-    $sub  = array();
-
-    //By default, $sub elements should be joined together with OR statements (don't change this variable).
-    $subGlue = ' OR ';
-
-    $strtolower = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
-
-    if (substr($name, 0, 1) == '"' &&
-         substr($name, -1, 1) == '"') {
-      //If name is encased in double quotes, the value should be taken to be the string in entirety and the
-      $value = substr($name, 1, -1);
-      $value = $strtolower(CRM_Core_DAO::escapeString($value));
-      $wc = ( $newName == 'payable_to_name') ? 'LOWER(civicrm_payment.payable_to_name)' : 'LOWER(civicrm_payment.payable_to_name)';
-
-      $sub[] = " ( $wc = '%$value%' ) ";
-    }
-    else if (strpos($name, ',') !== FALSE) {
-      // if we have a comma in the string, search for the entire string
-      $value = $strtolower(CRM_Core_DAO::escapeString($name));
-      if ($wildcard) {
-        if ($config->includeWildCardInName) {
-          $value = "'%$value%'";
-        }
-        else {
-          $value = "'$value%'";
-        }
-        $op = 'LIKE';
-      }
-      else {
-        $value = "'%$value%'";
-      }
-      if ($newName == 'payable_to_name') {
-        $wc = ($op != 'LIKE') ? "LOWER(civicrm_payment.payable_to_name)" : "civicrm_payment.payable_to_name";
-      }
-      $sub[] = " ( $wc $op $value )";
-    }
-    else {
-      //Else, the string should be treated as a series of keywords to be matched with match ANY/ match ALL depending on Civi config settings (see CiviAdmin)
-
-      // The Civi configuration setting can be overridden if the string *starts* with the case insenstive strings 'AND:' or 'OR:'
-      // TO THINK ABOUT: what happens when someone searches for the following "AND: 'a string in quotes'"? - probably nothing - it would make the AND OR variable reduntant because there is only one search string?
-
-      // Check to see if the $subGlue is overridden in the search text
-      if (strtolower(substr($name,  0,  4)) == 'and:') {
-        $name = substr($name, 4);
-        $subGlue = ' AND ';
-      }
-      if(strtolower(substr($name, 0, 3)) == 'or:') {
-        $name = substr($name, 3);
-        $subGlue = ' OR ';
-      }
-
-      $firstChar = substr($name, 0, 1);
-      $lastChar = substr($name, -1, 1);
-      $quotes = array("'", '"');
-      if (in_array($firstChar, $quotes) &&
-        in_array($lastChar, $quotes)) {
-        $name = substr($name,  1);
-        $name = substr($name, 0, -1);
-        $pieces = array($name);
-      }
-      else {
-        $pieces = explode(' ', $name);
-      }
-      foreach ($pieces as $piece) {
-        $value = $strtolower(CRM_Core_DAO::escapeString(trim($piece)));
-        if (strlen($value)) {
-          // Added If as a sanitization - without it, when you do an OR search, any string with
-          // double spaces (i.e. "  ") or that has a space after the keyword (e.g. "OR: ") will
-          // return all contacts because it will include a condition similar to "OR contact
-          // name LIKE '%'".  It might be better to replace this with array_filter.
-          $fieldsub = array();
-          if ($wildcard) {
-            if ($config->includeWildCardInName) {
-              $value = "'%$value%'";
-            }
-            else {
-              $value = "'$value%'";
-            }
-            $op = 'LIKE';
-          }
-          else {
-            $value = "'%$value%'";
-          }
-          if ($newName == 'payable_to_name') {
-            $wc = ($op != 'LIKE') ? "LOWER(civicrm_payment.payable_to_name)" : "civicrm_payment.payable_to_name";
-          }
-          $fieldsub[] = " ( $wc $op $value )";
-          $sub[] = ' ( ' . implode(' OR ', $fieldsub) . ' ) ';
-          // I seperated the glueing in two.  The first stage should always be OR because we are searching for matches in *ANY* of these fields
-        }
-      }
-    }
-
-    $sub = ' ( ' . implode($subGlue, $sub) . ' ) ';
-    $this->_where[$grouping][] = $sub;
-    $this->_qill[$grouping][]  = ts('Payee Name like') . " - '$name'";
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
-  }
-
-  function paymentDates($values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (($name == 'payment_created_date_low') || ($name == 'payment_created_date_high')) {
-
-      $this->dateQueryBuilder(
-        $values,
-        'civicrm_payment',
-        'payment_created_date',
-        'payment_created_date',
-        ts('Date')
-      );
     }
   }
 
@@ -372,205 +256,6 @@ class CRM_Grant_BAO_PaymentSearch {
       }
     }
     return $result;
-  }
-
-  function dateQueryBuilder(
-    &$values,
-    $tableName,
-    $fieldName,
-    $dbFieldName,
-    $fieldTitle,
-    $appendTimeStamp = TRUE
-  ) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (!$value) {
-      return;
-    }
-
-    if ($name == "{$fieldName}_low" ||
-      $name == "{$fieldName}_high") {
-      if (isset($this->_rangeCache[$fieldName])) {
-        return;
-      }
-      $this->_rangeCache[$fieldName] = 1;
-
-      $secondOP = $secondPhrase = $secondValue = $secondDate = $secondDateFormat = NULL;
-
-      if ($name == $fieldName . '_low') {
-        $firstOP = '>=';
-        $firstPhrase = 'greater than or equal to';
-        $firstDate = CRM_Utils_Date::processDate( $value );
-
-        $secondValues = $this->getWhereValues("{$fieldName}_high", $grouping);
-        if (!empty($secondValues) &&
-          $secondValues[2]) {
-          $secondOP = '<=';
-          $secondPhrase = 'less than or equal to';
-          $secondValue = $secondValues[2];
-
-          if ($appendTimeStamp &&
-            strlen($secondValue) == 10) {
-            $secondValue .= ' 23:59:59';
-          }
-          $secondDate = CRM_Utils_Date::processDate($secondValue);
-        }
-
-      }
-      else if ($name == $fieldName . '_high') {
-        $firstOP = '<=';
-        $firstPhrase = 'less than or equal to';
-
-        if ($appendTimeStamp &&
-          strlen($value) == 10) {
-          $value .= ' 23:59:59';
-        }
-        $firstDate = CRM_Utils_Date::processDate($value);
-
-        $secondValues = $this->getWhereValues("{$fieldName}_low", $grouping);
-        if (!empty($secondValues) &&
-          $secondValues[2]) {
-          $secondOP = '>=';
-          $secondPhrase = 'greater than or equal to';
-          $secondValue = $secondValues[2];
-          $secondDate = CRM_Utils_Date::processDate($secondValue);
-        }
-      }
-
-      if (!$appendTimeStamp) {
-        $firstDate = substr($date, 0, 8);
-      }
-      $firstDateFormat = CRM_Utils_Date::customFormat($firstDate);
-
-      if ($secondDate) {
-        if (!$appendTimeStamp) {
-          $secondDate = substr($secondDate, 0, 8);
-        }
-        $secondDateFormat = CRM_Utils_Date::customFormat($secondDate);
-      }
-
-      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
-      if ($secondDate) {
-        $this->_where[$grouping][] = "
-( {$tableName}.{$dbFieldName} $firstOP '$firstDate' ) AND
-( {$tableName}.{$dbFieldName} $secondOP '$secondDate' )
-";
-        $this->_qill[$grouping][]  =
-          "$fieldTitle - $firstPhrase \"$firstDateFormat\" " .
-          ts('AND') .
-          " $secondPhrase \"$secondDateFormat\"";
-      }
-      else {
-        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $firstOP '$firstDate'";
-        $this->_qill[$grouping][]  = "$fieldTitle - $firstPhrase \"$firstDateFormat\"";
-      }
-    }
-
-    if ($name == $fieldName) {
-      $op = '=';
-      $phrase = '=';
-
-      $date = CRM_Utils_Date::processDate($value);
-
-      if (!$appendTimeStamp) {
-        $date = substr($date, 0, 8);
-      }
-
-      $format = CRM_Utils_Date::customFormat($date);
-
-      if ($date) {
-        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op '$date'";
-        if ($tableName == 'civicrm_log' &&
-          $fieldName == 'added_log_date') {
-          //CRM-6903 --hack to check modified date of first record.
-          //as added date means first modified date of object.
-          $addedDateQuery = 'select id from civicrm_log group by entity_id order by id';
-          $this->_where[$grouping][] = "civicrm_log.id IN ( {$addedDateQuery} )";
-        }
-      }
-      else {
-        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op";
-      }
-      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
-      $this->_qill[$grouping][]  = "$fieldTitle - $phrase \"$format\"";
-    }
-  }
-
-  function amount(&$values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (!$op) {
-      $op = '=';
-    }
-    $n = trim($value);
-    if (strtolower($n) == 'odd') {
-      $this->_where[$grouping][] = " ( civicrm_payment.amount % 2 = 1 )";
-      $this->_qill[$grouping][] = ts('Payment Amount is odd');
-    }
-    elseif (strtolower($n) == 'even') {
-      $this->_where[$grouping][] = " ( civicrm_payment.amount % 2 = 0 )";
-      $this->_qill[$grouping][]  = ts('Payment Amount is even');
-    }
-    else {
-      $value = strtolower(CRM_Core_DAO::escapeString($n));
-      $value = "'$value'";
-
-      $this->_where[$grouping][] = " ( civicrm_payment.amount $op $value )";
-      $this->_qill[$grouping][]  = ts( 'Payment Amount' ) . " $op '$n'";
-    }
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
-  }
-
-  function payment_number(&$values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (!$op) {
-      $op = '=';
-    }
-    $n = trim($value);
-    if (strtolower($n) == 'odd') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_number % 2 = 1 )";
-      $this->_qill[$grouping][]  = ts( 'Payment Batch Number is odd' );
-    }
-    elseif (strtolower($n) == 'even') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_number % 2 = 0 )";
-      $this->_qill[$grouping][]  = ts('Payment Batch Number is even');
-    }
-    else {
-      $value = strtolower(CRM_Core_DAO::escapeString($n));
-      $value = "'$value'";
-
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_number $op $value )";
-      $this->_qill[$grouping][]  = ts('Check Number') . " $op '$n'";
-    }
-
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
-  }
-
-  function payment_batch_number(&$values) {
-    list($name, $op, $value, $grouping, $wildcard) = $values;
-
-    if (!$op) {
-      $op = '=';
-    }
-    $n = trim($value);
-    if (strtolower($n) == 'odd') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_batch_number % 2 = 1 )";
-      $this->_qill[$grouping][] = ts('Payment Batch Number is odd');
-    }
-    elseif (strtolower($n) == 'even') {
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_batch_number % 2 = 0 )";
-      $this->_qill[$grouping][] = ts('Payment Batch Number is even');
-    }
-    else {
-      $value = strtolower(CRM_Core_DAO::escapeString($n));
-      $value = "'$value'";
-
-      $this->_where[$grouping][] = " ( civicrm_payment.payment_batch_number $op $value )";
-      $this->_qill[$grouping][]  = ts('Payment Batch Number') . " $op '$n'";
-    }
-
-    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
   }
 
   function grantID(&$values) {
@@ -762,11 +447,11 @@ class CRM_Grant_BAO_PaymentSearch {
         }
         else {
           $limitSelect = ($this->_useDistinct) ?
-            'SELECT DISTINCT(ft.id) as id' :
-            'SELECT ft.id as id';
+            'SELECT DISTINCT(p.id) as id' :
+            'SELECT p.id as id';
         }
       }
-      $groupBy = 'GROUP BY ft.id';
+      $groupBy = 'GROUP BY p.id';
       $query = "$select $from $where $having $groupBy $order $limit";
     }
 
@@ -796,7 +481,7 @@ class CRM_Grant_BAO_PaymentSearch {
       return $params;
     }
     foreach ($formValues as $id => $values) {
-      $values = CRM_Grant_BAO_PaymentSearch::fixWhereValues($id, $values, $wildcard, $useEquals);
+      $values = self::fixWhereValues($id, $values, $wildcard, $useEquals);
       if (!$values) {
         continue;
       }
@@ -889,4 +574,216 @@ class CRM_Grant_BAO_PaymentSearch {
     }
     $this->_operator = $operator;
   }
+
+  /**
+   * Build query for a date field.
+   *
+   * @param array $values
+   * @param string $tableName
+   * @param string $fieldName
+   * @param string $dbFieldName
+   * @param string $fieldTitle
+   * @param bool $appendTimeStamp
+   * @param string $dateFormat
+   */
+  public function dateQueryBuilder(
+    &$values, $tableName, $fieldName,
+    $dbFieldName, $fieldTitle,
+    $appendTimeStamp = TRUE,
+    $dateFormat = 'YmdHis'
+  ) {
+    list($name, $op, $value, $grouping, $wildcard) = $values;
+
+    if ($name == "{$fieldName}_low" ||
+      $name == "{$fieldName}_high"
+    ) {
+
+      $secondOP = $secondPhrase = $secondValue = $secondDate = $secondDateFormat = NULL;
+
+      if ($name == $fieldName . '_low') {
+        $firstOP = '>=';
+        $firstPhrase = ts('greater than or equal to');
+        $firstDate = CRM_Utils_Date::processDate($value, NULL, FALSE, $dateFormat);
+
+        $secondValues = $this->getWhereValues("{$fieldName}_high", $grouping);
+        if (!empty($secondValues) && $secondValues[2]) {
+          $secondOP = '<=';
+          $secondPhrase = ts('less than or equal to');
+          $secondValue = $secondValues[2];
+
+          if ($appendTimeStamp && strlen($secondValue) == 10) {
+            $secondValue .= ' 23:59:59';
+          }
+          $secondDate = CRM_Utils_Date::processDate($secondValue, NULL, FALSE, $dateFormat);
+        }
+      }
+      elseif ($name == $fieldName . '_high') {
+        $firstOP = '<=';
+        $firstPhrase = ts('less than or equal to');
+
+        if ($appendTimeStamp && strlen($value) == 10) {
+          $value .= ' 23:59:59';
+        }
+        $firstDate = CRM_Utils_Date::processDate($value, NULL, FALSE, $dateFormat);
+
+        $secondValues = $this->getWhereValues("{$fieldName}_low", $grouping);
+        if (!empty($secondValues) && $secondValues[2]) {
+          $secondOP = '>=';
+          $secondPhrase = ts('greater than or equal to');
+          $secondValue = $secondValues[2];
+          $secondDate = CRM_Utils_Date::processDate($secondValue, NULL, FALSE, $dateFormat);
+        }
+      }
+
+      if (!$appendTimeStamp) {
+        $firstDate = substr($firstDate, 0, 8);
+      }
+      $firstDateFormat = CRM_Utils_Date::customFormat($firstDate);
+
+      if ($secondDate) {
+        if (!$appendTimeStamp) {
+          $secondDate = substr($secondDate, 0, 8);
+        }
+        $secondDateFormat = CRM_Utils_Date::customFormat($secondDate);
+      }
+
+      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
+      if ($secondDate) {
+        $this->_where[$grouping][] = "
+( {$tableName}.{$dbFieldName} $firstOP '$firstDate' ) AND
+( {$tableName}.{$dbFieldName} $secondOP '$secondDate' )
+";
+        $this->_qill[$grouping][] = "$fieldTitle - $firstPhrase \"$firstDateFormat\" " . ts('AND') . " $secondPhrase \"$secondDateFormat\"";
+      }
+      else {
+        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $firstOP '$firstDate'";
+        $this->_qill[$grouping][] = "$fieldTitle - $firstPhrase \"$firstDateFormat\"";
+      }
+    }
+
+    if ($name == $fieldName) {
+      //In Get API, for operators other then '=' the $value is in array(op => value) format
+      if (is_array($value) && !empty($value) && in_array(key($value), CRM_Core_DAO::acceptedSQLOperators(), TRUE)) {
+        $op = key($value);
+        $value = $value[$op];
+      }
+
+      $date = $format = NULL;
+      if (strstr($op, 'IN')) {
+        $format = array();
+        foreach ($value as &$date) {
+          $date = CRM_Utils_Date::processDate($date, NULL, FALSE, $dateFormat);
+          if (!$appendTimeStamp) {
+            $date = substr($date, 0, 8);
+          }
+          $format[] = CRM_Utils_Date::customFormat($date);
+        }
+        $date = "('" . implode("','", $value) . "')";
+        $format = implode(', ', $format);
+      }
+      elseif ($value && (!strstr($op, 'NULL') && !strstr($op, 'EMPTY'))) {
+        $date = CRM_Utils_Date::processDate($value, NULL, FALSE, $dateFormat);
+        if (!$appendTimeStamp) {
+          $date = substr($date, 0, 8);
+        }
+        $format = CRM_Utils_Date::customFormat($date);
+        $date = "'$date'";
+      }
+
+      if ($date) {
+        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op $date";
+      }
+      else {
+        $this->_where[$grouping][] = self::buildClause("{$tableName}.{$dbFieldName}", $op);
+      }
+
+      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
+
+      $op = CRM_Utils_Array::value($op, CRM_Core_SelectValues::getSearchBuilderOperators(), $op);
+      $this->_qill[$grouping][] = "$fieldTitle $op $format";
+    }
+  }
+
+  /**
+   * @param $values
+   * @param string $tableName
+   * @param string $fieldName
+   * @param string $dbFieldName
+   * @param $fieldTitle
+   * @param null $options
+   */
+  public function numberRangeBuilder(
+    &$values,
+    $tableName, $fieldName,
+    $dbFieldName, $fieldTitle,
+    $options = NULL
+  ) {
+    list($name, $op, $value, $grouping, $wildcard) = $values;
+
+    if ($name == "{$fieldName}_low" ||
+      $name == "{$fieldName}_high"
+    ) {
+      if (isset($this->_rangeCache[$fieldName])) {
+        return;
+      }
+      $this->_rangeCache[$fieldName] = 1;
+
+      $secondOP = $secondPhrase = $secondValue = NULL;
+
+      if ($name == "{$fieldName}_low") {
+        $firstOP = '>=';
+        $firstPhrase = ts('greater than');
+
+        $secondValues = $this->getWhereValues("{$fieldName}_high", $grouping);
+        if (!empty($secondValues)) {
+          $secondOP = '<=';
+          $secondPhrase = ts('less than');
+          $secondValue = $secondValues[2];
+        }
+      }
+      else {
+        $firstOP = '<=';
+        $firstPhrase = ts('less than');
+
+        $secondValues = $this->getWhereValues("{$fieldName}_low", $grouping);
+        if (!empty($secondValues)) {
+          $secondOP = '>=';
+          $secondPhrase = ts('greater than');
+          $secondValue = $secondValues[2];
+        }
+      }
+
+      if ($secondOP) {
+        $this->_where[$grouping][] = "
+( {$tableName}.{$dbFieldName} $firstOP {$value} ) AND
+( {$tableName}.{$dbFieldName} $secondOP {$secondValue} )
+";
+        $displayValue = $options ? $options[$value] : $value;
+        $secondDisplayValue = $options ? $options[$secondValue] : $secondValue;
+
+        $this->_qill[$grouping][]
+          = "$fieldTitle - $firstPhrase \"$displayValue\" " . ts('AND') . " $secondPhrase \"$secondDisplayValue\"";
+      }
+      else {
+        $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $firstOP {$value}";
+        $displayValue = $options ? $options[$value] : $value;
+        $this->_qill[$grouping][] = "$fieldTitle - $firstPhrase \"$displayValue\"";
+      }
+      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
+
+      return;
+    }
+
+    if ($name == $fieldName) {
+      $op = '=';
+      $phrase = '=';
+
+      $this->_where[$grouping][] = "{$tableName}.{$dbFieldName} $op {$value}";
+
+      $this->_tables[$tableName] = $this->_whereTables[$tableName] = 1;
+      $displayValue = $options ? $options[$value] : $value;
+      $this->_qill[$grouping][] = "$fieldTitle - $phrase \"$displayValue\"";
+    }
+  }
+
 }

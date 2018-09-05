@@ -148,7 +148,7 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
     $context = 'search'
   ) {
     // submitted form values
-    $this->_queryParams =& $queryParams;
+    $this->_queryParams = $queryParams;
 
 
     $this->_single  = $single;
@@ -197,19 +197,19 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
           'qs' => 'reset=1&id=%%id%%&action=view&context=%%cxt%%&selectedChild=grant' . $extraParams,
           'title' => ts('View Grant'),
                                        ),
-        121 => array(
+        CRM_Grant_BAO_GrantPayment::STOP => array(
           'name' => ts('Stop'),
           'url' => 'civicrm/grant/payment',
           'qs' => 'reset=1&action=stop&id=%%id%%&context=%%cxt%%' . $extraParams,
           'title' => ts('Edit Grant'),
         ),
-        1212 => array(
+        CRM_Grant_BAO_GrantPayment::REPRINT => array(
           'name' => ts('Reprint'),
           'url' => 'civicrm/grant/payment',
           'qs' => 'reset=1&action=reprint&id=%%id%%&context=%%cxt%%' . $extraParams,
           'title' => ts('Edit Grant'),
         ),
-        12121 => array(
+        CRM_Grant_BAO_GrantPayment::WITHDRAW => array(
           'name' => ts('Withdraw'),
           'url' => 'civicrm/grant/payment',
           'qs' => 'reset=1&action=withdraw&id=%%id%%&context=%%cxt%%' . $extraParams,
@@ -377,7 +377,7 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
           'direction' => CRM_Utils_Sort::DONTCARE,
               ),
         array(
-          'name' => ts('Check Number'),
+          'name' => ts('Payment Number'),
           'sort' => 'payment_number',
           'direction' => CRM_Utils_Sort::DONTCARE,
         ),

@@ -58,16 +58,11 @@
 
   <tr>
     <td colspan="2">
-    {if $printButtonName}
-       {$form.$printButtonName.html} &nbsp; &nbsp;
-    {else}
-       {$form._qf_PaymentSearch_next_print.html} &nbsp; &nbsp;
-     {/if}
      {$form.task.html}
     {if $actionButtonName}
        {$form.$actionButtonName.html} &nbsp; &nbsp;
     {else}
-     {$form._qf_PaymentSearch_next_action.html} 
+     {$form._qf_PaymentSearch_next_action.html}
    {/if}
     </td>
   </tr>{/if}

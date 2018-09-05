@@ -48,18 +48,18 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
    */
   function __construct($controller, $action = CRM_Core_Action::NONE) {
     parent::__construct($controller, $action);
-        
+
     $this->_pages = array();
-        
+
     $this->_pages['CRM_Grant_Form_PaymentSearch'] = NULL;
     list($task, $result) = $this->taskName($controller, 'PaymentSearch');
     $this->_task = $task;
-        
+
     if (is_array($task)) {
       foreach ($task as $t) {
         $this->_pages[$t] = NULL;
       }
-    } 
+    }
     elseif (!empty($task)) {
       $this->_pages[$task] = NULL;
     }
@@ -69,7 +69,7 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
     }
     $this->addSequentialPages($this->_pages, $action);
   }
-    
+
   /**
    * Determine the form name based on the action. This allows us
    * to avoid using  conditional state machine, much more efficient
@@ -84,8 +84,8 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
     // total hack, check POST vars and then session to determine stuff
     // fix value if print button is pressed
     if (CRM_Utils_Array::value( '_qf_' . $formName . '_next_print', $_POST)) {
-      $value = CRM_Grant_Task::PRINT_GRANTS;
-    } 
+      $value = CRM_Grant_Task::TASK_PRINT;
+    }
     else {
       $value = CRM_Utils_Array::value('task', $_POST);
     }
@@ -93,10 +93,10 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
       $value = $this->_controller->get('task');
     }
     $this->_controller->set('task', $value);
-        
-    return CRM_Grant_PaymentTask::getTask($value);  
+
+    return CRM_Grant_PaymentTask::getTask($value);
   }
-    
+
   /**
    * return the form name of the task
    *
@@ -107,4 +107,3 @@ class CRM_Grant_StateMachine_PaymentSearch extends CRM_Core_StateMachine {
     return CRM_Utils_String::getClassName($this->_task);
   }
 }
-

@@ -55,10 +55,10 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
   /**
    * Get payment fields
    */
-  public function getPaymentFields() {
+  public static function getPaymentFields($print) {
     return array(
       'check_number' => array(
-        'is_required' => TRUE,
+        'is_required' => $print,
         'add_field' => TRUE,
       ),
       'trxn_id' => array(
@@ -76,7 +76,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
         'htmlType' => 'datepicker',
         'name' => 'trxn_date',
         'title' => ts('Payment date to appear on cheques'),
-        'is_required' => TRUE,
+        'is_required' => $print,
         'attributes' => array(
           'date' => 'yyyy-mm-dd',
           'time' => 24,
@@ -89,7 +89,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
         'name' => 'contribution_batch_id',
         'title' => ts('Assign to Batch'),
         'attributes' => ['' => ts('None')] + CRM_Contribute_PseudoConstant::batch(),
-        'is_required' => TRUE,
+        'is_required' => $print,
       ],
     );
   }
@@ -100,7 +100,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
    * @return None
    * @access public
    */
-  public function buildQuickForm(){
+  public function buildQuickForm() {
+    CRM_Utils_System::setTitle(ts('Print Grants'));
     if ($this->_action & CRM_Core_Action::DELETE) {
       $this->addButtons([
         [
@@ -115,28 +116,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       ]);
       return;
     }
-
-    $paymentFields = $this->getPaymentFields();
-    $this->assign('paymentFields', $paymentFields);
-    foreach ($paymentFields as $name => $paymentField) {
-      if (!empty($paymentField['add_field'])) {
-        $attributes = array(
-          'entity' => 'FinancialTrxn',
-          'name' => $name,
-          'context' => 'create',
-          'action' => 'create',
-        );
-        $this->addField($name, $attributes, $paymentField['is_required']);
-      }
-      else {
-        $this->add($paymentField['htmlType'],
-          $name,
-          $paymentField['title'],
-          $paymentField['attributes'],
-          $paymentField['is_required']
-        );
-      }
-    }
+    self::buildPaymentBlock($this);
 
     $buttonName = $this->_prid ? 'Reprint Checks and CSV Export' : 'Create Checks and CSV Export';
     $this->addButtons([
@@ -152,6 +132,30 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
     ]);
   }
 
+  public static function buildPaymentBlock($form, $print = TRUE) {
+    $paymentFields = self::getPaymentFields($print);
+    $form->assign('paymentFields', $paymentFields);
+    foreach ($paymentFields as $name => $paymentField) {
+      if (!empty($paymentField['add_field'])) {
+        $attributes = array(
+          'entity' => 'FinancialTrxn',
+          'name' => $name,
+          'context' => 'create',
+          'action' => 'create',
+        );
+        $form->addField($name, $attributes, $paymentField['is_required']);
+      }
+      else {
+        $form->add($paymentField['htmlType'],
+          $name,
+          $paymentField['title'],
+          $paymentField['attributes'],
+          $paymentField['is_required']
+        );
+      }
+    }
+  }
+
   public function postProcess() {
     $values = $this->controller->exportValues($this->_name);
     $approvedGrants = $this->get('approvedGrants');
@@ -160,11 +164,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
     $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
     $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
     $checkID = CRM_Core_PseudoConstant::getKey('CRM_Contribute_DAO_Contribution', 'payment_instrument_id', 'Check');
-    $mailParams = $printedRows = $files = [];
+    $mailParams = $printedRows = $files = $trxnIDs = [];
     $totalAmount = $counter = 0;
-    $maxLimit = CRM_Utils_Array::value('Maximum number of checks per pdf file', CRM_Core_OptionGroup::values('grant_thresholds', TRUE));
-    $config = CRM_Core_Config::singleton();
-    $entityFileDAO = new CRM_Core_DAO_EntityFile();
 
     $dao = CRM_Core_DAO::executeQuery(sprintf("
     SELECT ft.id as ft_id, g.id as grant_id, fi.id as fi_id, g.financial_type_id, ft.to_financial_account_id, fi.currency, gp.is_auto_email, ft.total_amount, fi.contact_id, g.grant_program_id
@@ -192,12 +193,13 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
         'entity_id' => $grantID,
       ];
       $trxnID = civicrm_api3('FinancialTrxn', 'create', $financialTrxnParams)['id'];
+      $trxnIDs[] = $trxnID;
 
       $description = CRM_Utils_Array::value('description', $values, $grantPrograms[$dao->grant_program_id]);
       $financialParams = ['description' => $description, 'status_id' => CRM_Core_PseudoConstant::getKey('CRM_Financial_BAO_FinancialItem', 'status_id', 'Paid'), 'amount' => $dao->total_amount];
       $ids = ['id' => $dao->fi_id];
-      $trxnIDs = ['id' => $trxnID];
-      CRM_Financial_BAO_FinancialItem::create($financialParams, $ids, $trxnIDs);
+      $trxnids = ['id' => $trxnID];
+      CRM_Financial_BAO_FinancialItem::create($financialParams, $ids, $trxnids);
 
       civicrm_api3('EntityBatch', 'create', [
         'entity_table' => 'civicrm_financial_trxn',
@@ -225,6 +227,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       ];
       CRM_Grant_BAO_GrantPayment::add($grantPaymentRecord);
 
+
       $printedRows[$grantID] = [
         'contact_id' => $dao->contact_id,
         'financial_type_id' => $dao->financial_type_id,
@@ -238,7 +241,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
         'amount' => $dao->total_amount,
         'curreny' => $dao->currency,
         'payment_reason' => CRM_Utils_Array::value('description', $values, $grantPrograms[$dao->grant_program_id]),
-        'payment_status_id' => array_search('Completed', $contributionStatuses),
+        'payment_status_id' => $grantPaymentRecord['payment_status_id'],
         'replaces_payment_id' => NULL,
         'payment_details' => sprintf(
           '%s </td><td>%s</td><td>%s</td><td>%s',
@@ -256,23 +259,69 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       ));
     }
 
-    if (empty($printedRows)) {
-      return;
+    self::printPayments($this, $trxnIDs, CRM_Core_PseudoConstant::getKey('CRM_Grant_DAO_GrantPayment', 'payment_status_id', 'Printed'));
+  }
+
+  public static function printPayments($form, $trxnIDs, $statusID, $printPDF = TRUE) {
+    $totalAmount = 0;
+    $batchID = NULL;
+    $dao = CRM_Core_DAO::executeQuery(sprintf("
+    SELECT ft.id as ft_id, g.id as grant_id, fi.id as fi_id, g.financial_type_id, ft.to_financial_account_id, fi.currency, gp.is_auto_email, ft.total_amount, fi.contact_id, g.grant_program_id, fi.description, ft.trxn_date, ft.check_number, eb.batch_id
+      FROM civicrm_entity_financial_trxn eft
+       INNER JOIN civicrm_financial_trxn ft ON ft.id = eft.financial_trxn_id AND eft.entity_table = 'civicrm_grant'
+       INNER JOIN civicrm_grant g ON g.id = eft.entity_id
+       INNER JOIN civicrm_entity_financial_trxn eft1 ON eft1.financial_trxn_id = ft.id AND eft1.entity_table = 'civicrm_financial_item'
+       INNER JOIN civicrm_financial_item fi ON fi.id = eft1.entity_id
+       INNER JOIN civicrm_grant_program gp ON gp.id = g.grant_program_id
+       INNER JOIN civicrm_entity_batch eb ON eb.entity_id = ft.id AND eb.entity_table = 'civicrm_financial_trxn'
+      WHERE ft.id IN (%s) GROUP BY ft.id ", implode(', ', $trxnIDs)));
+    while($dao->fetch()) {
+      $batchID = $dao->batch_id;
+      $printedRows[$dao->ft_id] = [
+        'contact_id' => $dao->contact_id,
+        'financial_type_id' => $dao->financial_type_id,
+        'payment_batch_number' => $dao->batch_id,
+        'payment_number' => $dao->check_number,
+        'payment_date' => date("Y-m-d", strtotime($dao->trxn_date)),
+        'payment_created_date' => date('Y-m-d'),
+        // TODO remove CRM_Grant_BAO_GrantProgram::getDisplayName
+        'payable_to_name' => CRM_Contact_BAO_Contact::displayName($dao->contact_id),
+        'payable_to_address' => CRM_Utils_Array::value('address', CRM_Grant_BAO_GrantProgram::getAddress($dao->contact_id, NULL, TRUE)),
+        'amount' => $dao->total_amount,
+        'curreny' => $dao->currency,
+        'payment_reason' => $dao->description,
+        'payment_status_id' => $statusID,
+        'replaces_payment_id' => NULL,
+        'payment_details' => sprintf(
+          '%s </td><td>%s</td><td>%s</td><td>%s',
+          date("Y-m-d", strtotime($dao->trxn_date)),
+          $dao->grant_id,
+          CRM_Contact_BAO_Contact::displayName($dao->contact_id),
+          CRM_Utils_Money::format($dao->total_amount, NULL, NULL, FALSE)
+        ),
+        'total_in_words' => CRM_Grant_BAO_GrantProgram::convertNumberToWords($dao->total_amount),
+      ];
+      $totalAmount += $dao->total_amount;
+    }
+    $form->assign('grantPayment', $printedRows);
+
+    $maxLimit = CRM_Utils_Array::value('Maximum number of checks per pdf file', CRM_Core_OptionGroup::values('grant_thresholds', TRUE));
+    $config = CRM_Core_Config::singleton();
+    $entityFileDAO = new CRM_Core_DAO_EntityFile();
+    if ($printPDF) {
+      $counter = 0;
+      foreach (array_chunk($printedRows, $maxLimit, TRUE) as $payments) {
+        $downloadNamePDF = implode('_', [
+          check_plain('grantPayment'),
+          date('Ymdhis'),
+          $counter
+        ]) . '.pdf';
+        $fileName = CRM_Utils_File::makeFileName($downloadNamePDF);
+        $files[] = $fileName = $config->customFileUploadDir . CRM_Grant_BAO_GrantPayment::makePDF($fileName, $payments);
+        $counter++;
+      }
     }
 
-    foreach (array_chunk($printedRows, $maxLimit, TRUE) as $payments) {
-      $this->assign('grantPayment', $payments);
-      $downloadNamePDF = implode('_', [
-        check_plain('grantPayment'),
-        date('Ymdhis'),
-        $counter
-      ]) . '.pdf';
-      $fileName = CRM_Utils_File::makeFileName($downloadNamePDF);
-      $files[] = $fileName = $config->customFileUploadDir . CRM_Grant_BAO_GrantPayment::makePDF($fileName, $payments);
-      $counter++;
-    }
-
-    $this->assign('grantPayment', $printedRows);
     $downloadNameCSV = implode('_', [
       check_plain('grantPayment'),
       date('Ymdhis')
@@ -290,13 +339,13 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
     $entityFileDAO->file_id = $fileID;
     $entityFileDAO->save();
 
-    $this->assign('date', date('Y-m-d'));
-    $this->assign('time', date('H:i:s'));
-    $this->assign('batch_number', $values['contribution_batch_id']);
-    $this->assign('contact', CRM_Contact_BAO_Contact::displayName(CRM_Core_Session::getLoggedInContactID()));
-    $this->assign('total_payments', count($approvedGrantIDs));
-    $this->assign('total_amount' , CRM_Utils_Money::format($totalAmount, NULL, NULL,FALSE));
-    $this->assign('domain_name', CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Domain', CRM_Core_Config::domainID(), 'name'));
+    $form->assign('date', date('Y-m-d'));
+    $form->assign('time', date('H:i:s'));
+    $form->assign('batch_number', $batchID);
+    $form->assign('contact', CRM_Contact_BAO_Contact::displayName(CRM_Core_Session::getLoggedInContactID()));
+    $form->assign('total_payments', count($printedRows));
+    $form->assign('total_amount' , CRM_Utils_Money::format($totalAmount, NULL, NULL,FALSE));
+    $form->assign('domain_name', CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Domain', CRM_Core_Config::domainID(), 'name'));
     $checkFile = CRM_Utils_File::makeFileName(check_plain('CheckRegister') . '.pdf');
     $checkRegister = CRM_Grant_BAO_GrantPayment::makeReport($checkFile, $printedRows);
     $files[] = $config->customFileUploadDir . $checkRegister;

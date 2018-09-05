@@ -36,7 +36,7 @@
 
 /**
  * This class generates task actions for CiviEvent
- * 
+ *
  */
 class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
   /**
@@ -80,7 +80,7 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
 
   static function preProcessCommon(&$form, $useTable = FALSE) {
     $form->_grantIds = array();
-        
+
     if (!CRM_Utils_Array::value('prid', $_GET )) {
       $values = $form->controller->exportValues('PaymentSearch');
     }
@@ -97,18 +97,18 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
           $ids[] = substr($name, CRM_Core_Form::CB_PREFIX_LEN);
         }
       }
-    } 
+    }
     else {
       $queryParams = $form->get('queryParams');
-      $query = new CRM_Grant_BAO_PaymentSearch( 
-        $queryParams, 
-        NULL, 
-        NULL, 
-        FALSE, 
-        FALSE, 
+      $query = new CRM_Grant_BAO_PaymentSearch(
+        $queryParams,
+        NULL,
+        NULL,
+        FALSE,
+        FALSE,
         CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT
       );
-           
+
       $query->_distinctComponentClause = " civicrm_payment.id";
       $query->_groupByComponentClause  = " GROUP BY civicrm_payment.id ";
       $result = $query->searchQuery(0, 0, NULL);
@@ -123,7 +123,7 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
         implode(',', $ids) . ' ) ';
       $form->assign('totalSelectedGrants', count($ids));
     }
-        
+
     $form->_grantPaymentIds = $form->_componentIds = $ids;
 
     //set the context for redirection for any task actions
@@ -142,30 +142,8 @@ class CRM_Grant_Form_PaymentTask extends CRM_Core_Form {
    */
   public function setContactIDs() {
     $this->_contactIds =& CRM_Core_DAO::getContactIDsFromComponent($this->_grantIds,
-      'civicrm_grant' 
+      'civicrm_grant'
     );
   }
 
-  /**
-   * simple shell that derived classes can call to add buttons to
-   * the form with a customized title for the main Submit
-   *
-   * @param string $title title of the main button
-   * @param string $type  button type for the form after processing
-   * @return void
-   * @access public
-   */
-  function addDefaultButtons($title, $nextType = 'next', $backType = 'back') {
-    $this->addButtons(array(
-      array ( 
-        'type' => $nextType,
-        'name' => $title,
-        'isDefault' => TRUE),
-      array ( 
-        'type' => $backType,
-        'name' => ts('Back')),
-      )
-    );
-  }
 }
-
