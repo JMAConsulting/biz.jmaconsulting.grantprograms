@@ -259,4 +259,29 @@ public static function getPanesMapper(&$panes) {
    return $result;
  }
 
+ public static function buildSearchForm(&$form) {
+   $paymentStatus = CRM_Core_OptionGroup::values('grant_payment_status');
+   $form->add('select', 'payment_status_id',  ts('Status'),
+     array('' => ts('- select -')) + $paymentStatus);
+
+   $form->add('select', 'payment_batch_number',
+     ts('Batch'),
+       // CRM-19325
+       ['' => ts('None')] + CRM_Contribute_PseudoConstant::batch(),
+     FALSE, array('class' => 'crm-select2')
+   );
+
+   $form->addElement('text', 'payment_number', ts('Payment Number'), array('size' => 10, 'maxlength' => 10));
+
+   CRM_Core_Form_Date::buildDateRange($form, 'payment_created_date', 1, '_low', '_high', ts('From:'), FALSE);
+
+   $form->addElement('text', 'payable_to_name', ts('Payee name'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantPayment', 'payable_to_name'));
+
+   $form->add('text', 'amount_low', ts('From'), array('size' => 8, 'maxlength' => 8));
+   $form->addRule('amount_low', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('9.99', ' '))), 'money');
+
+   $form->add('text', 'amount_high', ts('To'), array('size' => 8, 'maxlength' => 8));
+   $form->addRule('amount_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
+ }
+
 }

@@ -101,6 +101,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask {
           $financialParams[$attr] = $values[$attr];
         }
       }
+      $replacedCheckNumber = CRM_Core_DAO::singleValueQuery('SELECT check_number FROM civicrm_financial_trxn WHERE id = ' . $financialTrxnID);
       if (!empty($financialParams)) {
         $financialParams['id'] = $financialTrxnID;
         civicrm_api3('FinancialTrxn', 'create', $financialParams);
@@ -132,6 +133,7 @@ class CRM_Grant_Form_Task_Reprint extends CRM_Grant_Form_PaymentTask {
         'payment_status_id' => $reprintedStatusID,
         'payment_reason' => CRM_Utils_Array::value('payment_reason', $values, $paymentDAO->payment_reason),
         'replaces_payment_id' => $paymentId,
+        'replaces_check_number' => $replacedCheckNumber,
       ];
       CRM_Grant_BAO_GrantPayment::add($grantPaymentRecord);
     }

@@ -169,8 +169,8 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
       CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT
     );
 
-    $this->_query->_distinctComponentClause = " ft.id";
-    $this->_query->_groupByComponentClause = " GROUP BY ft.id";
+    $this->_query->_distinctComponentClause = " p.id ";
+    $this->_query->_groupByComponentClause = " GROUP BY p.id";
 
   }
 
@@ -186,7 +186,6 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
    *
    */
   static function &links($key = NULL) {
-    $id = CRM_Utils_Request::retrieve('id', 'Integer', $this);
     $extraParams = ($key) ? "&key={$key}" : NULL;
 
     if (!(self::$_links)) {
@@ -199,21 +198,24 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
                                        ),
         CRM_Grant_BAO_GrantPayment::STOP => array(
           'name' => ts('Stop'),
-          'url' => 'civicrm/grant/payment',
-          'qs' => 'reset=1&action=stop&id=%%id%%&context=%%cxt%%' . $extraParams,
-          'title' => ts('Edit Grant'),
+          'url' => 'civicrm/grant-payment/actions',
+          'extra' => 'onclick="confirm(\'Do you want to stop this payment?\')"',
+          'qs' => 'reset=1&action=' . CRM_Grant_BAO_GrantPayment::STOP . '&id=%%id%%' . $extraParams,
+          'title' => ts('Stop Grant'),
         ),
         CRM_Grant_BAO_GrantPayment::REPRINT => array(
           'name' => ts('Reprint'),
-          'url' => 'civicrm/grant/payment',
-          'qs' => 'reset=1&action=reprint&id=%%id%%&context=%%cxt%%' . $extraParams,
-          'title' => ts('Edit Grant'),
+          'url' => 'civicrm/grant-payment/actions',
+          'extra' => 'onclick="confirm(\'Do you want to reprint this payment?\')"',
+          'qs' => 'reset=1&action=' . CRM_Grant_BAO_GrantPayment::REPRINT . '&id=%%id%%' . $extraParams,
+          'title' => ts('Reprint Grant'),
         ),
         CRM_Grant_BAO_GrantPayment::WITHDRAW => array(
           'name' => ts('Withdraw'),
-          'url' => 'civicrm/grant/payment',
-          'qs' => 'reset=1&action=withdraw&id=%%id%%&context=%%cxt%%' . $extraParams,
-          'title' => ts('Edit Grant'),
+          'url' => 'civicrm/grant-payment/actions',
+          'extra' => 'onclick="confirm(\'Do you want to withdraw this payment?\')"',
+          'qs' => 'reset=1&action=' . CRM_Grant_BAO_GrantPayment::WITHDRAW . '&id=%%id%%' . $extraParams,
+          'title' => ts('Withdraw Grant'),
         ),
       );
 
@@ -304,13 +306,11 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
 
     while ($result->fetch()) {
       $row = array();
-
       // the columns we are interested in
       foreach (self::$_properties as $property) {
         if (isset($result->$property)) {
           if ($property == 'payment_status_id') {
-            $paymentStatus = CRM_Core_OptionGroup::values('grant_payment_status');
-            $row[$property] = $paymentStatus[$result->$property];
+            $row[$property] = CRM_Core_PseudoConstant::getLabel('CRM_Grant_BAO_GrantPayment', 'payment_status_id', $result->$property);
           }
           else {
             $row[$property] = $result->$property;
@@ -322,10 +322,14 @@ class CRM_Grant_Selector_PaymentSearch extends CRM_Core_Selector_Base implements
       }
       $this->id = $result->id;
       $link = self::links( $this->_key);
-      if ( $result->payment_status_id == 2 || $result->payment_status_id == 4 ) {
-        unset($link[121]);
-        unset($link[1212]);
-        unset($link[12121]);
+      if (!in_array($result->payment_status_id, [
+        CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_GrantPayment', 'payment_status_id', 'Printed'),
+        CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_GrantPayment', 'payment_status_id', 'Reprinted')
+        ])
+      ) {
+        unset($link[CRM_Grant_BAO_GrantPayment::STOP]);
+        unset($link[CRM_Grant_BAO_GrantPayment::REPRINT]);
+        unset($link[CRM_Grant_BAO_GrantPayment::WITHDRAW]);
       }
 
       $row['action'] = CRM_Core_Action::formLink(

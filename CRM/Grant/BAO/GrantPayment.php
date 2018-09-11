@@ -440,4 +440,20 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     return $summary;
   }
 
+  public static function actions() {
+    $params = $_GET;
+    if ($params['action'] == CRM_Grant_BAO_GrantPayment::STOP) {
+      $dao = new CRM_Grant_DAO_GrantPayment();
+      $dao->id = $params['id'];
+      $dao->payment_status_id = CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_GrantPayment', 'payment_status_id', 'Stopped');
+      $dao->save();
+      CRM_Core_Session::setStatus(ts('Selected Grant Payment has been stopped successfully'));
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/search', '_qf_PaymentSearch_display=true&force=1&qfKey=' . $params['key']));
+    }
+    elseif ($params['action'] == CRM_Grant_BAO_GrantPayment::REPRINT) {
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/reprint', 'reset=1&prid=' . $params['id']));
+    }
+
+  }
+
 }

@@ -196,6 +196,17 @@ class CRM_Grant_DAO_GrantPayment extends CRM_Core_DAO
           'dataPattern' => '',
           'export' => true,
         ) ,
+        'replaces_check_number' => array(
+          'name' => 'replaces_check_number',
+          'type' => CRM_Utils_Type::T_STRING,
+          'maxlength' => 20,
+          'size' => CRM_Utils_Type::EIGHT,
+          'import' => true,
+          'where' => 'civicrm_payment.replaces_check_number',
+          'headerPattern' => '',
+          'dataPattern' => '',
+          'export' => true,
+        ) ,
       );
     }
     return self::$_fields;

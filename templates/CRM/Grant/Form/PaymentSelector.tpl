@@ -26,12 +26,13 @@
 {if $context EQ 'Search'}
     {include file="CRM/common/pager.tpl" location="top"}
 {/if}
+
 {strip}
-<table class="selector">
+<table class="selector row-highlight">
   <thead class="sticky">
-  <tr class="columnheader">
+  <tr>
   {if ! $single and $context eq 'Search' }
-     <th scope="col" title="Select Rows">{$form.toggleSelect.html}</th> 
+     <th scope="col" title="Select Rows">{$form.toggleSelect.html}</th>
   {/if}
   {foreach from=$columnHeaders item=header}
     <th scope="col">
@@ -47,17 +48,17 @@
   </thead>
 
   {counter start=0 skip=1 print=false}
-  {foreach from=$rows item=row}  
+  {foreach from=$rows item=row}
   <tr id='crm-payment_{$row.id}' class="{cycle values="odd-row,even-row"} crm-grant crm-grant_status-{$row.payment_status_id}">
 
- {if !$single }  
-     {if $context eq 'Search' }       
+ {if !$single }
+     {if $context eq 'Search' }
         {assign var=cbName value=$row.checkbox}
-        <td>{$form.$cbName.html}</td> 
-     {/if} 
+        <td>{$form.$cbName.html}</td>
+     {/if}
   {/if}
     <td class="crm-grant-grant_status">{$row.payment_status_id}</td>
-    <td class="crm-grant-grant_type">{$row.payment_batch_number}</td> 
+    <td class="crm-grant-grant_type">{$row.payment_batch_number}</td>
     <td class="crm-grant-grant_type">{$row.payment_number}</td>
     <td class="right crm-grant-grant_money_transfer_date">{$row.payment_created_date|truncate:10:''|crmDate}</td>
     <td class="crm-grant-grant_status">{$row.payable_to_name}</td>
@@ -73,14 +74,6 @@
 {/if}
 </table>
 {/strip}
-
-{if $context EQ 'Search'}
- <script type="text/javascript">
- {* this function is called to change the color of selected row(s) *}
-    var fname = "{$form.formName}";	
-    on_load_init_checkboxes(fname);
- </script>
-{/if}
 
 {if $context EQ 'Search'}
     {include file="CRM/common/pager.tpl" location="bottom"}

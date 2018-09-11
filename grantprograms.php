@@ -387,6 +387,8 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
       $form->add('select', 'status_id', ts('Grant Status'), $grantStatuses, TRUE);
     }
 
+    CRM_Grant_Form_Task_GrantPayment::buildPaymentBlock($form, FALSE);
+
     if ($form->getVar('_id')) {
       if (CRM_Core_Permission::check('administer CiviGrant')) {
         $form->add('text', 'assessment', ts('Assessment'));
@@ -611,8 +613,7 @@ function grantprograms_civicrm_queryObjects(&$queryObjects, $type) {
  * @param object $form form object
  *
  */
-function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
-  $errors = NULL;
+function grantprograms_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
   if ($formName == "CRM_Admin_Form_Options" && ($form->getVar('_action') & CRM_Core_Action::DELETE) && $form->getVar('_gName') == "grant_type") {
     $defaults = array();
     $valId = $form->getVar('_values');
@@ -629,7 +630,7 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
       CRM_Core_Session::setStatus(ts('You cannot delete this Grant Type because '. implode(' and ', $error ) .' are currently using it.'), ts("Sorry"), "error");
     }
   }
-  if ($formName == 'CRM_Grant_Form_Grant' && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
+  if ($formName == 'CRM_Grant_Form_Grant') {
     $defaults = array();
     $params['id'] = $form->_submitValues['grant_program_id'];
     CRM_Grant_BAO_GrantProgram::retrieve($params, $defaults);
@@ -639,6 +640,22 @@ function grantprograms_civicrm_validate($formName, &$fields, &$files, &$form) {
 
     if (CRM_Utils_Array::value('amount_granted', $fields) && $fields['amount_granted'] > 0 && !CRM_Utils_Array::value('financial_type_id', $fields) && CRM_Utils_Array::value('money_transfer_date', $fields)) {
       $errors['financial_type_id'] = ts('Financial Type is a required field if Amount is Granted');
+    }
+    if (!empty($fields['status_id'])) {
+      $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
+      if (in_array($grantStatuses[$fields['status_id']], ['Paid', 'Withdrawn', 'Approved for Payment']) && empty($fields['financial_type_id'])) {
+        $errors['financial_type_id'] = ts('Financial Type is a required field');
+      }
+      if ($grantStatuses[$fields['status_id']] == 'Paid') {
+        foreach([
+          'check_number' => ts('Check Number'),
+          'contribution_batch_id' => ts('Batch'),
+        ] as $attr => $label) {
+          if (empty($fields[$attr])) {
+            $errors[$attr] = ts($label . ' is a required field');
+          }
+        }
+      }
     }
   }
   if ($formName == 'CRM_Grant_Form_Search') {
@@ -731,7 +748,7 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
 
 function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName == 'Grant' && in_array($op, ['edit', 'create'])) {
-    $params = CRM_Core_BAO_Setting::getItem("grant params", 'grantprograms_civicrm_pre');
+    $params = CRM_Core_BAO_Cache::getItem("grant params", 'grantprograms_civicrm_pre');
     $smarty = CRM_Core_Smarty::singleton();
     $previousGrant = $smarty->get_template_vars('previousGrant');
     // core bug $op always return 'create'
@@ -787,7 +804,6 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
       $amount = $objectRef->amount_total;
       $financialItemStatusID = array_search('Paid', $financialItemStatus);
-      $params = [];
       if ($objectRef->status_id == array_search('Approved for Payment', $grantStatuses)) {
         $params['to_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
         $financialItemStatusID = array_search('Unpaid', $financialItemStatus);
@@ -829,6 +845,16 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           $trxnParams['from_financial_account_id'] = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
         }
         $trxnId = CRM_Core_BAO_FinancialTrxn::create($trxnParams);
+
+        if ($objectRef->status_id == array_search('Paid', $grantStatuses)) {
+          CRM_Grant_Form_Task_GrantPayment::processPaymentDetails([
+            'trxn_id' => $trxnId->id,
+            'batch_id' => $params['contribution_batch_id'],
+            'check_number' => $params['check_number'],
+            'description' => CRM_Utils_Array::value('description', $params),
+          ]);
+        }
+
         if ($createItem) {
           $financialAccountId = CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($objectRef->financial_type_id, 'Accounts Receivable Account is');
           $itemParams = array(
@@ -836,7 +862,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
             'contact_id' => $objectRef->contact_id,
             'currency' => $objectRef->currency,
             'amount' => $amount,
-            'description' => NULL,
+            'description' => CRM_Utils_Array::value('description', $params),
             'status_id' => $financialItemStatusID,
             'financial_account_id' => $financialAccountId,
             'entity_table' => 'civicrm_grant',

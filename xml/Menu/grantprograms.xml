@@ -48,6 +48,11 @@
     <access_arguments>access CiviCRM</access_arguments>
   </item>
   <item>
+    <path>civicrm/grant-payment/actions</path>
+    <page_callback>CRM_Grant_BAO_GrantPayment::actions</page_callback>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
     <path>civicrm/grant_program/processFinalization</path>
     <page_callback>CRM_Grant_Form_GrantProgramView::processFinalization</page_callback>
     <access_arguments>access CiviCRM</access_arguments>

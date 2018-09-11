@@ -51,7 +51,7 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
 
     //check permission for delete.
     if (!CRM_Core_Permission::checkActionPermission('CiviGrant', CRM_Core_Action::DELETE)) {
-      CRM_Core_Error::fatal(ts('You do not have permission to access this page'));  
+      CRM_Core_Error::fatal(ts('You do not have permission to access this page'));
     }
   }
 
@@ -77,23 +77,20 @@ class CRM_Grant_Form_Task_Cancel extends CRM_Grant_Form_PaymentTask {
   public function postProcess() {
     if (empty($this->_grantPaymentIds)) {
       return FALSE;
-    }    
-    // change status of payment(s) to Cancelled And grant status to Eligible
-    $query = "UPDATE civicrm_grant cg
-LEFT JOIN civicrm_entity_payment cep ON cep.entity_id = cg.id
-LEFT JOIN civicrm_payment cp ON cp.id = cep.payment_id
-SET cg.status_id = %1,
-cp.payment_status_id = %2
-WHERE  cp.id IN (" . implode(',', $this->_grantPaymentIds) . ") AND cep.entity_table = 'civicrm_grant'";
-    $params = array(
-      1 => array(CRM_Core_OptionGroup::getValue('grant_status', 'Eligible', 'name'), 'Integer'),
-      2 => array(CRM_Core_OptionGroup::getValue('grant_payment_status', 'Cancelled', 'name'), 'Integer'),
+    }
+
+    $sql = sprintf("UPDATE civicrm_payment p
+    INNER JOIN civicrm_entity_financial_trxn eft ON eft.financial_trxn_id = p.financial_trxn_id AND eft.entity_table = 'civicrm_grant'
+    INNER JOIN civicrm_grant g ON g.id = eft.entity_id
+    SET g.status_id = %s, p.payment_status_id = %s
+    WHERE p.id IN (%s) ",
+      CRM_Core_PseudoConstant::getKey('CRM_Grant_DAO_Grant', 'status_id', 'Eligible'),
+      CRM_Core_OptionGroup::getValue('grant_payment_status', 'Cancelled', 'name'),
+      implode(',', $this->_grantPaymentIds)
     );
-    CRM_Core_DAO::executeQuery($query, $params);
+    CRM_Core_DAO::executeQuery($sql);
 
     CRM_Core_Session::setStatus(ts('Cancel Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
     CRM_Core_Session::setStatus(ts('Total Selected Grant Payments(s): %1', array(1 => count($this->_grantPaymentIds))));
   }
 }
-
-

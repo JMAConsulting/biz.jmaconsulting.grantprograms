@@ -34,28 +34,9 @@ CREATE TABLE IF NOT EXISTS `civicrm_payment` (
   `payment_reason` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Payment Reason.',
   `payment_status_id` int(10) unsigned DEFAULT NULL COMMENT 'Payment Status ID',
   `replaces_payment_id` varchar(8) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Replaces Payment Id.',
+  `replaces_check_number` varchar(20) unsigned NOT NULL COMMENT 'Replaced Check Number',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
-
--- create civicrm_entity_payment
-CREATE TABLE IF NOT EXISTS `civicrm_entity_payment` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `payment_id` int(10) unsigned NOT NULL COMMENT 'Type of grant. Implicit FK to civicrm_payment.',
-  `entity_table` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Entity Table.',
-  `entity_id` int(10) unsigned NOT NULL COMMENT 'Entity ID',
-  PRIMARY KEY (`id`),
-  KEY `FK_civicrm_entity_payment_payment_id` (`payment_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `civicrm_entity_payment`
-
-ALTER TABLE `civicrm_entity_payment`
-  ADD CONSTRAINT `FK_civicrm_entity_payment_payment_id` FOREIGN KEY (`payment_id`) REFERENCES `civicrm_payment` (`id`);
 
 -- create civicrm_grant_program
 CREATE TABLE IF NOT EXISTS `civicrm_grant_program` (

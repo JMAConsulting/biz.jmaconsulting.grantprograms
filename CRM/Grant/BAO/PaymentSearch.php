@@ -57,7 +57,7 @@ class CRM_Grant_BAO_PaymentSearch {
     $displayRelationshipType = NULL,
     $operator = 'AND'
   ) {
-    $this->_params =& $params;
+    $this->_params = $params;
 
     if ($this->_params == NULL) {
       $this->_params = array();
@@ -185,11 +185,15 @@ class CRM_Grant_BAO_PaymentSearch {
 
   function whereClauseSingle(&$values) {
     list($name, $op, $value, $grouping, $wildcard) = $values;
+    $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
     switch ($values[0]) {
+    case 'id':
+      $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("p.$name", $op, $value, 'Int');
+      return;
+
     case 'payment_status_id':
       $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("p.$name", $op, $value, 'Int');
       $this->_qill[$grouping][] = ts('Payment Status is ') . CRM_Core_PseudoConstant::getLabel('CRM_Grant_DAO_GrantPayment', 'payment_status_id', $value);
-      $this->_tables['civicrm_payment'] = $this->_whereTables['civicrm_payment'] = 1;
       return;
 
     case 'payable_to_name':
@@ -270,13 +274,26 @@ class CRM_Grant_BAO_PaymentSearch {
    * @access public
    */
   function select() {
-    $this->_select['id'] = 'p.id as id';
-    $this->_select['payable_to_name'] = 'cc.display_name as payable_to_name';
-    $this->_select['payment_batch_number'] = 'b.id as payment_batch_number';
-    $this->_select['payment_status_id'] = 'p.payment_status_id';
-    $this->_select['payment_created_date'] = 'p.payment_created_date';
-    $this->_select['amount'] = 'ft.total_amount as amount';
-    $this->_select['payment_number'] = 'ft.check_number as payment_number';
+    $clauses = [
+      'id' => 'p.id as id',
+      'contact_id' => 'fi.contact_id',
+      'payable_to_name' => 'cc.display_name as payable_to_name',
+      'payment_batch_number' => 'b.id as payment_batch_number',
+      'payment_status_id' => 'p.payment_status_id',
+      'payment_created_date' => 'p.payment_created_date',
+      'amount' => 'ft.total_amount as amount',
+      'payment_number' => 'CASE WHEN p.replaces_check_number <> \'\' THEN p.replaces_check_number ELSE ft.check_number END AS payment_number',
+      'payment_created_date' => 'p.payment_created_date',
+      'payment_date' => 'ft.trxn_date as payment_date',
+      'currency' => 'fi.currency',
+      'payment_reason' => 'p.payment_reason',
+      'replaces_payment_id' => 'p.replaces_payment_id',
+    ];
+    foreach ($clauses as $property => $clause) {
+      if (!empty($this->_returnProperties[$property])) {
+        $this->_select[$property] = $clause;
+      }
+    }
     return $this->_select;
   }
 
@@ -288,7 +305,6 @@ class CRM_Grant_BAO_PaymentSearch {
     $this->_element['payment_status_id'] = 1;
     $this->_element['payment_created_date'] = 1;
     $this->_element['amount'] = 1;
-    return $this->_select;
     return $this->_element;
   }
 
@@ -301,9 +317,7 @@ class CRM_Grant_BAO_PaymentSearch {
    */
   static function where(&$query) {
     foreach (array_keys($query->_params) as $id) {
-      if (substr($query->_params[$id][0], 0, 6) == 'grant_') {
-        self::whereClauseSingle($query->_params[$id], $query);
-      }
+      self::whereClauseSingle($query->_params[$id], $query);
     }
   }
 
@@ -317,9 +331,7 @@ class CRM_Grant_BAO_PaymentSearch {
     return (isset($this->_qill)) ? $this->_qill : "";
   }
 
-  static function defaultReturnProperties($mode,
-    $includeCustomFields = TRUE
-  ) {
+  static function defaultReturnProperties($mode = CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT, $includeCustomFields = TRUE) {
     $properties = NULL;
     if ($mode & CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT) {
       $properties = array(
@@ -410,6 +422,7 @@ class CRM_Grant_BAO_PaymentSearch {
   ) {
 
     list($select, $from, $where, $having) = $this->query($count, $sortByChar, $groupContacts);
+    $groupBy = '';
     $order = $orderBy = $limit = '';
     if (!$count)  {
 
@@ -451,18 +464,13 @@ class CRM_Grant_BAO_PaymentSearch {
             'SELECT p.id as id';
         }
       }
-      $groupBy = 'GROUP BY p.id';
-      $query = "$select $from $where $having $groupBy $order $limit";
+      $groupBy = $this->_groupByComponentClause;
     }
 
+    $query = "$select $from $where $having $groupBy $order $limit";
     if ($count) {
-      $query = "$select $from $where";
       return CRM_Core_DAO::singleValueQuery($query);
     }
-    elseif (empty($query)) {
-      $query = "$select $from $where $having $groupBy $order $limit";
-    }
-    //CRM_Core_Error::debug_var('q', $query);
 
     $dao = CRM_Core_DAO::executeQuery($query);
     if ($groupContacts) {

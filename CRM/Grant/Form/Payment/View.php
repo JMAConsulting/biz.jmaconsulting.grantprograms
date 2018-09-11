@@ -1,85 +1,28 @@
 <?php
 
-/*
- +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
- |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
- +--------------------------------------------------------------------+
-*/
-
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2011
- * $Id$
- *
- */
-
 /**
  * This class generates form components for processing a Grant
- * 
+ *
  */
 class CRM_Grant_Form_Payment_View extends CRM_Core_Form {
 
-  /**  
-   * Function to set variables up before form is built  
-   *                                                            
-   * @return void  
-   * @access public  
+  /**
+   * Function to set variables up before form is built
+   *
+   * @return void
+   * @access public
    */
   public function preProcess() {
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
-    $context = CRM_Utils_Request::retrieve('context', 'String', $this); 
-    $this->assign('context', $context); 
-    $session = CRM_Core_Session::singleton();
-    $session->pushUserContext(CRM_Utils_System::url('civicrm/grant/payment/search', '_qf_PaymentSearch_display=true&force=1&reset=1')); 
-    $values = array(); 
-    $params['id'] = $this->_id;
-    CRM_Grant_BAO_GrantPayment::retrieve( $params, $values);
-    $paymentStatus = CRM_Core_OptionGroup::values( 'grant_payment_status' );
-    $contributionTypes = CRM_Grant_BAO_GrantProgram::contributionTypes();
-    $this->assign('payment_status_id', $paymentStatus[$values['payment_status_id']]);
-    $this->assign('financial_type_id', $contributionTypes[$values['financial_type_id']]);
- 
-    $grantTokens = array( 
-      'payment_batch_number',
-      'payment_number',
-      'payment_created_date',
-      'payment_date', 
-      'payable_to_name', 
-      'payable_to_address', 
-      'amount', 
-      'currency', 
-      'payment_reason', 
-      'replaces_payment_id' 
-    );
-
-    foreach ($grantTokens as $token) {
-      $this->assign($token, CRM_Utils_Array::value($token, $values));
+    $context = CRM_Utils_Request::retrieve('context', 'String', $this);
+    if (!$this->_action) {
+      $this->_action = $_REQUEST['action'];
     }
-
-    $this->assign('id', $this->_id);
+    $this->assign('context', $context);
+    $session = CRM_Core_Session::singleton();
+    $session->pushUserContext(CRM_Utils_System::url('civicrm/grant/payment/search', '_qf_PaymentSearch_display=true&force=1&reset=1'));
   }
-  
+
   /**
    * Function to build the form
    *
@@ -87,29 +30,62 @@ class CRM_Grant_Form_Payment_View extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
-    if ($this->_action & CRM_Core_Action::VIEW) { 
-      $this->addButtons(array(  
-        array ( 
-          'type' => 'cancel',  
-          'name' => ts('Cancel'),  
-          'isDefault' => TRUE)
-        )
-      );   
-    } 
-    elseif (($this->_action & CRM_Core_Action::STOP) || ($this->_action & CRM_Core_Action::REPRINT) || ($this->_action & CRM_Core_Action::WITHDRAW)) {
-      $this->addButtons(array( 
-        array ( 
-          'type' => 'submit',  
-          'name' => ts('OK'),  
-          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-          'isDefault' => TRUE), 
-        array ( 
-          'type' => 'cancel',  
-          'name' => ts('Cancel'),  
-          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',  
+    if ($this->_action == CRM_Core_Action::VIEW) {
+      $returnProperties = array_merge(
+        CRM_Grant_BAO_PaymentSearch::defaultReturnProperties(),
+        [
+          'id' => 1,
+          'contact_id' => 1,
+          'payment_created_date' => 1,
+          'payment_date' => 1,
+          'currency' => 1,
+          'payment_reason' => 1,
+          'replaces_payment_id' => 1,
+        ]
+      );
+      $params = ['id' => $this->_id];
+      $p = new CRM_Grant_BAO_PaymentSearch(
+        CRM_Grant_BAO_PaymentSearch::convertFormValues($params),
+        $returnProperties,
+        NULL,
+        FALSE,
+        FALSE,
+        CRM_Grant_BAO_PaymentSearch::MODE_GRANT_PAYMENT
+      );
+      $values = $p->searchQuery()->fetchAll()[0];
+      $values['payment_status_id'] = CRM_Core_PseudoConstant::getLabel('CRM_Grant_DAO_GrantPayment', 'payment_status_id', $values['payment_status_id']);
+      $values['payable_to_address'] = CRM_Grant_BAO_GrantProgram::getAddress($values['contact_id'], NULL, TRUE);
+
+      foreach (array_keys($returnProperties) as $token) {
+        $this->assign($token, CRM_Utils_Array::value($token, $values));
+      }
+
+      $this->addButtons(array(
+        array (
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
           'isDefault' => TRUE)
         )
       );
+    }
+    else {
+      $this->assign('action1', $this->_action);
+      if ($this->_action == CRM_Grant_BAO_GrantPayment::STOP) {
+        CRM_Utils_System::setTitle(ts('Stop Grants Payment'));
+        CRM_Core_Session::setStatus(ts('Selected Grant Payment has been stopped successfully.'), '', 'no-popup');
+      }
+      $this->addButtons(array(
+        array (
+          'type' => 'submit',
+          'name' => ts('OK'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'isDefault' => TRUE),
+        array (
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+        ),
+      ));
     }
   }
 
@@ -124,10 +100,10 @@ class CRM_Grant_Form_Payment_View extends CRM_Core_Form {
       $dao->save();
       CRM_Core_Session::setStatus(ts('Selected Grant Payment has been stopped successfully.'));
       CRM_Utils_System::redirect( CRM_Utils_System::url('civicrm/grant/payment/search', 'reset=1&force=1'));
-    } 
+    }
     elseif ($this->_action & CRM_Core_Action::REPRINT) {
-      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/reprint', 'reset=1&prid=' . $this->_id));            
-    } 
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/reprint', 'reset=1&prid=' . $this->_id));
+    }
     elseif ($this->_action & CRM_Core_Action::WITHDRAW) {
       $query = "SELECT cp.id as pid, cg.amount_granted as total_amount, cp.currency, cp.payment_reason, cp.contact_id as id, cep.entity_id as grant_id, cg.grant_program_id, cg.grant_type_id FROM civicrm_payment as cp LEFT JOIN civicrm_entity_payment as cep ON cep.payment_id = cp.id LEFT JOIN civicrm_grant as cg ON cg.id = cep.entity_id WHERE cp.id IN (".$this->_id.")";
       $grantDao = CRM_Grant_DAO_Grant::executeQuery($query);
@@ -150,5 +126,5 @@ class CRM_Grant_Form_Payment_View extends CRM_Core_Form {
       CRM_Core_Session::setStatus(ts('Selected Grant Payment has been withdraw successfully.'));
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/search', 'reset=1&force=1'));
     }
-  }  
+  }
 }

@@ -58,7 +58,25 @@
       {/if}
     </td>
   </tr>
+  <tr class="crm-grant-form-block-batch_id">
+    <td class="label">{$form.batch_id.label}</td>
+    <td>{$form.batch_id.html}</td>
+  </tr>
 </tbody></table>
+<div class="crm-accordion-wrapper" id="payment-details">
+  <div class="crm-accordion-header">{ts}Payment Details{/ts}</div><!-- /.crm-accordion-header -->
+  <div class="crm-accordion-body" style="display: block;">
+    <table class="form-layout-compressed">
+    {foreach from=$paymentFields key=fieldName item=paymentField}
+      {assign var='name' value=$fieldName}
+     <tr class="crm-container {$name}-section">
+        <td class="label">{$form.$name.label}</td>
+        <td class="content">{$form.$name.html}</td>
+      </tr>
+    {/foreach}
+     </table>
+  </div><!-- /.crm-accordion-body -->
+</div>
 
 {/if}
 {literal}
@@ -70,6 +88,7 @@
     $('.crm-grant-form-block-assessment').insertAfter('.crm-grant-form-block-amount_requested');
     $('.crm-grant-form-block-prev_assessment').insertAfter('.crm-grant-form-block-assessment');
     $('.crm-grant-form-block-financial_type').insertAfter('.crm-grant-form-block-money_transfer_date');
+    $('#payment-details').insertBefore('#customData');
 
     {/literal}{if !$showFields}{literal}
       $('.crm-grant-form-block-amount_granted').remove();
@@ -83,6 +102,8 @@
       $('#financial_type_id').val('');
     }
 
+    $('#payment-details').toggle(($("#status_id option:selected").text() === 'Paid'));
+
     $('#status_id').on('change', function() {
       var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn']) > -1);
       $('.grant_rejected_reason_id').toggle(($("#status_id option:selected").text() == 'Ineligible'));
@@ -90,6 +111,10 @@
       $('.crm-grant-form-block-financial_type').toggle(statusChange);
       if (!statusChange) {
         $('#financial_type_id').val('');
+      }
+      $('#payment-details').toggle(($("#status_id option:selected").text() === 'Paid'));
+      if ($("#status_id option:selected").text() != 'Paid') {
+        $('#contribution_batch_id').val('');
       }
     });
   });

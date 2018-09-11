@@ -91,7 +91,7 @@
 	<div class="crm-results-block">
         {* This section handles form elements for action task select and submit *}
         <div class="crm-search-tasks">
-            {include file="CRM/Grant/Form/Task/paymentResultTask.tpl"}
+          {include file="CRM/common/searchResultTasks.tpl"}
         </div>
         {* This section displays the rows along and includes the paging controls *}
         <div class="crm-search-results">
@@ -100,8 +100,3 @@
     </div><!-- /.crm-results-block -->
 {/if}
 </div><!-- /.crm-content-block -->
-<script type="text/javascript">
-{* this function is called to change the color of selected row(s) *}
-   var fname = "{$form.formName}";
-   on_load_init_checkboxes(fname);
-</script>
