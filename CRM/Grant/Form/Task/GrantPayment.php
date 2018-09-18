@@ -394,10 +394,11 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
     $entityFileDAO->file_id = $fileID;
     $entityFileDAO->save();
 
+    $contactID = CRM_Core_Session::getLoggedInContactID();
     $activityID = civicrm_api3('Activity', 'create', [
-      'source_contact_id' => CRM_Core_Session::getLoggedInContactID(),
+      'source_contact_id' => $contactID,
       'activity_type_id' => 'grant_payment',
-      'assignee_contact_id' => CRM_Core_Session::getLoggedInContactID(),
+      'assignee_contact_id' => $contactID,
       'subject' => "Grant Payment",
       'status_id' => 'Completed',
       'priority_id' => 2,
@@ -412,15 +413,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       ),
     );
     CRM_Activity_BAO_Activity::create($params);
-
-    // download the zip file
-    CRM_Utils_System::setHttpHeader('Content-Type', 'application/zip');
-    CRM_Utils_System::setHttpHeader('Content-Disposition', 'attachment; filename=' . CRM_Utils_File::cleanFileName(basename($zipFile)));
-    CRM_Utils_System::setHttpHeader('Content-Length', '' . filesize($uri));
-    ob_clean();
-    flush();
-    readfile($uri);
-    CRM_Utils_System::civiExit();
+    CRM_Core_Session::setStatus(ts('Please click the attached zip file to download the printed grant payments'));
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/activity', "action=view&reset=1&id=$activityID&cid=$contactID&context=activity&searchContext=activity"));
   }
 
 }
