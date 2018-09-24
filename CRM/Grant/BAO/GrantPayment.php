@@ -351,21 +351,24 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
    * @return array Array of event summary values
    */
   static function getGrantSummary($admin = FALSE) {
-    $query = "SELECT
-      p.id,
-      p.label,
-      g.status_id,
-      count(g.id) AS status_total,
-      sum(g.amount_total) AS amount_requested,
-      sum(g.amount_granted) AS amount_granted,
-      sum(cp.amount) AS total_paid,
-      sum(g.amount_granted)/count(g.id) AS average_amount
+      $query = "
+      SELECT
+        p.id,
+        p.label,
+        g.status_id,
+        count(g.id) AS status_total,
+        sum(g.amount_total) AS amount_requested,
+        sum(g.amount_granted) AS amount_granted,
+        sum(ft.total_amount) AS total_paid,
+        sum(g.amount_granted)/count(g.id) AS average_amount
+
       FROM civicrm_grant_program p
       LEFT JOIN civicrm_grant g ON g.grant_program_id = p.id
-      LEFT JOIN civicrm_entity_payment ep ON ep.entity_id = g.id AND ep.entity_table = 'civicrm_grant'
-      LEFT JOIN civicrm_payment cp ON cp.id = ep.payment_id
+      LEFT JOIN civicrm_entity_financial_trxn eft ON eft.entity_id = g.id AND eft.entity_table = 'civicrm_grant'
+      LEFT JOIN civicrm_financial_trxn ft ON ft.id = eft.financial_trxn_id
       WHERE g.status_id IS NOT NULL
-      GROUP BY g.grant_program_id, g.status_id WITH ROLLUP";
+      GROUP BY g.grant_program_id, g.status_id WITH ROLLUP
+      ";
 
     $dao = CRM_Core_DAO::executeQuery($query, CRM_Core_DAO::$_nullArray);
 
@@ -453,7 +456,31 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
     elseif ($params['action'] == CRM_Grant_BAO_GrantPayment::REPRINT) {
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/grant/payment/reprint', 'reset=1&prid=' . $params['id']));
     }
+  }
 
+  public static function deleteGrantFinancialEntries($grantID) {
+    $sql = "SELECT fi.id as fi_id, GROUP_CONCAT(DISTINCT ft.id) as ft_id, eb.batch_id
+      FROM civicrm_entity_financial_trxn eft
+      INNER JOIN civicrm_financial_trxn ft ON eft.financial_trxn_id = ft.id AND eft.entity_table = 'civicrm_grant' AND eft.entity_id = $grantID
+      LEFT JOIN civicrm_entity_financial_trxn eft1 ON eft1.financial_trxn_id = ft.id AND eft1.entity_table = 'civicrm_financial_item'
+      LEFT JOIN civicrm_financial_item fi ON eft1.entity_id = fi.id
+      LEFT JOIN civicrm_entity_batch eb ON eb.entity_table ='civicrm_financial_trxn' AND eb.entity_id = ft.id
+      LEFT JOIN civicrm_batch b ON b.id = eb.batch_id
+      GROUP BY eft.entity_id
+    ";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while($dao->fetch()) {
+      $ftIDs = explode(',', $dao->ft_id);
+      foreach ($ftIDs as $id) {
+        civicrm_api3('FinancialTrxn', 'delete', ['id' => $id]);
+      }
+      civicrm_api3('FinancialItem', 'delete', ['id' => $dao->fi_id]);
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_payment WHERE financial_trxn_id IN ($dao->ft_id)");
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_entity_financial_trxn WHERE financial_trxn_id IN ($dao->ft_id)");
+      if ($dao->batch_id) {
+        CRM_Core_DAO::executeQuery("DELETE FROM civicrm_entity_batch WHERE entity_id IN ($dao->ft_id) AND entity_table = 'civicrm_financial_trxn' AND batch_id = $dao->batch_id ");
+      }
+    }
   }
 
 }
