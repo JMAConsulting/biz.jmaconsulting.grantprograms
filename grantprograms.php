@@ -659,7 +659,7 @@ function grantprograms_civicrm_validateForm($formName, &$fields, &$files, &$form
     }
     if (!empty($fields['status_id'])) {
       $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
-      if (in_array($grantStatuses[$fields['status_id']], ['Paid', 'Withdrawn', 'Approved for Payment']) && empty($fields['financial_type_id'])) {
+      if (in_array($grantStatuses[$fields['status_id']], ['Paid', 'Withdrawn', 'Approved for Payment', 'Eligible']) && empty($fields['financial_type_id'])) {
         $errors['financial_type_id'] = ts('Financial Type is a required field');
       }
       if ($grantStatuses[$fields['status_id']] == 'Paid') {

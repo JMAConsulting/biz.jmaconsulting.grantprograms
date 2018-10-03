@@ -79,6 +79,7 @@
     </div>
 {/if}
 {/if}
+<div id="actionDialog" class="crm-container" style="display:none;"></div>
 
 {if $action neq 4}{literal}
 <script type="text/javascript">
@@ -87,25 +88,33 @@ cj(document).ready(function(){
 cj('ul.panel').css('width','250px');
 
 cj('#allocation').click(function(event){
-var r=confirm("Do you want to do a trial allocation?");
-if (r==true)
-  {
-     event.preventDefault();
-     var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
-     var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
-     cj.ajax({
-         url: dataURL,
-         data: data,
-         type: 'POST',
-         success: function(output) {
-          setTimeout("location.reload(true);",1500);
-	 }
-      });
-   }
-else {
-return false;
-}
+  actionTask('allocation');
+  return false;
 });
+
+function actionTask(type) {
+  if (task == 'allocation') {
+    CRM.$('#actionDialog').dialog({
+      title: {/literal}'{ts}Grant Allocation{/ts}'{literal},
+      modal: true,
+      open:function() {
+        CRM.$('#actionDialog').show().html({/literal}"{ts escape='js'}Do you want to do a trial allocation?{/ts}"{literal});
+      },
+      buttons: {
+        {/literal}"{ts escape='js'}No{/ts}"{literal}: function() {
+          CRM.$(this).dialog("close");
+        },
+        {/literal}"{ts escape='js'}Yes{/ts}"{literal}: function() {
+          CRM.$(this).dialog("close");
+          var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
+          var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
+          window.location.href = dataURL;
+          return;
+        }
+      }
+    });
+  }
+}
 
 cj('#finalize').click(function(event){
  var confirmed = 0;

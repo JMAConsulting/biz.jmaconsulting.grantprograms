@@ -94,7 +94,7 @@
       $('.crm-grant-form-block-amount_granted').remove();
     {/literal}{/if}{literal}
 
-    var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn']) > -1);
+    var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn', 'Eligible']) > -1);
     $('.grant_rejected_reason_id').toggle(($("#status_id option:selected").text() == 'Ineligible'));
     $('.grant_incomplete_reason_id').toggle(($("#status_id option:selected").text() == 'Awaiting Information'));
     $('.crm-grant-form-block-financial_type').toggle(statusChange);
@@ -105,7 +105,7 @@
     $('#payment-details').toggle(($("#status_id option:selected").text() === 'Paid'));
 
     $('#status_id').on('change', function() {
-      var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn']) > -1);
+      var statusChange = ($.inArray($("#status_id option:selected").text(), ['Paid', 'Approved for Payment', 'Withdrawn', 'Eligible']) > -1);
       $('.grant_rejected_reason_id').toggle(($("#status_id option:selected").text() == 'Ineligible'));
       $('.grant_incomplete_reason_id').toggle(($("#status_id option:selected").text() == 'Awaiting Information'));
       $('.crm-grant-form-block-financial_type').toggle(statusChange);

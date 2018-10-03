@@ -88,26 +88,46 @@
         </div>
     </div>
 </div>
-
+<div id="actionDialog" class="crm-container" style="display:none;"></div>
 
 {literal}
 <script type="text/javascript">
-cj('.allocation').click(function(){
-var r = confirm("Do you want to do a trial allocation?");
-if (r == true)
-  {
-     var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
-     var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
-     cj.ajax({
-         url: dataURL,
-         data: data,
-         type: 'POST',
-         success: function(output) {
-           setTimeout("location.reload(true);",1500);
-	 }
-      });
-   }
-});
+  cj('.allocation').click(function(event){
+    actionTask('allocation');
+    return false;
+  });
+
+  function actionTask(task) {
+    if (task == 'allocation') {
+      var msg = {/literal}'{ts}Do you want to do a trial allocation?{/ts}'{literal};
+      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
+      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
+    }
+    CRM.$('#actionDialog').dialog({
+      title: {/literal}'{ts}Grant Allocation{/ts}'{literal},
+      modal: true,
+      open:function() {
+        CRM.$(this).show().html(msg);
+      },
+      buttons: {
+        {/literal}"{ts escape='js'}No{/ts}"{literal}: function() {
+          CRM.$(this).dialog("close");
+        },
+        {/literal}"{ts escape='js'}Yes{/ts}"{literal}: function() {
+          CRM.$(this).dialog("close");
+          cj.ajax({
+            url: dataURL,
+            data: data,
+            type: 'POST',
+            success: function(output) {
+   	          setTimeout("location.reload(true);",1500);
+   	        }
+          });
+          return;
+        }
+      }
+    });
+  }
 
 cj('.finalize').click(function(){
  var confirmed = 0;

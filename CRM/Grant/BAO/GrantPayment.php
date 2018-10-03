@@ -411,11 +411,11 @@ class CRM_Grant_BAO_GrantPayment extends CRM_Grant_DAO_GrantPayment {
         $summary['total_grants']['total_average'] = $dao->average_amount ? CRM_Utils_Money::format($dao->average_amount) : CRM_Utils_Money::format(0);
         continue;
       }
-      if (!empty($dao->status_id)) {
+      if (!empty($dao->status_id) && !empty($stats[$dao->status_id])) {
         $programs[$dao->label][$stats[$dao->status_id]['weight']] = array(
-          'label' => $stats[$dao->status_id]['label'],
+          'label' => CRM_Utils_Array::value('label', CRM_Utils_Array::value($dao->status_id, $stats)),
           'total' => $dao->status_total,
-          'value' => $stats[$dao->status_id]['value'],
+          'value' => CRM_Utils_Array::value('value', CRM_Utils_Array::value($dao->status_id, $stats)),
           'amount_requested' => $dao->amount_requested ? CRM_Utils_Money::format($dao->amount_requested) : CRM_Utils_Money::format(0),
           'amount_granted' => $dao->amount_granted ? CRM_Utils_Money::format($dao->amount_granted) : CRM_Utils_Money::format(0),
           'total_paid' => $dao->total_paid ? CRM_Utils_Money::format($dao->total_paid) : CRM_Utils_Money::format(0),
