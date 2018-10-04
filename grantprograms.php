@@ -225,21 +225,21 @@ function &links() {
       'name'  => ts('Allocate Approved (Trial)'),
       'url'   => 'civicrm/grant_program',
       'qs'    => 'id=allocation',
-      'extra'   => 'id=allocation',
+      'extra' => 'onclick="actionTask(\'allocation\', %%id%%); return false;"',
       'title' => ts('Allocate Approved (Trial)')
     ),
     CRM_Core_Action::BROWSE  => array(
       'name'  => ts('Finalize Approved Allocations'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
-      'extra'   => 'id=finalize',
+      'extra' => 'onclick="actionTask(\'finalize\', %%id%%); return false;"',
       'title' => ts('Finalize Approved Allocations')
     ),
     CRM_Core_Action::MAP  => array(
       'name'  => ts('Mark remaining unapproved Grants as Ineligible'),
       'url'   => 'civicrm/grant_program',
       'qs'    => '#',
-      'extra'   => 'id=reject',
+      'extra' => 'onclick="actionTask(\'reject\', %%id%%); return false;"',
       'title' => ts('Mark remaining unapproved Grants as Ineligible')
     ),
   );

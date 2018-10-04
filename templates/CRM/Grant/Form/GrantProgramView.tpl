@@ -24,7 +24,7 @@
  +--------------------------------------------------------------------+
 *}
 {* this template is used for viewing grants *}
-<h3>{ts}View Grant Program{/ts}</h3>
+
 <div class="crm-block crm-content-block crm-grant-view-block">
     <div class="crm-submit-buttons">
         {if call_user_func(array('CRM_Core_Permission','check'), 'edit grants')}
@@ -43,11 +43,6 @@
         {/if}
         {include file="CRM/common/formButtons.tpl" location="top"}<br/>
 
-    </div>
-    <div class="buttonset" style="width:50px">
-    <input type="button" class="allocation" value="Allocate Approved (Trial)">
-    <input type="button" class="finalize" value="Finalize Approved Allocations">
-    <input type="button" class="reject" value="Mark remaining unapproved Grants as Ineligible">
     </div>
     <table class="crm-info-panel">
         <tr class="crm-grant-program-view-form-block-name"><td class="label">{ts}Name{/ts}</td><td class="bold">{$name}</td></tr>
@@ -81,116 +76,11 @@
             <a class="button" href="{crmURL p='civicrm/grant_program' q=$urlParams}"><span><div class="icon delete-icon"></div>{ts}Delete{/ts}</span></a>
         {/if}
         {include file="CRM/common/formButtons.tpl" location="bottom"}<br/>
-        <div class="buttonset" style="width:50px">
-        <input type="button" class="allocation" value="Allocate Approved (Trial)">
-        <input type="button" class="finalize" value="Finalize Approved Allocations">
-        <input type="button" class="reject" value="Mark remaining unapproved Grants as Ineligible">
-        </div>
     </div>
 </div>
-<div id="actionDialog" class="crm-container" style="display:none;"></div>
-
-{literal}
-<script type="text/javascript">
-  cj('.allocation').click(function(event){
-    actionTask('allocation');
-    return false;
-  });
-
-  function actionTask(task) {
-    if (task == 'allocation') {
-      var msg = {/literal}'{ts}Do you want to do a trial allocation?{/ts}'{literal};
-      var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}&algorithm={/literal}{$grantProgramAlgorithm}{literal}';
-      var dataURL = {/literal}"{crmURL p='civicrm/grant_program/allocate'}"{literal};
-    }
-    CRM.$('#actionDialog').dialog({
-      title: {/literal}'{ts}Grant Allocation{/ts}'{literal},
-      modal: true,
-      open:function() {
-        CRM.$(this).show().html(msg);
-      },
-      buttons: {
-        {/literal}"{ts escape='js'}No{/ts}"{literal}: function() {
-          CRM.$(this).dialog("close");
-        },
-        {/literal}"{ts escape='js'}Yes{/ts}"{literal}: function() {
-          CRM.$(this).dialog("close");
-          cj.ajax({
-            url: dataURL,
-            data: data,
-            type: 'POST',
-            success: function(output) {
-   	          setTimeout("location.reload(true);",1500);
-   	        }
-          });
-          return;
-        }
-      }
-    });
-  }
-
-cj('.finalize').click(function(){
- var confirmed = 0;
- var totalAmounts = 0;
- var grantedAmount = 0;
- var data = 'pid={/literal}{$id}{literal}&amount={/literal}{$total_amount}{literal}';
-     var dataURL = {/literal}"{crmURL p='civicrm/grant_program/finalize'}"{literal};
-     cj.ajax({
-         url: dataURL,
-         data: data,
-         type: 'POST',
-         success: function(output) {
-	 var result = eval('(' + output + ')');
-	 cj.each( result, function( index, value ) {
-	 if( index == 'confirm' ) {
-	   confirmed = value;
-	 }
-	 if( index == 'total_amount' ) {
-	   totalAmounts = value;
-	 }
-	 if( index == 'amount_granted' ) {
-	   grantedAmount = value;
-	   var data = 'amount_granted = '+value;
-	   alert(data);
-	 }
-         });
-	 if (confirmed == 'confirm' ) {
-	    var r=confirm("Do you want finalize the award of grants for this grant program to the amounts currently allocated?");
-	    if (r==true)
-  	    {
-	    var dataURL = {/literal}"{crmURL p='civicrm/grant_program/processFinalization'}"{literal};
-     	    cj.ajax({
-              url: dataURL,
-              data: data,
-              type: 'POST',
-              success: function(output) {
-	        setTimeout("location.reload(true);",1500);
-	      }
-	      });
-	    }
-	 } else {
-alert("The sum of the grants to be allocated ($"+grantedAmount+".00) is greater than the total amount available to be allocated by the program ($"+totalAmounts+"). Please reduce the amount granted in pending applications or increase the total amount available to be granted.");
-	  }
-	}
-   });
-});
-cj('.reject').click(function(){
-
-var r=confirm("Do you want to reject all Pending grant applications for this Grant Program??");
-if (r==true)
-  {
- var data = 'pid={/literal}{$id}{literal}&remainder_amount={/literal}{$remainder_amount}{literal}';
-     var dataURL = {/literal}"{crmURL p='civicrm/grant_program/reject'}"{literal};
-     cj.ajax({
-         url: dataURL,
-         data: data,
-         type: 'POST',
-         success: function(output) {
-	   setTimeout("location.reload(true);",1500);
-	 }
-   });
-  }
-});
-
-</script>
-{/literal}
+<div>
+    <a class="action-item crm-hover-button" href="#" onclick="actionTask('allocation', {$id});return false;">{ts}Allocate Approved (Trial){/ts}</a>
+    <a class="action-item crm-hover-button" href="#" onclick="actionTask('finalize', {$id});return false;">{ts}Finalize Approved Allocations{/ts}</a>
+    <a class="action-item crm-hover-button" href="#" onclick="actionTask('reject', {$id});return false;" >{ts}Mark remaining unapproved Grants as Ineligible{/ts}</a>
+</div>
+{include file="CRM/Grant/Form/GrantActionTask.tpl"}
