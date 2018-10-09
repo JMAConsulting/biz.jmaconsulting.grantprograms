@@ -610,7 +610,7 @@ function grantprograms_civicrm_pageRun( &$page ) {
 
 function grantprograms_civicrm_alterTemplateFile($formName, &$form, $context, &$tplName) {
   if ($tplName == 'CRM/Grant/Page/DashBoard.tpl') {
-    $tplName = 'CRM/Grant/Page/DashBoardExtra.tpl';
+    $tplName = 'CRM/Grant/Page/DashboardExtra.tpl';
   }
 }
 
