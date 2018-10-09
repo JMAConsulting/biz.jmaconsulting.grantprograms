@@ -239,39 +239,6 @@ WHERE civicrm_contact.id = $id ";
     return $grantPrograms;
   }
 
-  static function getGrants($params) {
-    $grants = array();
-    if (!empty($params)) {
-      $where = "WHERE ";
-      foreach ($params as $key => $value) {
-        if ($key == 'status_id') {
-          $where .= "{$key} IN ( {$value} ) AND ";
-        }
-        else {
-          if (strstr($value, 'NULL')) {
-            $where .= "{$key} IS {$value} AND ";
-          }
-          else {
-            $where .= "{$key} = '{$value}' AND ";
-          }
-        }
-      }
-      $where = rtrim($where ," AND ");
-      $query = "SELECT * FROM civicrm_grant {$where} ORDER BY application_received_date ASC";
-      $dao = CRM_Core_DAO::executeQuery($query);
-      while ($dao->fetch()) {
-        $grants[$dao->id]['assessment'] = $dao->assessment;
-        $grants[$dao->id]['amount_total'] = $dao->amount_total;
-        $grants[$dao->id]['amount_requested'] = $dao->amount_requested;
-        $grants[$dao->id]['amount_granted'] = $dao->amount_granted;
-        $grants[$dao->id]['status_id'] = $dao->status_id;
-        $grants[$dao->id]['contact_id'] = $dao->contact_id;
-        $grants[$dao->id]['grant_id'] = $dao->id;
-      }
-    }
-    return $grants;
-  }
-
   static function sendMail($contactID, &$values, $grantStatus, $grantId = FALSE, $status = '') {
     $value = array();
     if (CRM_Utils_Array::value('is_auto_email', $values)) {
@@ -370,13 +337,11 @@ WHERE civicrm_contact.id = $id ";
 
   static function getPriorities($id, $contactId) {
     $priority = 10;
-    $prevGrantProgram = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $id, 'grant_program_id');
     $amount = 0;
-    $params = array(
-      'grant_program_id' => $prevGrantProgram,
+    $grants = civicrm_api3('Grant', 'get', [
+      'grant_program_id' => CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $id, 'grant_program_id'),
       'contact_id' => $contactId,
-    );
-    $grants = CRM_Grant_BAO_GrantProgram::getGrants($params);
+    ])['values'];
     if (!empty($grants)) {
       foreach ($grants as $values) {
         $amount += $values['amount_granted'];

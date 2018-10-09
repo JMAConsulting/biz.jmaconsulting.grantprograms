@@ -24,7 +24,7 @@
               data: data,
               type: 'POST',
               success: function(output) {
-                CRM.status(CRM.$.parseJSON(output));
+                location.reload(true);
               }
             });
             return;
@@ -66,7 +66,7 @@
                         data: data,
                         type: 'POST',
                         success: function(output) {
-                          CRM.status({/literal}"{ts escape='js'}Grants are approved successfully.{/ts}"{literal});
+                          location.reload(true);
                         }
                       });
                       return;
@@ -102,7 +102,7 @@
               data: data,
               type: 'POST',
               success: function(output) {
-                CRM.status(CRM.$.parseJSON(output));
+                location.reload(true);
               }
             });
             return;
