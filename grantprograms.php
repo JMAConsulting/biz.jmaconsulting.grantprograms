@@ -708,7 +708,6 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     $grantStatusApproved = array_search('Approved for Payment', $grantStatuses);
     $calculateAssessment = FALSE;
     $previousGrant = [];
-    $assessmentAmount = 0;
     if ($op == 'edit') {
       $previousGrant = civicrm_api3('Grant', 'getsingle', ['id' => $id]);
       $sendMail = (CRM_Utils_Array::value('status_id', $params) !== $previousGrant['status_id']);
@@ -720,27 +719,12 @@ function grantprograms_civicrm_pre($op, $objectName, $id, &$params) {
     ) {
       $params['decision_date'] = date('Ymd');
     }
-    if ((empty($params['assessment']) || $calculateAssessment) && !empty($params['custom'])) {
-      foreach($params['custom'] as $key => $value) {
-        foreach($value as $fieldKey => $fieldValue) {
-          $customParams = array('id' => $key, 'is_active' => 1, 'html_type' => 'Select');
-          $customFields = CRM_Core_BAO_CustomField::retrieve($customParams, $default = array());
-          if (!empty($customFields)) {
-            $optionValueParams = array('option_group_id' => $customFields->option_group_id, 'value' => $fieldValue['value'], 'is_active' => 1);
-            $optionValues = CRM_Core_BAO_OptionValue::retrieve($optionValueParams,  $default = array());
-            if(!empty($optionValues->description)) {
-              $assessmentAmount += $optionValues->description;
-            }
-          }
-        }
-      }
+
+    if ((empty($params['assessment']) || $calculateAssessment)) {
+      $params['assessment'] = $params['amount_total'];
     }
-    $params['assessment'] = $assessmentAmount;
 
     if ($op == 'edit') {
-      if ($assessmentAmount == 0) {
-        $params['adjustment_value'] = FALSE;
-      }
       if (!CRM_Utils_Array::value('allocation', $params) &&
         !empty($previousGrant['amount_granted']) &&
         CRM_Utils_Array::value('amount_granted', $params) != $previousGrant['amount_granted'] &&

@@ -87,10 +87,12 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
 
   public function allocate() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
-    $algorithm = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
-    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algorithm, 'grouping', 'name');
+    $algorithm = civicrm_api3('OptionValue', 'getvalue', [
+      'return' => "name",
+      'id' => CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm'),
+    ]);
     $statuses = [$grantStatus['Eligible']];
-    if ($algoName == 'immediate') {
+    if ($algorithm == 'immediate') {
       $statuses = array_merge($statuses, [
         $grantStatus['Awaiting Information'],
         $grantStatus['Submitted']
@@ -104,15 +106,14 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
         'assessment' => ['IS NOT NULL' => 1],
       ]
     ])['values'];
-
     if (!empty($result)) {
-      if (trim($algorithm) == 'Best To Worst, Fully Funded') {
+      if ($algorithm == 'Best To Worst, Fully Funded') {
         $order = CRM_Utils_Array::collect('assessment', $result);
         $sort_order = SORT_DESC;
         array_multisort($order, $sort_order, $result);
       }
 
-      $totalAmount = $_POST['remainder_amount'];
+      $totalAmount = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'remainder_amount');
 
       $contact = array();
       $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
@@ -234,25 +235,35 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function finalize() {
     $grantedAmount = 0;
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
-    $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
-    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
-    if ($algoName == "immediate") {
-      $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
-    }
-    else {
-      $statuses = $grantStatus['Eligible'];
+    $algorithm = civicrm_api3('OptionValue', 'getvalue', [
+      'return' => "name",
+      'id' => CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm'),
+    ]);
+    $statuses = [$grantStatus['Eligible']];
+    if ($algorithm == 'immediate') {
+      $statuses = array_merge($statuses, [
+        $grantStatus['Awaiting Information'],
+        $grantStatus['Submitted']
+      ]);
     }
     $params = array(
       'status_id' => $statuses,
       'grant_program_id' => $_POST['pid'],
     );
-    $result = CRM_Grant_BAO_GrantProgram::getGrants($params);
+    $result = civicrm_api3('Grant', 'get', [
+      'status_id' => [
+        'IN' => $statuses,
+        'grant_program_id' => $_POST['pid'],
+        'assessment' => ['IS NOT NULL' => 1],
+      ]
+    ])['values'];
+
     if (!empty($result)) {
       foreach ($result as $key => $row) {
         $grantedAmount += $row['amount_granted'];
       }
       $totalAmount = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'total_amount');
-      if($grantedAmount < $totalAmount) {
+      if($grantedAmount <= $totalAmount) {
         $data = [
           'status' => 'confirm',
           'amount_granted' => $grantedAmount,
@@ -275,11 +286,13 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
   public function processFinalization() {
     $grantStatus = CRM_Core_OptionGroup::values('grant_status', TRUE);
     $grantRej = CRM_Core_OptionGroup::values('reason_grant_ineligible', TRUE);
-    $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
-    $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
     $grantThresholds = CRM_Core_OptionGroup::values('grant_thresholds', TRUE);
+    $algorithm = civicrm_api3('OptionValue', 'getvalue', [
+      'return' => "name",
+      'id' => CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm'),
+    ]);
     $statuses = [$grantStatus['Eligible']];
-    if ($algoName == 'immediate') {
+    if ($algorithm == 'immediate') {
       $statuses = array_merge($statuses, [
         $grantStatus['Awaiting Information'],
         $grantStatus['Submitted']
@@ -329,13 +342,17 @@ class CRM_Grant_Form_GrantProgramView extends CRM_Core_Form {
 
   public function reject() {
     $grantStatus = CRM_Core_OptionGroup::values( 'grant_status', TRUE);
-    $algoId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm');
     $algoName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionValue', $algoId, 'grouping');
-    if ($algoName == "immediate") {
-      $statuses = $grantStatus['Eligible'].', '.$grantStatus['Awaiting Information'].', '.$grantStatus['Submitted'];
-    }
-    else {
-      $statuses = $grantStatus['Eligible'];
+    $algorithm = civicrm_api3('OptionValue', 'getvalue', [
+      'return' => "name",
+      'id' => CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $_POST['pid'], 'allocation_algorithm'),
+    ]);
+    $statuses = [$grantStatus['Eligible']];
+    if ($algorithm == 'immediate') {
+      $statuses = array_merge($statuses, [
+        $grantStatus['Awaiting Information'],
+        $grantStatus['Submitted']
+      ]);
     }
     $id = $_POST['pid'];
     $params = array(
