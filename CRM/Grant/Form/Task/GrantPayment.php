@@ -181,6 +181,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       'payment_reason' => CRM_Utils_Array::value('description', $params),
     ];
     CRM_Grant_BAO_GrantPayment::add($grantPaymentRecord);
+    return $grantPaymentRecord;
   }
 
   public function postProcess() {
@@ -193,7 +194,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
     $mailParams = $printedRows = $files = $trxnIDs = [];
     $totalAmount = $counter = 0;
 
-    $where = '(1) AND ';
+    $where = 'ft.to_financial_account_id IS NOT NULL AND ';
     if (!empty($this->_prid)) {
       $where .= " cp.id = " . $this->_prid;
     }
@@ -209,7 +210,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
        INNER JOIN civicrm_entity_financial_trxn eft1 ON eft1.financial_trxn_id = ft.id AND eft1.entity_table = 'civicrm_financial_item'
        INNER JOIN civicrm_financial_item fi ON fi.id = eft1.entity_id
        INNER JOIN civicrm_grant_program gp ON gp.id = g.grant_program_id
-       INNER JOIN civicrm_payment cp  ON cp.financial_trxn_id = eft.financial_trxn_id
+       LEFT JOIN civicrm_payment cp  ON cp.financial_trxn_id = eft.financial_trxn_id
       WHERE %s GROUP BY ft.id ", $where));
     while($dao->fetch()) {
       $totalAmount += $dao->total_amount;
