@@ -249,7 +249,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
         CRM_Grant_BAO_GrantProgram::sendMail($dao->contact_id, $mailParams, 'Paid', $grantID, 'Approved for Payment');
       }
 
-      self::processPaymentDetails([
+      $grantPaymentRecord = self::processPaymentDetails([
         'trxn_id' => $trxnID,
         'batch_id' => $values['contribution_batch_id'],
         'description' => $description,

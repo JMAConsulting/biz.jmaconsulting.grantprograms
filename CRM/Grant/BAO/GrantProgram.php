@@ -256,7 +256,7 @@ WHERE civicrm_contact.id = $id ";
           'groupName' => 'msg_tpl_workflow_grant',
           'valueName' => 'grant_'.$valueName,
           'contactId' => $contactID,
-          'tplParams' => array_merge(['email' => $email], CRM_Utils_Array::value('tplParams', $params, [])),
+          'tplParams' => array_merge(['email' => $email], CRM_Utils_Array::value('tplParams', $values, [])),
           'PDFFilename' => '',
         );
 
