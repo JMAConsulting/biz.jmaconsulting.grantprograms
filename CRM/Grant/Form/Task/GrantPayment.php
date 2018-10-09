@@ -281,8 +281,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       ];
 
       CRM_Core_DAO::executeQuery(sprintf('UPDATE civicrm_grant SET status_id = %d WHERE id = %d',
-        $grantID,
-        array_search('Paid', CRM_Core_OptionGroup::values('grant_status'))
+        array_search('Paid', CRM_Core_OptionGroup::values('grant_status')),
+        $grantID
       ));
     }
 
