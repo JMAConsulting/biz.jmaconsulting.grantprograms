@@ -680,7 +680,7 @@ function grantprograms_civicrm_validateForm($formName, &$fields, &$files, &$form
         if (strstr($fieldKey, 'mark_x_')) {
           $grantID = ltrim( $fieldKey, 'mark_x_' );
           if ($fields['task'] == PAY_GRANTS) {
-            $grantDetails = CRM_Grant_BAO_GrantProgram::getGrants(array('id' => $grantID));
+            $grantDetails = civicrm_api3('Grant', 'get', ['id' => $grantID])['values'];
             if (!$grantDetails[$grantID]['amount_granted']) {
               $errors['task'] = ts('Payments are only possible when there is an amount owing.');
               break;
@@ -965,7 +965,7 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
         }
       }
       $grantParams['id'] = $next;
-      $result = CRM_Grant_BAO_GrantProgram::getGrants($grantParams);
+      $result = civicrm_api3('Grant', 'get', ['id' => $next])['values'];
       if (CRM_Utils_Array::value($form->getButtonName('submit', 'savenext'), $_POST)) {
         if ($form->getVar('_id') != $form->_prev) {
           CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/contact/view/grant',
