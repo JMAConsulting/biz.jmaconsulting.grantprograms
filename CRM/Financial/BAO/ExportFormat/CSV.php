@@ -82,14 +82,13 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
       ft.trxn_id AS trxn_id,
       cov.label AS payment_instrument,
       ft.check_number,
-      CASE 
-        WHEN eftc.entity_table = 'civicrm_contribution'
-        THEN c.source
-        ELSE cgp.label
-      END AS source,
+      c.source AS source,
+      c.id AS contribution_id,
+      c.contact_id AS contact_id,
+      eb.batch_id AS batch_id,
       ft.currency AS currency,
       cov_status.label AS status,
-      CASE 
+      CASE
         WHEN efti.entity_id IS NOT NULL
         THEN efti.amount
         ELSE eftc.amount
@@ -109,7 +108,7 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
       LEFT JOIN civicrm_option_value cov ON (cov.value = ft.payment_instrument_id AND cov.option_group_id = cog.id)
       LEFT JOIN civicrm_entity_financial_trxn eftc ON (eftc.financial_trxn_id  = ft.id AND (eftc.entity_table = 'civicrm_contribution' OR  eftc.entity_table = 'civicrm_grant'))
       LEFT JOIN civicrm_contribution c ON c.id = eftc.entity_id AND eftc.entity_table = 'civicrm_contribution'
-     
+
       LEFT JOIN civicrm_grant ccg ON ccg.id = eftc.entity_id AND eftc.entity_table = 'civicrm_grant'
       LEFT JOIN civicrm_grant_program cgp ON cgp.id = ccg.grant_program_id
       LEFT JOIN civicrm_option_group cog_status ON cog_status.name = 'contribution_status'
@@ -150,7 +149,7 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
    */
   function formatHeaders($values) {
     $arrayKeys = array_keys($values);
-    $headers = '';
+    $headers = [];
     if (!empty($arrayKeys)) {
       foreach ($values[$arrayKeys[0]] as $title => $value) {
         $headers[] = $title;
@@ -170,7 +169,7 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
       $financialItems = array();
       $this->_batchIds = $batchId;
       while ($dao->fetch()) {
-        $creditAccountName = $creditAccountType = 
+        $creditAccountName = $creditAccountType =
           $creditAccount = NULL;
         if ($dao->credit_account) {
           $creditAccountName = $dao->credit_account_name;
@@ -180,9 +179,9 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
         else {
           $creditAccountName = $dao->from_credit_account_name;
           $creditAccountType = $dao->from_credit_account_type_code;
-          $creditAccount = $dao->from_credit_account;   
+          $creditAccount = $dao->from_credit_account;
         }
-        
+
         $financialItems[] = array(
           'Transaction Date' => $dao->trxn_date,
           'Debit Account' => $dao->to_account_code,
@@ -220,4 +219,71 @@ class CRM_Financial_BAO_ExportFormat_CSV extends CRM_Financial_BAO_ExportFormat 
 
   function exportTRANS() {
   }
+
+  /**
+   * Generate CSV array for export.
+   *
+   * @param array $export
+   */
+  public function makeExport($export) {
+    // getting data from admin page
+    $prefixValue = Civi::settings()->get('contribution_invoice_settings');
+
+    foreach ($export as $batchId => $dao) {
+      $financialItems = array();
+      $this->_batchIds = $batchId;
+
+      $queryResults = array();
+
+      while ($dao->fetch()) {
+        $creditAccountName = $creditAccountType = $creditAccount = NULL;
+        if ($dao->credit_account) {
+          $creditAccountName = $dao->credit_account_name;
+          $creditAccountType = $dao->credit_account_type_code;
+          $creditAccount = $dao->credit_account;
+        }
+        else {
+          $creditAccountName = $dao->from_credit_account_name;
+          $creditAccountType = $dao->from_credit_account_type_code;
+          $creditAccount = $dao->from_credit_account;
+        }
+
+        $invoiceNo = CRM_Utils_Array::value('invoice_prefix', $prefixValue) . "" . $dao->contribution_id;
+
+        $financialItems[] = array(
+          'Batch ID' => $dao->batch_id,
+          'Invoice No' => $invoiceNo,
+          'Contact ID' => $dao->contact_id,
+          'Financial Trxn ID/Internal ID' => $dao->financial_trxn_id,
+          'Transaction Date' => $dao->trxn_date,
+          'Debit Account' => $dao->to_account_code,
+          'Debit Account Name' => $dao->to_account_name,
+          'Debit Account Type' => $dao->to_account_type_code,
+          'Debit Account Amount (Unsplit)' => $dao->debit_total_amount,
+          'Transaction ID (Unsplit)' => $dao->trxn_id,
+          'Debit amount (Split)' => $dao->amount,
+          'Payment Instrument' => $dao->payment_instrument,
+          'Check Number' => $dao->check_number,
+          'Source' => $dao->source,
+          'Currency' => $dao->currency,
+          'Transaction Status' => $dao->status,
+          'Amount' => $dao->amount,
+          'Credit Account' => $creditAccount,
+          'Credit Account Name' => $creditAccountName,
+          'Credit Account Type' => $creditAccountType,
+          'Item Description' => $dao->item_description,
+        );
+
+        end($financialItems);
+        $queryResults[] = get_object_vars($dao);
+      }
+
+      CRM_Utils_Hook::batchItems($queryResults, $financialItems);
+
+      $financialItems['headers'] = self::formatHeaders($financialItems);
+      self::export($financialItems);
+    }
+    parent::initiateDownload();
+  }
+
 }
