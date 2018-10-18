@@ -219,7 +219,6 @@ class CRM_Grantprograms_AJAX {
       'name',
       'action',
     );
-    CRM_Core_Error::Debug_var('as', $financialitems);
 
     if ($return) {
       return CRM_Utils_JSON::encodeDataTableSelector($financialitems, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);

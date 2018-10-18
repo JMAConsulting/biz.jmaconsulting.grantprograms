@@ -157,7 +157,7 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
   }
 
   public static function processPaymentDetails($params, $updateTrxn = TRUE) {
-    $trxnID = $params['trxn_id'];
+    $trxnID = $params['financial_trxn_id'];
     civicrm_api3('EntityBatch', 'create', [
       'entity_table' => 'civicrm_financial_trxn',
       'entity_id' => $trxnID,
@@ -250,7 +250,8 @@ class CRM_Grant_Form_Task_GrantPayment extends CRM_Core_Form {
       }
 
       $grantPaymentRecord = self::processPaymentDetails([
-        'trxn_id' => $trxnID,
+        'trxn_id' => $values['trxn_id'],
+        'financial_trxn_id' => $trxnID,
         'batch_id' => $values['contribution_batch_id'],
         'description' => $description,
       ], FALSE);

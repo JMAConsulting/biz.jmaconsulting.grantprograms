@@ -810,7 +810,7 @@ function grantprograms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
 
 function _createFinancialEntries($previousStatusID, $grantParams, $params) {
   $grantStatuses = CRM_Core_OptionGroup::values('grant_status');
-  $multiEntries = CRM_Core_BAO_Cache::getItem("multifund entries", 'multifund_civicrm_postProcess');
+  $multiEntries = _processMultiFundEntries($_POST);
   $amount = $grantParams['amount_total'];
   $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
   $financialItemStatus = CRM_Core_PseudoConstant::accountOptionValues('financial_item_status');
@@ -864,9 +864,6 @@ function _createFinancialEntries($previousStatusID, $grantParams, $params) {
       ];
     }
   }
-  else {
-    CRM_Core_BAO_Cache::deleteGroup("multifund entries");
-  }
 
   $financialItemID = NULL;
   foreach ($multiEntries as $key => $entry) {
@@ -875,7 +872,8 @@ function _createFinancialEntries($previousStatusID, $grantParams, $params) {
 
     if ($currentStatusID == array_search('Paid', $grantStatuses)) {
       CRM_Grant_Form_Task_GrantPayment::processPaymentDetails([
-        'trxn_id' => $trxnId->id,
+        'trxn_id' => $params['trxn_id'],
+        'financial_trxn_id' => $trxnId->id,
         'batch_id' => $params['contribution_batch_id'],
         'check_number' => $params['check_number'],
         'description' => CRM_Utils_Array::value('description', $params),
@@ -987,6 +985,24 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
       }
     }
   }
+}
+
+function _processMultiFundEntries($values) {
+  $totalCount = civicrm_api3('FinancialAccount', 'getcount', []);
+  $multifundEntries = [];
+  if (empty($values['multifund_amount'])) {
+    return $multifundEntries;
+  }
+  for ($i = 0; $i < $totalCount; $i++) {
+    if (!empty($values['financial_account'][$i])) {
+      $multifundEntries[$i] = [
+        'from_financial_account_id' => $values['financial_account'][$i],
+        'total_amount' => $values['multifund_amount'][$i],
+      ];
+    }
+  }
+
+  return $multifundEntries;
 }
 
 /*
