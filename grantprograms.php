@@ -39,7 +39,7 @@ function grantprograms_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function grantprograms_civicrm_uninstall() {
-  $config = CRM_Core_Config::singleton();
+  manageNavigationLinks('delete');
   return _grantprograms_civix_civicrm_uninstall();
 }
 
@@ -50,6 +50,7 @@ function grantprograms_civicrm_enable() {
   $config = CRM_Core_Config::singleton();
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir . 'biz.jmaconsulting.grantprograms/sql/grantprograms_enable.sql');
   grantprograms_addRemoveMenu(TRUE);
+  manageNavigationLinks('enable');
   return _grantprograms_civix_civicrm_enable();
 }
 
@@ -60,6 +61,7 @@ function grantprograms_civicrm_disable() {
   $config = CRM_Core_Config::singleton();
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir . 'biz.jmaconsulting.grantprograms/sql/grantprograms_disable.sql');
   grantprograms_addRemoveMenu(FALSE);
+  manageNavigationLinks('disable');
   return _grantprograms_civix_civicrm_disable();
 }
 
@@ -1058,6 +1060,29 @@ function grantprograms_addRemoveMenu($enable) {
     }
   }
   CRM_Core_BAO_Setting::setItem($params['enableComponents'], CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
+}
+
+function manageNavigationLinks($action) {
+  $menus = [
+    'Grant Programs',
+    'Grant Payment',
+    'Find Grant Payments',
+    'Grant Payment Reprint',
+  ];
+  foreach ($menus as $menu) {
+    $navs = CRM_Utils_Array::collect('id', civicrm_api3('Navigation', 'get', ['name' => $menu, 'sequential' => 1])['values']);
+    foreach ($navs as $id) {
+      if ($action == 'disable') {
+        civicrm_api3('Navigation', 'create', ['id' => $id, 'is_active' => FALSE]);
+      }
+      elseif ($action == 'enable') {
+        civicrm_api3('Navigation', 'create', ['id' => $id, 'is_active' => TRUE]);
+      }
+      elseif ($action == 'delete') {
+        civicrm_api3('Navigation', 'delete', ['id' => $id]);
+      }
+    }
+  }
 }
 
 function getCustomFields($params, &$values) {
