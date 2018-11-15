@@ -665,13 +665,8 @@ function grantprograms_civicrm_validateForm($formName, &$fields, &$files, &$form
         $errors['financial_type_id'] = ts('Financial Type is a required field');
       }
       if ($grantStatuses[$fields['status_id']] == 'Paid') {
-        foreach([
-          'check_number' => ts('Check Number'),
-          'contribution_batch_id' => ts('Batch'),
-        ] as $attr => $label) {
-          if (empty($fields[$attr])) {
-            $errors[$attr] = ts($label . ' is a required field');
-          }
+        if (empty($fields['contribution_batch_id'])) {
+          $errors['contribution_batch_id'] = ts('Batch is a required field');
         }
       }
     }
