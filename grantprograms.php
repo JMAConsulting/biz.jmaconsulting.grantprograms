@@ -355,6 +355,11 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
 
     //Financial Type RG-125
     $financialType = CRM_Contribute_PseudoConstant::financialType();
+    foreach ($financialType as $id => $dontCare) {
+      if (!CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($id, 'Expense Account is')) {
+        unset($financialType[$id]);
+      }
+    }
     if (count($financialType)) {
       $form->assign('financialType', $financialType);
     }
@@ -391,6 +396,12 @@ function grantprograms_civicrm_buildForm($formName, &$form) {
           }
         }
       $form->removeElement('status_id');
+      if ($grantStatuses[$currentStatus] == 'Paid') {
+        $approvedStatusID = array_search('Approved for Payment', $grantStatuses);
+        if (!empty($grantStatuses[$approvedStatusID])) {
+          unset($grantStatuses[$approvedStatusID]);
+        }
+      }
 
       $element = $form->add('select', 'status_id', ts('Grant Status'),
         $grantStatuses,
@@ -985,12 +996,11 @@ function grantprograms_civicrm_postProcess($formName, &$form) {
 }
 
 function _processMultiFundEntries($values) {
-  $totalCount = civicrm_api3('FinancialAccount', 'getcount', []);
   $multifundEntries = [];
   if (empty($values['multifund_amount'])) {
     return $multifundEntries;
   }
-  for ($i = 0; $i < $totalCount; $i++) {
+  for ($i = 0; $i < 2; $i++) {
     if (!empty($values['financial_account'][$i])) {
       $multifundEntries[$i] = [
         'from_financial_account_id' => $values['financial_account'][$i],
